@@ -1,12 +1,13 @@
 package Token
 
 type Token int
-type Arrow Token
+
+const None Token=0
 const (
-	Arrow_Left  Arrow = 0
-	Arrow_Right       = 1
-	Arrow_Up          = 2
-	Arrow_Down        = 3
+	Arrow_Left  Token = 1
+	Arrow_Right       = 2
+	Arrow_Up          = 3
+	Arrow_Down        = 4
 )
 
 func (t Token) String() string {

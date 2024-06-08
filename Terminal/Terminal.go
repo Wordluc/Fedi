@@ -1,10 +1,9 @@
-package main
+package Terminal
 
 import (
-	"fmt"
-	"github.com/eiannone/keyboard"
-	"golang.org/x/term"
 	"os"
+
+	"golang.org/x/term"
 )
 
 type Terminal struct {
@@ -25,19 +24,10 @@ func (t *Terminal) Stop() {
 	term.Restore(int(os.Stdin.Fd()), t.term)
 }
 
-func main() {
-	t := Terminal{}
-	t.Start()
-	keyboard.Open()
-	defer t.Stop()
+func (t *Terminal) Clear() {
 	os.Stdout.Write([]byte("\033[H\033[2J"))
-	for {
-
-		var a, b, _ = keyboard.GetKey()
-		fmt.Println(a, b)
-		if b == keyboard.KeyCtrlW {
-			break
-		}
-		os.Stdout.Write([]byte(string(a))) // write a )
-	}
+}
+ 
+func (t *Terminal) Print(byte []byte) {
+	os.Stdout.Write(byte)
 }
