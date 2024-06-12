@@ -28,7 +28,6 @@ func (t *KeyBoard) Start(loop loop) error {
 		if t.loop() {
 			break
 		}
-		print("dio cane")
 	}
 	return nil
 }
