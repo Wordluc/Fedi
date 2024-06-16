@@ -1,21 +1,22 @@
 package impl
 
 import (
+	"TUI/KeyBoard"
 	"TUI/Terminal/Token"
+
 	"github.com/eiannone/keyboard"
 )
 
-type loop func() bool
-type KeyBoard struct {
+type ImplKeyBoard struct {
 	key  stateKey
-	loop loop
+	loop KeyBoard.Loop
 }
 type stateKey struct {
 	key  keyboard.Key
 	rune rune
 }
 
-func (t *KeyBoard) Start(loop loop) error {
+func (t *ImplKeyBoard) Start(loop KeyBoard.Loop) error {
 	keyboard.Open()
 	eventKey, e := keyboard.GetKeys(10)
 	if e != nil {
@@ -32,15 +33,15 @@ func (t *KeyBoard) Start(loop loop) error {
 	return nil
 }
 
-func (t *KeyBoard) Stop() {
+func (t *ImplKeyBoard) Stop() {
 	keyboard.Close()
 }
 
-func (t *KeyBoard) GetKey() (byte, error) {
+func (t *ImplKeyBoard) GetKey() (byte, error) {
 	return byte(t.key.rune), nil
 }
 
-func (t *KeyBoard) IsPressed(token Token.Token) bool {
+func (t *ImplKeyBoard) IsPressed(token Token.Token) bool {
 	key := t.key.key
 	if v, e := mapTokenToKey(token); e == nil {
 		if v == key {
