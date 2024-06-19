@@ -1,6 +1,7 @@
 package impl
 
 import (
+	ITerminal "TUI/Devices/Terminal"
 	"os"
 
 	"golang.org/x/term"
@@ -34,4 +35,14 @@ func (t *Terminal) Print(byte []byte) {
 
 func (t *Terminal) PrintStr(str string) {
 	os.Stdout.Write([]byte(str))
+}
+
+func (t *Terminal) Len() ITerminal.Size {
+	size := ITerminal.Size{}
+	var e error
+	size.Width, size.Height, e = term.GetSize(int(os.Stdout.Fd()))
+	if e != nil {
+		panic(e)
+	}
+	return size
 }

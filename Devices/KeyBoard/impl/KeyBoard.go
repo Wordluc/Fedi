@@ -1,8 +1,8 @@
 package impl
 
 import (
-	"TUI/KeyBoard"
-	"TUI/Terminal/Token"
+	"TUI/Devices/KeyBoard"
+	"TUI/Devices/Terminal/Token"
 
 	"github.com/eiannone/keyboard"
 )

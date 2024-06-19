@@ -1,45 +1,48 @@
 package main
 
 import (
-	"TUI/Core"
-	KeyImpl "TUI/KeyBoard/impl"
-	"TUI/Terminal/Token"
-	TermImpl "TUI/Terminal/impl"
+	KeyBoardImpl "TUI/Devices/KeyBoard/impl"
+	TermImpl "TUI/Devices/Terminal/impl"
+	"TUI/Engine"
+	"TUI/Engine/Events"
+	"strconv"
 )
 
-var keyb = KeyImpl.ImplKeyBoard{}
+var keyb = KeyBoardImpl.ImplKeyBoard{}
 var t = TermImpl.Terminal{}
+var core, e = Engine.Setup(&keyb, &t)
 
 func main() {
-	t.Start()
+	if core == nil {
+		panic("Core is nil")
+	}
+	e = t.Start()
+	if e != nil {
+		panic(e)
+	}
 	t.Clear()
 	defer t.Stop()
-	Core.Setup(&keyb, &t)
-	eventArrow := Core.ArrowEvent{
-		Key: []Token.Token{Token.Arrow_Left, Token.Arrow_Right, Token.Arrow_Up, Token.Arrow_Down},
-		Handler: func(Key Token.Token) {
-			switch Key {
-			case Token.Arrow_Left:
-				t.PrintStr("\x1b[1D")
-			case Token.Arrow_Right:
-				t.PrintStr("\x1b[1C")
-			case Token.Arrow_Up:
-				t.PrintStr("\x1b[1A")
-			case Token.Arrow_Down:
-				t.PrintStr("\x1b[1B")
-			}
-		},
+	if e != nil {
+		panic(e)
 	}
-	Core.AddEvent(eventArrow)
-	e := keyb.Start(loop)
+
+	e = core.AddEvent(Events.GetArrow(core))
+	if e != nil {
+		panic(e)
+	}
+	e = keyb.Start(loop)
 	if e != nil {
 		panic(e)
 	}
 	defer keyb.Stop()
 }
+
 func loop() bool {
-	Core.LoopEvent()
+	core.LoopEvent()
 	v, _ := keyb.GetKey()
+	if v == 'p' {
+		t.PrintStr("len: " + strconv.Itoa(t.Len().Width) + "x" + strconv.Itoa(t.Len().Height))
+	}
 	t.Print([]byte{v})
 	if v == 'q' {
 		return true

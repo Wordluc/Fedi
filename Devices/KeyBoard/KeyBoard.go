@@ -1,7 +1,7 @@
 package KeyBoard
 
 import (
-	"TUI/Terminal/Token"
+	"TUI/Devices/Terminal/Token"
 )
 
 type Loop func() bool
