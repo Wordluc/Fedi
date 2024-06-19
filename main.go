@@ -26,7 +26,7 @@ func main() {
 		panic(e)
 	}
 
-	e = core.AddEvent(Events.GetArrow(core))
+	e = core.AddEvent(Events.Arrow(core))
 	if e != nil {
 		panic(e)
 	}

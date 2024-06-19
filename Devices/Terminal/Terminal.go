@@ -1,8 +1,8 @@
 package ITerminal
 
 type Size struct {
-	Height int
 	Width  int
+	Height int
 }
 type ITerminal interface {
 	Start() error

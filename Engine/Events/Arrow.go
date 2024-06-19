@@ -18,7 +18,11 @@ func (event ArrowEvent) EventHandler(core *Engine.Core) error {
 	}
 	return nil
 }
-
+//func moveLeft(core *Engine.Core) bool {
+//	size:=core.Term.Len()
+//	
+//
+//}
 func Arrow(core *Engine.Core) ArrowEvent {
 	return ArrowEvent{
 		Key: []Token.Token{Token.Arrow_Left, Token.Arrow_Right, Token.Arrow_Up, Token.Arrow_Down},
