@@ -1,7 +1,6 @@
 package impl
 
 import (
-	ITerminal "TUI/Devices/Terminal"
 	"os"
 	"regexp"
 	"strconv"
@@ -39,14 +38,13 @@ func (t *Terminal) PrintStr(str string) {
 	os.Stdout.Write([]byte(str))
 }
 
-func (t *Terminal) Len() ITerminal.Size {
+func (t *Terminal) Len() (int,int) {
 	var e error
-	var size ITerminal.Size
-	size.Width, size.Height,e = term.GetSize(int(os.Stdout.Fd()))
+	x,y,e := term.GetSize(int(os.Stdout.Fd()))
 	if e != nil {
 		panic(e)
 	}
-	return size
+	return x,y
 }
 
 func (t *Terminal) GetCursor() (int, int) {

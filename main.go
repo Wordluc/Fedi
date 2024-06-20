@@ -5,7 +5,6 @@ import (
 	TermImpl "TUI/Devices/Terminal/impl"
 	"TUI/Engine"
 	"TUI/Engine/Events"
-	"strconv"
 )
 
 var keyb = KeyBoardImpl.ImplKeyBoard{}
@@ -25,14 +24,6 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	posEvent:=Events.KeyEvent{
-     Key:[]byte{'p'},
-     Handler: func(key byte) {
-			 x,y:=t.GetCursor()
-			t.PrintStr("x: "+strconv.Itoa(x)+" y: "+strconv.Itoa(y))
-     },
-	}
-	core.AddEvent(posEvent)
  	e = core.AddEvent(Events.Arrow(core))
 	if e != nil {
 		panic(e)
