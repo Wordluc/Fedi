@@ -25,8 +25,15 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-
-	e = core.AddEvent(Events.Arrow(core))
+	posEvent:=Events.KeyEvent{
+     Key:[]byte{'p'},
+     Handler: func(key byte) {
+			 x,y:=t.GetCursor()
+			t.PrintStr("x: "+strconv.Itoa(x)+" y: "+strconv.Itoa(y))
+     },
+	}
+	core.AddEvent(posEvent)
+ 	e = core.AddEvent(Events.Arrow(core))
 	if e != nil {
 		panic(e)
 	}
@@ -40,9 +47,6 @@ func main() {
 func loop() bool {
 	core.LoopEvent()
 	v, _ := keyb.GetKey()
-	if v == 'p' {
-		t.PrintStr("len: " + strconv.Itoa(t.Len().Width) + "x" + strconv.Itoa(t.Len().Height))
-	}
 	t.Print([]byte{v})
 	if v == 'q' {
 		return true

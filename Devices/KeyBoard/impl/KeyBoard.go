@@ -41,7 +41,7 @@ func (t *ImplKeyBoard) GetKey() (byte, error) {
 	return byte(t.key.rune), nil
 }
 
-func (t *ImplKeyBoard) IsPressed(token Token.Token) bool {
+func (t *ImplKeyBoard) IsTokenPressed(token Token.Token) bool {
 	key := t.key.key
 	if v, e := mapTokenToKey(token); e == nil {
 		if v == key {
@@ -49,6 +49,10 @@ func (t *ImplKeyBoard) IsPressed(token Token.Token) bool {
 		}
 	}
 	return false
+}
+
+func (t *ImplKeyBoard) IsKeyPressed(key byte) bool {
+	return byte(t.key.rune)==key 
 }
 
 func mapTokenToKey(token Token.Token) (keyboard.Key, error) {

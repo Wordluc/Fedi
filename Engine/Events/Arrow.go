@@ -5,28 +5,11 @@ import (
 	"TUI/Engine"
 )
 
-type ArrowEvent struct {
-	Key     []Token.Token
-	Handler Engine.Handler
-}
-
-func (event ArrowEvent) EventHandler(core *Engine.Core) error {
-	for _, key := range event.Key {
-		if core.Keyb.IsPressed(key) {
-			event.Handler(key)
-		}
-	}
-	return nil
-}
-//func moveLeft(core *Engine.Core) bool {
-//	size:=core.Term.Len()
-//	
-//
-//}
-func Arrow(core *Engine.Core) ArrowEvent {
-	return ArrowEvent{
+func Arrow(core *Engine.Core) TokenEvent {
+	return TokenEvent{
 		Key: []Token.Token{Token.Arrow_Left, Token.Arrow_Right, Token.Arrow_Up, Token.Arrow_Down},
-		Handler: func(Key Token.Token) {
+		Handler: func(key byte) {
+			Key := Token.Token(key)
 			switch Key {
 			case Token.Arrow_Left:
 				core.Term.PrintStr("\x1b[1D")

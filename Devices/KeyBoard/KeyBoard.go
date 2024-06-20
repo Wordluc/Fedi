@@ -6,9 +6,9 @@ import (
 
 type Loop func() bool
 type IKeyBoard interface {
-	Start(loop Loop)error
+	Start(loop Loop) error
 	Stop()
 	GetKey() (byte, error)
-	IsPressed(token Token.Token) bool
+	IsKeyPressed(key byte) bool
+	IsTokenPressed(token Token.Token) bool
 }
-

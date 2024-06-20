@@ -11,4 +11,5 @@ type ITerminal interface {
 	Print(byte []byte)
 	PrintStr(str string)
 	Len() Size
+	GetCursor() (int, int)
 }
