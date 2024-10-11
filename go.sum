@@ -1,5 +1,7 @@
-github.com/Wordluc/GTUI v0.4.2 h1:L8nH6XU2UAbYMVikWSGk3Ba2dlK9pZRfCwUeVQSTLow=
-github.com/Wordluc/GTUI v0.4.2/go.mod h1:cQQPLXJy9E5+p9doKr3sziRME1R3ebLWQ3OyTM3Eqyo=
+github.com/Wordluc/GTUI v0.4.5 h1:+z98JyHtU18gpZSI7C9uMexICpS0CIQxrgefrfE9XmA=
+github.com/Wordluc/GTUI v0.4.5/go.mod h1:E8JdntQlRmvrGoS7R1GvBwmcbwyj0bZYcWud5l7Koos=
+github.com/Wordluc/GTUI v0.4.6 h1:yTR36wrDlUGOWsFt8b43sqPSUy71zcLLwYm7t2uIcrc=
+github.com/Wordluc/GTUI v0.4.6/go.mod h1:E8JdntQlRmvrGoS7R1GvBwmcbwyj0bZYcWud5l7Koos=
 github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203 h1:XBBHcIb256gUJtLmY22n99HaZTz+r2Z51xUPi01m3wg=
