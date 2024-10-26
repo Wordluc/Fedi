@@ -5,36 +5,18 @@ import (
 	"github.com/Wordluc/GTUI/Core"
 	"github.com/Wordluc/GTUI/Core/Component"
 	"github.com/Wordluc/GTUI/Core/Drawing"
+	"github.com/Wordluc/GTUI/Core/Utils/Color"
 	"github.com/Wordluc/GTUI/Keyboard"
 	"github.com/Wordluc/GTUI/Terminal"
 )
+
 var core *GTUI.Gtui
-func createElement(text string,width,height int) *Component.Container{
-	textElement:=Drawing.CreateTextBlock(2,2,width-1,height-4,len(text))
-	for i:=range text{
-		textElement.Type(rune(text[i]))
-	}
-	edgeElement:=Drawing.CreateRectangle(1,1,width-2,height)
-	drawingContainer:= Drawing.CreateContainer(0,0);
-   drawingContainer.AddChild(edgeElement)
-	drawingContainer.AddChild(textElement)
-
-	doneButton:=Component.CreateButton(width/2-2,height-3,8,3,"Done")
-	deleteButton:=Component.CreateButton(width/2-10,height-3,8,3,"Delete")
-	editButton:=Component.CreateButton(width/2+6,height-3,8,3,"Edit")
-	containerComponent:=Component.CreateContainer(0,0)
-	containerComponent.AddComponent(doneButton)
-	containerComponent.AddComponent(deleteButton)
-	containerComponent.AddComponent(editButton)
-	containerComponent.AddDrawing(*drawingContainer)
-
-	return containerComponent
-}
-func createLabel(text string) Core.IEntity{
-	labelList:=Drawing.CreateTextField(0,0)
+var carosello Carosello=*CreateCarosello(0,0,3)
+func createLabel(text string) Core.IEntity {
+	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
-	bottonLine:=Drawing.CreateLine(0,1,len(text)+1,0)
-   container:=Drawing.CreateContainer(0,0)
+	bottonLine := Drawing.CreateLine(0, 1, len(text)+1, 0)
+	container := Drawing.CreateContainer(0, 0)
 	container.AddChild(labelList)
 	container.AddChild(bottonLine)
 	return container
@@ -42,77 +24,85 @@ func createLabel(text string) Core.IEntity{
 
 func main() {
 	var e error
-	core,e=GTUI.NewGtui(loop,&Keyboard.Keyboard{},&Terminal.Terminal{})
-	if e!=nil{
+	core, e = GTUI.NewGtui(loop, &Keyboard.Keyboard{}, &Terminal.Terminal{})
+	if e != nil {
 		panic(e)
 	}
 
-	xSize,ySize:=core.Size()
-	listZoneXSize:=int(float32(xSize)*0.7)
-	listZone:=Drawing.CreateRectangle(0,0,listZoneXSize-2,ySize)
+	xSize, ySize := core.Size()
+	listZoneXSize := int(float32(xSize) * 0.7)
+	listZone := Drawing.CreateRectangle(0, 0, listZoneXSize-2, ySize)
 	core.InsertEntity(listZone)
-	insertZone:=Drawing.CreateRectangle(listZoneXSize,0,xSize-listZoneXSize,ySize)
+	insertZone := Drawing.CreateRectangle(listZoneXSize, 0, xSize-listZoneXSize, ySize)
 	core.InsertEntity(insertZone)
-	listLabel:=createLabel("To Do")
-	listLabel.SetPos(1,1)
+	listLabel := createLabel("To Do")
+	listLabel.SetPos(1, 1)
 	core.InsertEntity(listLabel)
-	editLabel:=createLabel("Edit")
-	editLabel.SetPos(listZoneXSize+1,1)
+	editLabel := createLabel("Edit")
+	editLabel.SetPos(listZoneXSize+1, 1)
 	core.InsertEntity(editLabel)
-	listTexts:=[]string{"Prova","fai questa cosa","Esplodi"}
-	listElementYSize:=int(float32(ySize)*0.3)
-   var elements []*Component.Container=make([]*Component.Container,len(listTexts))
-	for i:=0;i<len(listTexts);i++{
-		elements[i]=createElement(listTexts[i],listZoneXSize-2,listElementYSize)
-		elements[i].SetActivity(false)
-		elements[i].SetPos(0,i*listElementYSize+2)
-		core.InsertComponent(elements[i])
+	listTexts := []string{"1", "2", "3","4","5","6"}
+	listElementYSize := int(float32(ySize) * 0.3)
+	var elements []*Element = make([]*Element, 3)
+	for i := 0; i < len(elements); i++ {
+		elements[i] = CreateElement(0, i*listElementYSize+2, listZoneXSize-4, listElementYSize)
+		core.InsertComponent(elements[i].GetComponent())
 	}
-	x,y:=elements[0].GetGraphics().GetPos()
-	elements[0].SetActivity(true)
-	core.SetCur(x+2,y+2)
-	firstEdit:=true
-	TextBox:=Component.CreateTextBox(listZoneXSize+1,5,xSize-listZoneXSize-2,ySize-10,core.CreateStreamingCharacter())
+	for i := 0; i < len(listTexts); i++ {
+		caroselloEl := &CaroselloElement{
+			wakeUpCallBack: func(index int) {
+				elements[index%3].components.SetActivity(true)
+				elements[index%3].rectangle.SetColor(Color.Get(Color.Blue, Color.None))
+			},
+			sleepCallBack: func(index int) {
+				elements[index%3].components.SetActivity(false)
+				elements[index%3].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
+			},
+			updateCallBack: func(index int) {
+				elements[index%3].SetText(listTexts[index])
+			},
+		}
+		carosello.AddElement(caroselloEl)
+	}
+
+	firstEdit := true
+	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 5, xSize-listZoneXSize-2, ySize-10, core.CreateStreamingCharacter())
+	if e != nil {
+		panic(e)
+	}
 	TextBox.Paste("Here you can write your todo")
 	TextBox.SetOnClick(func() {
 		if firstEdit {
-			firstEdit=false
+			firstEdit = false
 			TextBox.ClearAll()
 		}
 	})
-	SendButton:=Component.CreateButton(listZoneXSize+1,ySize-5,8,3,"Send")
-	CancelButton:=Component.CreateButton(listZoneXSize+17,ySize-5,8,3,"Cancel")
+	TextBox.SetOnHover(func() {
+		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
+	})
+
+	TextBox.SetOnOut(func() {
+		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+	})
+
+	SendButton := Component.CreateButton(listZoneXSize+1, ySize-5, 8, 3, "Send")
+	CancelButton := Component.CreateButton(listZoneXSize+17, ySize-5, 8, 3, "Cancel")
 	CancelButton.SetOnClick(func() {
 		TextBox.ClearAll()
 	})
 	core.InsertComponent(TextBox)
 	core.InsertComponent(SendButton)
 	core.InsertComponent(CancelButton)
-	core.InsertEntity(TextBox.GetGraphics())
 	defer core.Start()
 }
 
 func loop(keyb Keyboard.IKeyBoard) bool {
 	var x, y = core.GetCur()
 	if keyb.IsKeySPressed(Keyboard.KeyArrowDown) {
-		y++
+		carosello.NextOrPre(false)
 	}
 	if keyb.IsKeySPressed(Keyboard.KeyArrowUp) {
-		y--
-	}
-	if keyb.IsKeySPressed(Keyboard.KeyArrowRight) {
-		x++
-	}
-	if keyb.IsKeySPressed(Keyboard.KeyArrowLeft) {
-		x--
-	}
-
-	if keyb.IsKeySPressed(Keyboard.KeyCtrlS) {
-		core.RefreshComponents()
-	}
-
-	if e:=core.SetCur(x,y);e!=nil{
-		panic(e)
+		carosello.NextOrPre(true)
 	}
 	if keyb.IsKeySPressed(Keyboard.KeyEsc) {
 		core.EventOn(x, y, func(c Component.IComponent) {
@@ -162,4 +152,3 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 	}
 	return true
 }
-
