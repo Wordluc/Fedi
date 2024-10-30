@@ -30,7 +30,7 @@ func createLabel(text string) Core.IEntity {
 
 func main() {
 	var e error
-	core, e = GTUI.NewGtui(loop, &Keyboard.Keyboard{}, &Terminal.Terminal{})
+	core, e = GTUI.NewGtui(loop, Keyboard.NewKeyboard(), &Terminal.Terminal{})
 	if e != nil {
 		panic(e)
 	}
@@ -103,15 +103,15 @@ func main() {
 
 func loop(keyb Keyboard.IKeyBoard) bool {
 	var x, y = core.GetCur()
-	if side == LeftSide &&  keyb.IsKeySPressed(Keyboard.KeyArrowDown) {
+	if side == LeftSide &&  keyb.IsKeySPressed(Keyboard.Down) {
 		isElementSelected=false
 		carosello.NextOrPre(false)
 	}
-	if side == LeftSide && keyb.IsKeySPressed(Keyboard.KeyArrowUp) {
+	if side == LeftSide && keyb.IsKeySPressed(Keyboard.Up) {
 		isElementSelected=false
 		carosello.NextOrPre(true)
 	}
-	if side == LeftSide && keyb.IsKeySPressed(Keyboard.KeyEsc) {
+	if side == LeftSide && keyb.IsKeySPressed(Keyboard.Esc) {
 		isElementSelected = false
 		core.EventOn(x, y, func(c Component.IComponent) {
 			if c, ok := c.(Component.IWritableComponent); ok {
@@ -120,7 +120,7 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 		})
 	}
 
-	if side == LeftSide &&  keyb.IsKeySPressed(Keyboard.KeyEnter) {
+	if side == LeftSide &&  keyb.IsKeySPressed(Keyboard.Enter) {
 		iElement:=carosello.index%3
 		if isElementSelected{
 			elements[iElement].buttons[elements[iElement].indexButton].OnClick(0,0)
@@ -133,10 +133,10 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 	}
 	if side == LeftSide && isElementSelected{
 		iElement:=carosello.index%3
-		if keyb.IsKeySPressed(Keyboard.KeyArrowLeft) {
+		if keyb.IsKeySPressed(Keyboard.Left) {
 			elements[iElement].ChangeButton()
 		}
-		if keyb.IsKeySPressed(Keyboard.KeyArrowRight) {
+		if keyb.IsKeySPressed(Keyboard.Right) {
 			elements[iElement].ChangeButton()
 		}
 	}
@@ -145,11 +145,11 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 		//scolorire rettangolo grande
 	}
 
-	if keyb.IsKeySPressed(Keyboard.KeyEnter) {
+	if keyb.IsKeySPressed(Keyboard.Enter) {
 		core.Click(x, y)
 	}
 
-	if keyb.IsKeySPressed(Keyboard.KeyCtrlV) {
+	if keyb.IsKeySPressed(Keyboard.CtrlV) {
 		core.EventOn(x, y, func(c Component.IComponent) {
 			if c, ok := c.(*Component.TextBox); ok {
 				if c.IsTyping() {
@@ -160,7 +160,7 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 		})
 	}
 
-	if keyb.IsKeySPressed(Keyboard.KeyCtrlA) {
+	if keyb.IsKeySPressed(Keyboard.CtrlA) {
 		core.EventOn(x, y, func(c Component.IComponent) {
 			if c, ok := c.(*Component.TextBox); ok {
 				if c.IsTyping() {
@@ -170,7 +170,7 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 		})
 	}
 
-	if keyb.IsKeySPressed(Keyboard.KeyCtrlC) {
+	if keyb.IsKeySPressed(Keyboard.CtrlC) {
 		core.EventOn(x, y, func(c Component.IComponent) {
 			if c, ok := c.(*Component.TextBox); ok {
 				if c.IsTyping() {
@@ -180,7 +180,7 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 		})
 	}
 
-	if keyb.IsKeySPressed(Keyboard.KeyCtrlQ) {
+	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		return false
 	}
 	return true
