@@ -19,6 +19,8 @@ github.com/Wordluc/GTUI v0.0.0-20241030112224-026cce9ca1f1 h1:Z5w3ujSLoL3Ah2Nema
 github.com/Wordluc/GTUI v0.0.0-20241030112224-026cce9ca1f1/go.mod h1:b+kb3NuGE6hogFz34XwZ8/ciQPtuh2Gulb2bqp/J4Rg=
 github.com/Wordluc/GTUI v0.0.0-20241030113538-9d92636e72aa h1:PexyYkVtRMikPc3ITut8SXnV0oqG/u7SG/d+b4UOD/c=
 github.com/Wordluc/GTUI v0.0.0-20241030113538-9d92636e72aa/go.mod h1:b+kb3NuGE6hogFz34XwZ8/ciQPtuh2Gulb2bqp/J4Rg=
+github.com/Wordluc/GTUI v0.0.0-20241030140713-90b482c9a722 h1:PkcS6p7+bWz3jMZuJeFfJShSR+Y1t+zQUg7zDrIds2Y=
+github.com/Wordluc/GTUI v0.0.0-20241030140713-90b482c9a722/go.mod h1:b+kb3NuGE6hogFz34XwZ8/ciQPtuh2Gulb2bqp/J4Rg=
 github.com/Wordluc/GTUI v0.0.1 h1:NoSOCqixNCgEjzM+VEEML0RhVusV6M2g8cmLNkdy1MI=
 github.com/Wordluc/GTUI v0.0.1/go.mod h1:E8JdntQlRmvrGoS7R1GvBwmcbwyj0bZYcWud5l7Koos=
 github.com/Wordluc/GTUI v0.4.5 h1:+z98JyHtU18gpZSI7C9uMexICpS0CIQxrgefrfE9XmA=

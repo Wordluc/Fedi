@@ -32,7 +32,6 @@ func (e *Carosello) AddElement(element *CaroselloElement) {
 		e.elements[i].updateCallBack(i)
 	}
 }
-
 func (e *Carosello) NextOrPre(isPre bool) {
 	pre_relativeIndex := e.index % e.limitElements
 	if isPre {
