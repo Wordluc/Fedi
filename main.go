@@ -37,7 +37,7 @@ func main() {
 
 	xSize, ySize := core.Size()
 	listZoneXSize := int(float32(xSize) * 0.7)
-	listZone := Drawing.CreateRectangle(0, 0, listZoneXSize-2, ySize)
+	listZone := Drawing.CreateRectangle(0, 0, listZoneXSize-1, ySize)
 	core.InsertEntity(listZone)
 	insertZone := Drawing.CreateRectangle(listZoneXSize, 0, xSize-listZoneXSize, ySize)
 	core.InsertEntity(insertZone)
@@ -50,7 +50,7 @@ func main() {
 	listTexts := []string{"1", "2", "3","4","5","6"}
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(elements); i++ {
-		elements[i] = CreateElement(0, i*listElementYSize+2, listZoneXSize-4, listElementYSize)
+		elements[i] = CreateElement(1, i*listElementYSize+2, listZoneXSize-4, listElementYSize)
 		core.InsertComponent(elements[i].GetComponent())
 	}
 	for i := 0; i < len(listTexts); i++ {
