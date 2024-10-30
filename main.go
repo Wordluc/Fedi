@@ -12,6 +12,12 @@ import (
 
 var core *GTUI.Gtui
 var carosello Carosello=*CreateCarosello(0,0,3)
+var elements []*Element=make([]*Element,3)
+var isElementSelected bool=false
+const LeftSide=0
+const RightSide=1
+var side int=LeftSide
+
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
@@ -43,7 +49,6 @@ func main() {
 	core.InsertEntity(editLabel)
 	listTexts := []string{"1", "2", "3","4","5","6"}
 	listElementYSize := int(float32(ySize) * 0.3)
-	var elements []*Element = make([]*Element, 3)
 	for i := 0; i < len(elements); i++ {
 		elements[i] = CreateElement(0, i*listElementYSize+2, listZoneXSize-4, listElementYSize)
 		core.InsertComponent(elements[i].GetComponent())
@@ -52,7 +57,7 @@ func main() {
 		caroselloEl := &CaroselloElement{
 			wakeUpCallBack: func(index int) {
 				elements[index%3].components.SetActivity(true)
-				elements[index%3].rectangle.SetColor(Color.Get(Color.Blue, Color.None))
+				elements[index%3].rectangle.SetColor(Color.Get(Color.White, Color.None))
 			},
 			sleepCallBack: func(index int) {
 				elements[index%3].components.SetActivity(false)
@@ -98,18 +103,46 @@ func main() {
 
 func loop(keyb Keyboard.IKeyBoard) bool {
 	var x, y = core.GetCur()
-	if keyb.IsKeySPressed(Keyboard.KeyArrowDown) {
+	if side == LeftSide &&  keyb.IsKeySPressed(Keyboard.KeyArrowDown) {
+		isElementSelected=false
 		carosello.NextOrPre(false)
 	}
-	if keyb.IsKeySPressed(Keyboard.KeyArrowUp) {
+	if side == LeftSide && keyb.IsKeySPressed(Keyboard.KeyArrowUp) {
+		isElementSelected=false
 		carosello.NextOrPre(true)
 	}
-	if keyb.IsKeySPressed(Keyboard.KeyEsc) {
+	if side == LeftSide && keyb.IsKeySPressed(Keyboard.KeyEsc) {
+		isElementSelected = false
 		core.EventOn(x, y, func(c Component.IComponent) {
 			if c, ok := c.(Component.IWritableComponent); ok {
 				c.StopTyping()
 			}
 		})
+	}
+
+	if side == LeftSide &&  keyb.IsKeySPressed(Keyboard.KeyEnter) {
+		iElement:=carosello.index%3
+		if isElementSelected{
+			elements[iElement].buttons[elements[iElement].indexButton].OnClick(0,0)
+		}else{
+			elements[iElement].components.SetActivity(true)
+			elements[iElement].rectangle.SetColor(Color.Get(Color.Blue, Color.None))
+			isElementSelected=true
+			elements[iElement].ChangeButton()
+		}
+	}
+	if side == LeftSide && isElementSelected{
+		iElement:=carosello.index%3
+		if keyb.IsKeySPressed(Keyboard.KeyArrowLeft) {
+			elements[iElement].ChangeButton()
+		}
+		if keyb.IsKeySPressed(Keyboard.KeyArrowRight) {
+			elements[iElement].ChangeButton()
+		}
+	}
+
+	if side == LeftSide && !isElementSelected {
+		//scolorire rettangolo grande
 	}
 
 	if keyb.IsKeySPressed(Keyboard.KeyEnter) {
