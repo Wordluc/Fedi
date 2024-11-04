@@ -11,7 +11,8 @@ type tupleBuilderCond struct {
 }
 type BuilderStateFork struct {
 	state *State.StateFork
-	tos   []*tupleBuilderCond
+	builders []IBuilder
+	cond func () bool
 }
 
 func CreateBuilderStateFork(nameState string) *BuilderStateFork {
@@ -47,17 +48,11 @@ func (b *BuilderStateFork) Build() (State.IState, error) {
 	if b.state.StateName == "" {
 		return nil, errors.New("no state name")
 	}
-	for _, t := range b.tos {
-		if t.builder == nil {
-			return nil, errors.New("no builder")
-		}
-		if t.cond == nil {
-			return nil, errors.New("no condition")
-		}
-		if to, e := t.builder.Build(); e != nil {
+	for _, t := range b.builders {
+		if to, e := t.Build(); e != nil {
 			return nil, e
 		} else {
-			b.state.Transitions = append(b.state.Transitions, *State.CreateTransition(b.state, to, t.cond))
+			b.state.Transitions = append(b.state.Transitions, State.CreateTransition(b.state, to, b.cond))
 		}
 	}
 	if n := len(b.state.Transitions); n == 0 {
@@ -71,13 +66,13 @@ func (b *BuilderStateFork) Build() (State.IState, error) {
 	return b.state, nil
 }
 
-func (b *BuilderStateFork) AddTo(cond func() bool, to IBuilder)error {
-	if _,ok:=to.(*BuilderStateMerge);ok{
-		return errors.New("cannot use merge as next")
+func (b *BuilderStateFork) AddTos(cond func() bool, tos ... IBuilder)error {
+	for _, to := range tos {
+		if _,ok:=to.(*BuilderStateMerge);ok{
+			return errors.New("cannot use merge as next")
+		}
 	}
-	b.tos = append(b.tos, &tupleBuilderCond{
-		cond:    cond,
-		builder: to,
-	})
+	b.cond = cond
+	b.builders = tos
 	return nil
 }
