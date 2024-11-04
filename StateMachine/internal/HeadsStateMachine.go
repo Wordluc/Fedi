@@ -4,6 +4,11 @@ type HeadsStateMachine struct {
 }
 
 func (h *HeadsStateMachine) AddHead(state IState) {
+	for _, head := range h.Heads {
+		if head == state {
+			return
+		}
+	}
 	h.Heads = append(h.Heads, state)
 	state.EntryAction()
 }

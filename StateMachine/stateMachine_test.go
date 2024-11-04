@@ -3,6 +3,7 @@ package StateMachine
 import (
 	"testing"
 )
+
 //a->b->c
 func TestStateMachineLinearStates(t *testing.T) {
 	stateMachine := CreateStateMachine()
@@ -36,10 +37,8 @@ func TestStateMachineLinearStates(t *testing.T) {
 		return nil
 	})
 
-	buildEnd:=CreateBuilderStateEnd("end")
 
-	builderA.SetNext(func() bool {return true },builderB)
-	builderB.SetNext(func() bool {return true },buildEnd)
+	builderA.AddBranch(func() bool {return true },builderB)
 	stateMachine.AddBuilder(builderA)
 	stateMachine.Clock()
 	if res!="entryA->doA->exitA->entryB->"{
@@ -82,7 +81,7 @@ func TestStateMachineFork(t *testing.T) {
 		res+="entryB->"
 		return nil
 	})
-	builderC:=CreateBuilderStateBase("b")
+	builderC:=CreateBuilderStateBase("c")
 	builderC.SetActionDo(func() error {
 		res+="doC->"
 		return nil
@@ -118,23 +117,9 @@ func TestStateMachineFork(t *testing.T) {
 		return nil
 	})
 	mergeBuilder:=CreateBuilderStateMerge("merge")
-	builderEnd:=CreateBuilderStateEnd("end")
-	builderEnd.SetActionDo(func() error {
-		res+="doEnd->"
-		return nil
-	})
-	builderEnd.SetExitAction(func() error {
-		res+="exitEnd->"
-		return nil
-	})
-	builderEnd.SetEntryAction(func() error {
-		res+="entryEnd->"
-		return nil
-	})
 
-	builderA.SetNext(func () bool{return true},forkBuilder)
-	forkBuilder.AddTo(func () bool{return true},builderC)
-	forkBuilder.AddTo(func () bool{return true},builderB)
+	builderA.AddBranch(func () bool{return true},forkBuilder)
+	forkBuilder.AddTos(func () bool{return true},builderC,builderB)
 
 	error:=mergeBuilder.AddToWait(func () bool{return true},builderC)
 	if error!=nil{
@@ -146,15 +131,17 @@ func TestStateMachineFork(t *testing.T) {
 	}
 
 	mergeBuilder.SetNext(func () bool{return true},builderE)
-	builderE.SetNext(func () bool{return true},builderEnd)
 	error=stateMachine.AddBuilder(builderA)
 	if error!=nil{
 		t.Fatalf("builder: %s",error)
 	}
-	for i:=0;i<6;i++{
-		stateMachine.Clock()
+	for i:=0;i<7;i++{
+		if e:=stateMachine.Clock();e!=nil{
+			t.Fatalf("clock: %s",e)
+		}
 	}
-	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->doB->exitB->entryE->entryE->exitE->entryEnd->exitE->entryEnd->doEnd->exitEnd->"
+
+	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->doB->exitB->entryE->exitE->"
 	if res!=exp{
 		t.Fatalf("got: %s, expected: %s",res,exp)
 	}
@@ -226,30 +213,16 @@ func TestStateMachineForkWaitWrongState(t *testing.T) {
 		return nil
 	})
 	mergeBuilder:=CreateBuilderStateMerge("merge")
-	builderEnd:=CreateBuilderStateEnd("end")
-	builderEnd.SetActionDo(func() error {
-		res+="doEnd->"
-		return nil
-	})
-	builderEnd.SetExitAction(func() error {
-		res+="exitEnd->"
-		return nil
-	})
-	builderEnd.SetEntryAction(func() error {
-		res+="entryEnd->"
-		return nil
-	})
 
-	builderA.SetNext(func () bool{return true},forkBuilder)
-	forkBuilder.AddTo(func () bool{return true},builderC)
-	forkBuilder.AddTo(func () bool{return true},builderB)
+	builderA.AddBranch(func () bool{return true},forkBuilder)
+	forkBuilder.AddTos(func () bool{return true},builderC)
+	forkBuilder.AddTos(func () bool{return true},builderB)
 
 	mergeBuilder.AddToWait(func () bool{return true},builderA)
 
 	mergeBuilder.SetNext(func () bool{return true},builderE)
 
 	mergeBuilder.SetNext(func () bool{return true},builderE)
-	builderE.SetNext(func () bool{return true},builderEnd)
 	error:=stateMachine.AddBuilder(builderA)
 	if error!=nil{
 		t.Fatalf("error: %s",error)
@@ -261,5 +234,77 @@ func TestStateMachineForkWaitWrongState(t *testing.T) {
 				t.Fatalf("expected: invalid transition: cannot wait for a transition that doesn't merge back, got: %s",e)
 			}
 		}
+	}
+}
+func StateMachineWithDualPathTakeEandB(res *string,takeB bool) StateMachine{
+	stateMachine := CreateStateMachine()
+
+	builderA:=CreateBuilderStateBase("a")
+	builderA.SetActionDo(func() error {
+		*res+="doA->"
+		return nil
+	})
+	builderA.SetExitAction(func() error {
+		*res+="exitA->"
+		return nil
+	})
+	builderA.SetEntryAction(func() error {
+		*res+="entryA->"
+		return nil
+	})
+	
+	builderB:=CreateBuilderStateBase("b")
+	builderB.SetActionDo(func() error {
+		*res+="doB->"
+		return nil
+	})
+	builderB.SetExitAction(func() error {
+		*res+="exitB->"
+		return nil
+	})
+	builderB.SetEntryAction(func() error {
+		*res+="entryB->"
+		return nil
+	})
+	
+	builderE:=CreateBuilderStateBase("e")
+	
+	builderE.SetEntryAction(func() error {
+		*res+="entryE->"
+		return nil
+	})
+	
+	builderE.SetExitAction(func() error {
+		*res+="exitE->"
+		return nil
+	})
+	builderE.SetActionDo(func() error {
+		*res+="doE->"
+		return nil
+	})
+	builderA.AddBranch(func () bool{return takeB},builderB)
+	builderA.AddBranch(func () bool{return !takeB},builderE)
+
+	stateMachine.AddBuilder(builderA)
+	return *stateMachine
+}
+func TestStateMachineWithDualPathTakeE(t *testing.T) {
+	res:=""
+	stateMachine:=StateMachineWithDualPathTakeEandB(&res,false)
+	stateMachine.Clock()
+	stateMachine.Clock()
+	stateMachine.Clock()
+	if res!="entryA->doA->exitA->entryE->doE->exitE->"{
+		t.Fatalf("expected: entryA->doA->exitA->entryE->doE->exitE->, got: %s",res)
+	}
+}
+func TestStateMachineWithDualPathTakeB(t *testing.T) {
+	res:=""
+	stateMachine:=StateMachineWithDualPathTakeEandB(&res,true)
+	stateMachine.Clock()
+	stateMachine.Clock()
+	stateMachine.Clock()
+	if res!="entryA->doA->exitA->entryB->doB->exitB->"{
+		t.Fatalf("expected: entryA->doA->exitA->entryB->doB->exitB->, got: %s",res)
 	}
 }
