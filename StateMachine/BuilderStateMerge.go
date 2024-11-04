@@ -72,6 +72,11 @@ func (b *BuilderStateMerge) SetNext(condToOut func() bool, outBuild IBuilder) {
 		builder: outBuild,
 	}
 }
-func (b *BuilderStateMerge) AddToWait(toWait IBuilder) {
-	b.toWaits = append(b.toWaits, toWait)
+func (b *BuilderStateMerge) AddToWait(cond func() bool, toWait IBuilder) error {
+	if state,ok:=toWait.(*BuilderStateBase);ok{
+		state.SetNext(cond,b)
+		b.toWaits = append(b.toWaits, toWait)
+		return nil
+	}
+	return errors.New("cannot wait for this type of state")
 }
