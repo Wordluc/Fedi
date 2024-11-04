@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 //a->b->c
-func TestStateMachineLinearState(t *testing.T) {
+func TestStateMachineLinearStates(t *testing.T) {
 	stateMachine := CreateStateMachine()
 	var res string =""
 	builderA:=CreateBuilderStateBase("a")
@@ -35,26 +35,9 @@ func TestStateMachineLinearState(t *testing.T) {
 	})
 
 	buildEnd:=CreateBuilderStateEnd("end")
-   end,e:=buildEnd.Build()
-	if e!=nil{
-		t.Fatalf(e.Error())
-	}
-	builderB.SetTransition(func() bool {
-		return true
-	},end)
-
-	b,e:=builderB.Build()
-	if e!=nil{
-		t.Fatalf(e.Error())
-	}
-	builderA.SetTransition(func() bool {
-		return true
-	},b)
-	a,e:=builderA.Build()
-	if e!=nil{
-		t.Fatalf(e.Error())
-	}
-	stateMachine.AddHead(a)
+	builderA.SetNext(func() bool {return true },builderB)
+	builderB.SetNext(func() bool {return true },buildEnd)
+	stateMachine.AddBuilder(builderA)
 	stateMachine.Clock()
 	if res!="entryA->doA->exitA->entryB->"{
 		t.Fail()
