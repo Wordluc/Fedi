@@ -71,9 +71,13 @@ func (b *BuilderStateFork) Build() (State.IState, error) {
 	return b.state, nil
 }
 
-func (b *BuilderStateFork) AddTo(cond func() bool, to IBuilder) {
+func (b *BuilderStateFork) AddTo(cond func() bool, to IBuilder)error {
+	if _,ok:=to.(*BuilderStateMerge);ok{
+		return errors.New("cannot use merge as next")
+	}
 	b.tos = append(b.tos, &tupleBuilderCond{
 		cond:    cond,
 		builder: to,
 	})
+	return nil
 }

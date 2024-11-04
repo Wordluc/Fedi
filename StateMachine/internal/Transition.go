@@ -16,8 +16,16 @@ func (t *Transition) TryTransition() (bool, error) {
 	t.isDone = t.isDone || t.condition()
 	return t.isDone, nil
 }
+
 func (t *Transition) IsDone() bool {
 	return t.isDone
+}
+
+func (t *Transition) GetFrom() IState {
+	return t.from
+}
+func (t *Transition) GetTo() IState {
+	return t.to
 }
 func (t *Transition) IsValid() error {
 
