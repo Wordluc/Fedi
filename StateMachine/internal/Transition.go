@@ -14,6 +14,7 @@ func (t *Transition) TryTransition() (bool, error) {
 	}
 	return t.condition(), nil
 }
+
 func (t *Transition) IsValid()error {
 	
 	if t.from==nil{
@@ -26,6 +27,10 @@ func (t *Transition) IsValid()error {
 		return errors.New("no condition")
 	}
 	return nil
+}
+
+func (t *Transition) SetTo(to IState) {
+	t.to = to
 }
 
 func CreateTransition(from, to IState, condition func() bool) *Transition {

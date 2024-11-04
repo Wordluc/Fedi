@@ -7,6 +7,7 @@ import (
 
 type BuilderStateMerge struct {
 	state *State.StateMerge
+	inBuilds []tupleBuilderCond
 }
 
 func CreateBuilderStateMerge(nameState string) *BuilderStateMerge {
@@ -32,24 +33,25 @@ func (b *BuilderStateMerge) SetActionDo(do func() error) *BuilderStateMerge {
 	return b
 }
 
-func (b *BuilderStateMerge) AddInTransition(cond func() bool,from State.IState) error {
-	state,ok:=from.(*State.StateBase)
-	if !ok{
-		return errors.New("expected StateBase")
-	}
-	if state.TransitionTo.IsValid()==nil{
-		return errors.New("transition already set")
-	}
-	state.TransitionTo = *State.CreateTransition(state, b.state, cond)
-	return nil
-}
-
 func (b *BuilderStateMerge) Build() (*State.StateMerge,error) {
 	if b.state==nil{
 		return nil,errors.New("no state")
 	}
 	if b.state.StateName==""{
 		return nil,errors.New("no state name")
+	}
+	for _, t := range b.inBuilds {
+		if t.builder == nil {
+			return nil, errors.New("no builder")
+		}
+		if t.cond == nil {
+			return nil, errors.New("no condition")
+		}
+		if to, e := t.builder.Build(); e != nil {
+			return nil, e
+		} else {
+			b.state.InTransitions = append(b.state.InTransitions, *State.CreateTransition(to, b.state, t.cond))
+		}
 	}
 	if e:= b.state.TransitionTo.IsValid();e!=nil{
 		return nil,e
@@ -60,3 +62,12 @@ func (b *BuilderStateMerge) Build() (*State.StateMerge,error) {
 	return b.state,nil
 }
 
+//add builder state who will merge in this state
+//condToIn: condition to SetAddIn
+//inBuild: state who will merge
+func (b *BuilderStateMerge) SetAddIn(condToIn func () bool,inBuild IBuilder){
+	b.inBuilds = append(b.inBuilds,tupleBuilderCond{
+		cond:condToIn,
+		builder:inBuild,
+	})
+}

@@ -32,7 +32,7 @@ func (b *BuilderStateEnd) SetActionDo(do func() error) *BuilderStateEnd {
 	return b
 }
 
-func (b *BuilderStateEnd) Build() (*State.StateEnd,error) {
+func (b *BuilderStateEnd) Build() (State.IState,error) {
 	if b.state==nil{
 		return nil,errors.New("no state")
 	}
@@ -40,8 +40,4 @@ func (b *BuilderStateEnd) Build() (*State.StateEnd,error) {
 		return nil,errors.New("no state name")
 	}
 	return b.state,nil
-}
-
-func (b *BuilderStateEnd) SetTransition(cond func() bool,to State.IState) {
-		b.state.TransitionTo=*State.CreateTransition(b.state, to, cond)
 }
