@@ -9,6 +9,7 @@ import (
 type BuilderStateBase struct {
 	state *State.StateBase
 	tos []*tupleBuilderCond
+	alreadyBuilt bool
 }
 
 func CreateBuilderStateBase(nameState string) *BuilderStateBase {
@@ -37,6 +38,9 @@ func (b *BuilderStateBase) SetActionDo(do func() error) *BuilderStateBase {
 }
 
 func (b *BuilderStateBase) Build() (State.IState,error) {
+	if b.alreadyBuilt {
+		return b.state, nil
+	}
 	if b.state==nil{
 		return nil,errors.New("no state")
 	}
@@ -58,7 +62,8 @@ func (b *BuilderStateBase) Build() (State.IState,error) {
 			b.state.TransitionTo = append(b.state.TransitionTo, State.CreateTransition(b.state, to, t.cond))
 		}
 	}
-
+	
+	b.alreadyBuilt = true
 	return b.state,nil
 }
 

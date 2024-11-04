@@ -13,6 +13,7 @@ type BuilderStateFork struct {
 	state *State.StateFork
 	builders []IBuilder
 	cond func () bool
+	alreadyBuilt bool
 }
 
 func CreateBuilderStateFork(nameState string) *BuilderStateFork {
@@ -41,7 +42,11 @@ func (b *BuilderStateFork) SetActionDo(do func() error) *BuilderStateFork {
 func (b *BuilderStateFork) GetInstance() State.IState {
 	return b.state
 }
+
 func (b *BuilderStateFork) Build() (State.IState, error) {
+	if b.alreadyBuilt {
+		return b.state, nil
+	}
 	if b.state == nil {
 		return nil, errors.New("no state")
 	}
@@ -63,6 +68,7 @@ func (b *BuilderStateFork) Build() (State.IState, error) {
 			return nil, e
 		}
 	}
+	b.alreadyBuilt = true
 	return b.state, nil
 }
 
