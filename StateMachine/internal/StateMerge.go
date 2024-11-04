@@ -7,7 +7,7 @@ import (
 type StateMerge struct {
 	StateName         string
 	ToWait     			[]IState
-	TransitionTo      Transition
+	TransitionTo      *Transition
 	HeadsStateMachine *HeadsStateMachine
 
 	IEntryAction func() error
@@ -43,16 +43,13 @@ func (s *StateMerge) SetHeadsStateMachine(headsStateMachine *HeadsStateMachine) 
 	s.HeadsStateMachine = headsStateMachine
 }
 
-func (s *StateMerge) GetTransitionsTo() []Transition {
-	return []Transition{s.TransitionTo}
+func (s *StateMerge) GetTransitionsTo() []*Transition {
+	return []*Transition{s.TransitionTo}
 }
 func (s *StateMerge) CheckTransition() error {
 	for _, state := range s.ToWait {
 		tran:=state.GetTransitionsTo()
 		for _, transition := range tran {
-			if transition.to!=s{
-				return errors.New("invalid transition: cannot wait for a transition that doesn't merge back")
-			}
 			if !transition.IsDone() {
 				return nil
 			}

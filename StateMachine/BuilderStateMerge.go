@@ -47,7 +47,7 @@ func (b *BuilderStateMerge) Build() (State.IState, error) {
 	}
 	for _, t := range b.toWaits {
 		istance := t.GetInstance()
-		b.state.ToWait = append(b.state.ToWait,istance)
+		b.state.ToWait = append(b.state.ToWait, istance)
 	}
 
 	if b.to.builder == nil {
@@ -59,7 +59,7 @@ func (b *BuilderStateMerge) Build() (State.IState, error) {
 	if to, e := b.to.builder.Build(); e != nil {
 		return nil, e
 	} else {
-		b.state.TransitionTo = *State.CreateTransition(b.state, to, b.to.cond)
+		b.state.TransitionTo = State.CreateTransition(b.state, to, b.to.cond)
 	}
 	if e := b.state.TransitionTo.IsValid(); e != nil {
 		return nil, e
@@ -75,9 +75,8 @@ func (b *BuilderStateMerge) SetNext(condToOut func() bool, outBuild IBuilder) {
 }
 
 func (b *BuilderStateMerge) AddToWait(cond func() bool, toWait IBuilder) error {
-	if state,ok:=toWait.(*BuilderStateBase);ok{
-		state.builderNext = b
-		state.conditionNext = cond
+	if state, ok := toWait.(*BuilderStateBase); ok {
+		state.tos = append(state.tos, &tupleBuilderCond{cond: cond, builder: b})
 		b.toWaits = append(b.toWaits, toWait)
 		return nil
 	}

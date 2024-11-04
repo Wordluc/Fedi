@@ -2,7 +2,7 @@ package State
 
 type StateBase struct {
 	StateName         string
-	TransitionTo      Transition
+	TransitionTo      []*Transition
 	HeadsStateMachine *HeadsStateMachine
 
 	IEntryAction func() error
@@ -16,8 +16,8 @@ func (s *StateBase) EntryAction() error {
 	}
 	return s.IEntryAction()
 }
-func (s *StateBase) GetTransitionsTo() []Transition {
-	return []Transition{s.TransitionTo}
+func (s *StateBase) GetTransitionsTo() []*Transition {
+	return s.TransitionTo
 }
 func (s *StateBase) ExitAction() error {
 	if s.IExitAction == nil {
@@ -37,14 +37,20 @@ func (s *StateBase) SetHeadsStateMachine(headsStateMachine *HeadsStateMachine) {
 	s.HeadsStateMachine = headsStateMachine
 }
 
-func (s *StateBase) CheckTransition() (error) {
-	ok, err := s.TransitionTo.TryTransition()
-	if err != nil {
-		return err
+func (s *StateBase) CheckTransition() error {
+	for _, transition := range s.TransitionTo {
+		ok, err := transition.TryTransition()
+		if err != nil {
+			return err
+		}
+		if ok {
+			s.HeadsStateMachine.RemoveHead(s)
+			s.HeadsStateMachine.AddHead(transition.to)
+			return nil
+		}
 	}
-	if ok {
+	if len(s.TransitionTo) == 0 {
 		s.HeadsStateMachine.RemoveHead(s)
-		s.HeadsStateMachine.AddHead(s.TransitionTo.to)
 	}
 	return nil
 }

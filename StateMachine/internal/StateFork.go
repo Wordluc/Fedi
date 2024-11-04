@@ -6,7 +6,7 @@ import (
 
 type StateFork struct {
 	StateName         string
-	Transitions       []Transition
+	Transitions       []*Transition
 	HeadsStateMachine *HeadsStateMachine
 	passedState int
 
@@ -22,7 +22,7 @@ func (s *StateFork) EntryAction() error {
 	return s.IEntryAction() 	
 }
 
-func (s *StateFork) GetTransitionsTo() []Transition {
+func (s *StateFork) GetTransitionsTo() []*Transition {
 	return s.Transitions
 }
 func (s *StateFork) ExitAction() error {
@@ -64,6 +64,9 @@ func (s *StateFork) CheckTransition() (error) {
 			}
 			s.HeadsStateMachine.AddHead(transition.to)
 		}
+	}
+	if len(s.Transitions) == 0 {
+		s.HeadsStateMachine.RemoveHead(s)
 	}
 	return nil
 }

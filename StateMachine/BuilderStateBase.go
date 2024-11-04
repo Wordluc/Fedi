@@ -8,8 +8,7 @@ import (
 
 type BuilderStateBase struct {
 	state *State.StateBase
-	builderNext IBuilder
-	conditionNext func() bool
+	tos []*tupleBuilderCond
 }
 
 func CreateBuilderStateBase(nameState string) *BuilderStateBase {
@@ -46,27 +45,30 @@ func (b *BuilderStateBase) Build() (State.IState,error) {
 		return nil,errors.New("no state name")
 	}
 
-	if b.builderNext==nil{
-		return nil,nil
+	for _, t := range b.tos {
+		if t.builder == nil {
+			return nil, errors.New("no builder")
+		}
+		if t.cond == nil {
+			return nil, errors.New("no condition")
+		}
+		if to, e := t.builder.Build(); e != nil {
+			return nil, e
+		} else {
+			b.state.TransitionTo = append(b.state.TransitionTo, State.CreateTransition(b.state, to, t.cond))
+		}
 	}
 
-	to, e:= b.builderNext.Build()
-	if e!=nil{
-		return nil,e
-	}
-	b.state.TransitionTo = *State.CreateTransition(b.state, to, b.conditionNext)
-
-	if e:= b.state.TransitionTo.IsValid();e!=nil{
-		return nil,e
-	}
 	return b.state,nil
 }
 
-func (b *BuilderStateBase) SetNext(cond func() bool,builderNext IBuilder)error {
+func (b *BuilderStateBase) AddBranch(cond func() bool,builderNext IBuilder)error {
 	if _,ok:=builderNext.(*BuilderStateMerge);ok{
 		return errors.New("invalid next state, cannot use merge as next, use wait instead")
 	}
-	b.builderNext = builderNext
-	b.conditionNext = cond
+	b.tos = append(b.tos, &tupleBuilderCond{
+		cond:    cond,
+		builder: builderNext,
+	})
 	return nil
 }
