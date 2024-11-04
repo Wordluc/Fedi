@@ -9,6 +9,7 @@ type BuilderStateMerge struct {
 	state   *State.StateMerge
 	toWaits []IBuilder
 	to      tupleBuilderCond
+	alreadyBuilt bool
 }
 
 func CreateBuilderStateMerge(nameState string) *BuilderStateMerge {
@@ -39,6 +40,9 @@ func (b *BuilderStateMerge) GetInstance() State.IState {
 }
 
 func (b *BuilderStateMerge) Build() (State.IState, error) {
+	if b.alreadyBuilt {
+		return b.state, nil
+	}
 	if b.state == nil {
 		return nil, errors.New("no state")
 	}
@@ -64,6 +68,7 @@ func (b *BuilderStateMerge) Build() (State.IState, error) {
 	if e := b.state.TransitionTo.IsValid(); e != nil {
 		return nil, e
 	}
+	b.alreadyBuilt = true
 	return b.state, nil
 }
 
