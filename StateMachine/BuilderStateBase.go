@@ -62,7 +62,8 @@ func (b *BuilderStateBase) Build() (State.IState,error) {
 	return b.state,nil
 }
 
-func (b *BuilderStateBase) SetNext(cond func() bool,builderNext IBuilder) {
+func (b *BuilderStateBase) SetNext(cond func() bool,builderNext IBuilder)error {
 	b.builderNext = builderNext
 	b.conditionNext = cond
+	return nil
 }
