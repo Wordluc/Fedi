@@ -1,6 +1,8 @@
 package StateMachine
 
-import State "Fedi/StateMachine/internal"
+import (
+	State "Fedi/StateMachine/internal"
+)
 
 type StateMachine struct {
 	begin State.IState

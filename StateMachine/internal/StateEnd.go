@@ -40,6 +40,9 @@ func (s *StateEnd) SetHeadsStateMachine(headsStateMachine *HeadsStateMachine) {
 	s.HeadsStateMachine = headsStateMachine
 }
 
+func (s *StateEnd) GetTransitionsTo() []Transition {
+	return []Transition{s.TransitionTo}
+}
 func (s *StateEnd) CheckTransition() error {
 	ok, err := s.TransitionTo.TryTransition()
 	if err != nil {

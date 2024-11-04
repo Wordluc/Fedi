@@ -18,7 +18,9 @@ func CreateBuilderStateBase(nameState string) *BuilderStateBase {
 		},
 	}
 }
-
+func (b *BuilderStateBase) GetInstance() State.IState {
+	return b.state
+}
 func (b *BuilderStateBase) SetEntryAction(entryAction func() error) *BuilderStateBase {
 	b.state.IEntryAction = entryAction
 	return b
@@ -44,7 +46,7 @@ func (b *BuilderStateBase) Build() (State.IState,error) {
 	}
 
 	if b.builderNext==nil{
-		return nil,errors.New("no next state")
+		return nil,nil
 	}
 
 	to, e:= b.builderNext.Build()

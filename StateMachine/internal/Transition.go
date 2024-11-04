@@ -6,15 +6,19 @@ type Transition struct {
 	from      IState
 	to        IState
 	condition func() bool
+	isDone    bool
 }
 
 func (t *Transition) TryTransition() (bool, error) {
 	if t.condition == nil {
 		return false, errors.New("no condition")
 	}
-	return t.condition(), nil
+	t.isDone =t.isDone || t.condition()
+	return t.isDone, nil
 }
-
+func (t *Transition) IsDone() bool {
+	return t.isDone
+}
 func (t *Transition) IsValid()error {
 	
 	if t.from==nil{
