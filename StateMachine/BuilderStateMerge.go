@@ -37,6 +37,7 @@ func (b *BuilderStateMerge) SetActionDo(do func() error) *BuilderStateMerge {
 func (b *BuilderStateMerge) GetInstance() State.IState {
 	return b.state
 }
+
 func (b *BuilderStateMerge) Build() (State.IState, error) {
 	if b.state == nil {
 		return nil, errors.New("no state")
@@ -72,6 +73,7 @@ func (b *BuilderStateMerge) SetNext(condToOut func() bool, outBuild IBuilder) {
 		builder: outBuild,
 	}
 }
+
 func (b *BuilderStateMerge) AddToWait(cond func() bool, toWait IBuilder) error {
 	if state,ok:=toWait.(*BuilderStateBase);ok{
 		state.builderNext = b
