@@ -21,6 +21,11 @@ func (m *StateMachine) Clock() {
 	}
 }
 
-func (m *StateMachine) AddHead(state State.IState) {
-	m.heads.AddHead(state)
+func (m *StateMachine) AddBuilder(state IBuilder)error {
+	build, err := state.Build()
+	if err != nil {
+		return err
+	}
+	m.heads.AddHead(build)
+	return nil
 }
