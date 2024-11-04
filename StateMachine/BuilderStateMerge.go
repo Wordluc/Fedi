@@ -74,7 +74,8 @@ func (b *BuilderStateMerge) SetNext(condToOut func() bool, outBuild IBuilder) {
 }
 func (b *BuilderStateMerge) AddToWait(cond func() bool, toWait IBuilder) error {
 	if state,ok:=toWait.(*BuilderStateBase);ok{
-		state.SetNext(cond,b)
+		state.builderNext = b
+		state.conditionNext = cond
 		b.toWaits = append(b.toWaits, toWait)
 		return nil
 	}
