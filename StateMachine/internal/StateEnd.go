@@ -44,12 +44,6 @@ func (s *StateEnd) GetTransitionsTo() []Transition {
 	return []Transition{s.TransitionTo}
 }
 func (s *StateEnd) CheckTransition() error {
-	ok, err := s.TransitionTo.TryTransition()
-	if err != nil {
-		return err
-	}
-	if ok {
-		s.HeadsStateMachine.RemoveHead(s)
-	}
+	s.HeadsStateMachine.RemoveHead(s)
 	return nil
 }
