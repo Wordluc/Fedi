@@ -6,8 +6,9 @@ import (
 )
 
 type BuilderStateMerge struct {
-	state *State.StateMerge
-	inBuilds []tupleBuilderCond
+	state   *State.StateMerge
+	toWaits []IBuilder
+	to      tupleBuilderCond
 }
 
 func CreateBuilderStateMerge(nameState string) *BuilderStateMerge {
@@ -33,41 +34,44 @@ func (b *BuilderStateMerge) SetActionDo(do func() error) *BuilderStateMerge {
 	return b
 }
 
-func (b *BuilderStateMerge) Build() (*State.StateMerge,error) {
-	if b.state==nil{
-		return nil,errors.New("no state")
+func (b *BuilderStateMerge) GetInstance() State.IState {
+	return b.state
+}
+func (b *BuilderStateMerge) Build() (State.IState, error) {
+	if b.state == nil {
+		return nil, errors.New("no state")
 	}
-	if b.state.StateName==""{
-		return nil,errors.New("no state name")
+	if b.state.StateName == "" {
+		return nil, errors.New("no state name")
 	}
-	for _, t := range b.inBuilds {
-		if t.builder == nil {
-			return nil, errors.New("no builder")
-		}
-		if t.cond == nil {
-			return nil, errors.New("no condition")
-		}
-		if to, e := t.builder.Build(); e != nil {
-			return nil, e
-		} else {
-			b.state.InTransitions = append(b.state.InTransitions, *State.CreateTransition(to, b.state, t.cond))
-		}
+	for _, t := range b.toWaits {
+		istance := t.GetInstance()
+		b.state.ToWait = append(b.state.ToWait,istance)
 	}
-	if e:= b.state.TransitionTo.IsValid();e!=nil{
-		return nil,e
+
+	if b.to.builder == nil {
+		return nil, errors.New("no builder")
 	}
-	if n:= len(b.state.InTransitions);n==0{
-		return nil,errors.New("no inTransitions")
+	if b.to.cond == nil {
+		return nil, errors.New("no condition")
 	}
-	return b.state,nil
+	if to, e := b.to.builder.Build(); e != nil {
+		return nil, e
+	} else {
+		b.state.TransitionTo = *State.CreateTransition(b.state, to, b.to.cond)
+	}
+	if e := b.state.TransitionTo.IsValid(); e != nil {
+		return nil, e
+	}
+	return b.state, nil
 }
 
-//add builder state who will merge in this state
-//condToIn: condition to SetAddIn
-//inBuild: state who will merge
-func (b *BuilderStateMerge) SetAddIn(condToIn func () bool,inBuild IBuilder){
-	b.inBuilds = append(b.inBuilds,tupleBuilderCond{
-		cond:condToIn,
-		builder:inBuild,
-	})
+func (b *BuilderStateMerge) SetNext(condToOut func() bool, outBuild IBuilder) {
+	b.to = tupleBuilderCond{
+		cond:    condToOut,
+		builder: outBuild,
+	}
+}
+func (b *BuilderStateMerge) AddToWait(toWait IBuilder) {
+	b.toWaits = append(b.toWaits, toWait)
 }

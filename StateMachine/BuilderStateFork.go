@@ -37,15 +37,15 @@ func (b *BuilderStateFork) SetActionDo(do func() error) *BuilderStateFork {
 	return b
 }
 
-func (b *BuilderStateFork) Build() (*State.StateFork, error) {
+func (b *BuilderStateFork) GetInstance() State.IState {
+	return b.state
+}
+func (b *BuilderStateFork) Build() (State.IState, error) {
 	if b.state == nil {
 		return nil, errors.New("no state")
 	}
 	if b.state.StateName == "" {
 		return nil, errors.New("no state name")
-	}
-	if n := len(b.state.Transitions); n == 0 {
-		return nil, errors.New("no transition")
 	}
 	for _, t := range b.tos {
 		if t.builder == nil {
@@ -59,6 +59,9 @@ func (b *BuilderStateFork) Build() (*State.StateFork, error) {
 		} else {
 			b.state.Transitions = append(b.state.Transitions, *State.CreateTransition(b.state, to, t.cond))
 		}
+	}
+	if n := len(b.state.Transitions); n == 0 {
+		return nil, errors.New("no transition")
 	}
 	for _, transition := range b.state.Transitions {
 		if e := transition.IsValid(); e != nil {
