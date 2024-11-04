@@ -3,6 +3,7 @@ package StateMachine
 import (
 	State "Fedi/StateMachine/internal"
 	"errors"
+
 )
 
 type BuilderStateBase struct {

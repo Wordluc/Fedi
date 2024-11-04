@@ -138,6 +138,7 @@ func TestStateMachineFork(t *testing.T) {
 
 	builderC.SetNext(func () bool{return true},mergeBuilder)
 	builderB.SetNext(func () bool{return true},mergeBuilder)
+
 	mergeBuilder.AddToWait(builderC)
 	mergeBuilder.AddToWait(builderB)
 
@@ -149,14 +150,10 @@ func TestStateMachineFork(t *testing.T) {
 	if error!=nil{
 		t.Fatalf("error: %s",error)
 	}
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->doB->exitB->entryE->entryE->exitE->entryEnd->exitE->entryEnd->doEnd->doEnd->doEnd->"
+	for i:=0;i<6;i++{
+		stateMachine.Clock()
+	}
+	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->doB->exitB->entryE->entryE->exitE->entryEnd->exitE->entryEnd->doEnd->exitEnd->"
 	if res!=exp{
 		t.Fatalf("got: %s, expected: %s",res,exp)
 	}
@@ -259,15 +256,14 @@ func TestStateMachineForkWithoutWait(t *testing.T) {
 	if error!=nil{
 		t.Fatalf("error: %s",error)
 	}
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	stateMachine.Clock()
-	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->entryE->doB->exitB->entryE->exitE->entryEnd->doEnd->exitE->entryEnd->doEnd->doEnd->doEnd->"
+	for i:=0;i<5;i++{
+		e:=stateMachine.Clock()
+		if e!=nil{
+			t.Fatalf("error: %s",e)
+		}
+	}
+	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->entryE->doB->exitB->entryE->exitE->entryEnd->doEnd->exitEnd->"
 	if res!=exp{
-		t.Fatalf("got: %s, expected: %s",res,exp)
+		t.Fatalf("got: %s, expected: |%s|",res,exp)
 	}
 }

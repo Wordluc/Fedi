@@ -50,6 +50,9 @@ func (s *StateMerge) CheckTransition() error {
 	for _, state := range s.ToWait {
 		tran:=state.GetTransitionsTo()
 		for _, transition := range tran {
+			if transition.to!=s{
+				return errors.New("invalid transition: cannot transition to a state that doesn't merge back")
+			}
 			if !transition.IsDone() {
 				return nil
 			}
