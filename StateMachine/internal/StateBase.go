@@ -16,7 +16,9 @@ func (s *StateBase) EntryAction() error {
 	}
 	return s.IEntryAction()
 }
-
+func (s *StateBase) GetTransitionsTo() []Transition {
+	return []Transition{s.TransitionTo}
+}
 func (s *StateBase) ExitAction() error {
 	if s.IExitAction == nil {
 		return nil

@@ -17,6 +17,9 @@ func CreateBuilderStateEnd(nameState string) *BuilderStateEnd {
 	}
 }
 
+func (b *BuilderStateEnd) GetInstance() State.IState {
+	return b.state
+}
 func (b *BuilderStateEnd) SetEntryAction(entryAction func() error) *BuilderStateEnd {
 	b.state.IEntryAction = entryAction
 	return b

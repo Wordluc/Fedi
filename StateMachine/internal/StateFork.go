@@ -8,6 +8,7 @@ type StateFork struct {
 	StateName         string
 	Transitions       []Transition
 	HeadsStateMachine *HeadsStateMachine
+	passedState int
 
 	IEntryAction func() error
 	IExitAction  func() error
@@ -16,19 +17,22 @@ type StateFork struct {
 
 func (s *StateFork) EntryAction() error {
 	if s.IEntryAction == nil {
-		return s.IEntryAction() 	
+		return nil
 	}
-	return nil
+	return s.IEntryAction() 	
 }
 
+func (s *StateFork) GetTransitionsTo() []Transition {
+	return s.Transitions
+}
 func (s *StateFork) ExitAction() error {
 	if s.HeadsStateMachine == nil {
 		return errors.New("no state machine")
 	}
-	if s.IExitAction == nil || s.IExitAction() == nil {
-		s.HeadsStateMachine.RemoveHead(s)
+	if s.IExitAction == nil {
+		return nil
 	}
-	return nil
+	return s.IExitAction()
 }
 
 func (s *StateFork) DoAction() error {
@@ -44,12 +48,20 @@ func (s *StateFork) SetHeadsStateMachine(headsStateMachine *HeadsStateMachine) {
 
 func (s *StateFork) CheckTransition() (error) {
 	for _, transition := range s.Transitions {
+		if transition.IsDone() {
+			continue
+		}
 		ok, err := transition.TryTransition()
 		if err != nil {
 			return err
 		}
 		if ok {
-			s.HeadsStateMachine.RemoveHead(s)
+			s.passedState++
+			if s.passedState==len(s.Transitions){
+				s.HeadsStateMachine.RemoveHead(s)
+			}else{
+				s.ExitAction()
+			}
 			s.HeadsStateMachine.AddHead(transition.to)
 		}
 	}
