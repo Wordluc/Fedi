@@ -154,7 +154,6 @@ func TestStateMachineFork(t *testing.T) {
 	for i:=0;i<6;i++{
 		stateMachine.Clock()
 	}
-
 	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->doB->exitB->entryE->entryE->exitE->entryEnd->exitE->entryEnd->doEnd->exitEnd->"
 	if res!=exp{
 		t.Fatalf("got: %s, expected: %s",res,exp)
@@ -245,10 +244,7 @@ func TestStateMachineForkWaitWrongState(t *testing.T) {
 	forkBuilder.AddTo(func () bool{return true},builderC)
 	forkBuilder.AddTo(func () bool{return true},builderB)
 
-	builderC.SetNext(func () bool{return true},mergeBuilder)
-	builderB.SetNext(func () bool{return true},mergeBuilder)
 	mergeBuilder.AddToWait(func () bool{return true},builderA)
-//	mergeBuilder.AddToWait(builderB)
 
 	mergeBuilder.SetNext(func () bool{return true},builderE)
 

@@ -63,6 +63,9 @@ func (b *BuilderStateBase) Build() (State.IState,error) {
 }
 
 func (b *BuilderStateBase) SetNext(cond func() bool,builderNext IBuilder)error {
+	if _,ok:=builderNext.(*BuilderStateMerge);ok{
+		return errors.New("invalid next state, cannot use merge as next, use wait instead")
+	}
 	b.builderNext = builderNext
 	b.conditionNext = cond
 	return nil

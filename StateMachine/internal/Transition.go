@@ -33,7 +33,7 @@ func (t *Transition) IsValid() error {
 		return errors.New("no from state")
 	}
 	if t.to == nil {
-		return errors.New("no to state")
+		return errors.New("no 'to' state")
 	}
 	if t.condition == nil {
 		return errors.New("no condition")
