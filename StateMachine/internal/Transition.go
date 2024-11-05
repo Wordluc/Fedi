@@ -13,7 +13,7 @@ func (t *Transition) TryTransition() (bool, error) {
 	if t.condition == nil {
 		return false, errors.New("no condition")
 	}
-	t.isDone = t.isDone || t.condition()
+	t.isDone = t.condition()
 	return t.isDone, nil
 }
 

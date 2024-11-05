@@ -9,7 +9,7 @@ type BuilderStateMerge struct {
 	state   *State.StateMerge
 	toWaits []IBuilder
 	to      tupleBuilderCond
-	alreadyBuilt bool
+	isbeingBuilt bool
 }
 
 func CreateBuilderStateMerge(nameState string) *BuilderStateMerge {
@@ -40,7 +40,7 @@ func (b *BuilderStateMerge) GetInstance() State.IState {
 }
 
 func (b *BuilderStateMerge) Build() (State.IState, error) {
-	if b.alreadyBuilt {
+	if b.isbeingBuilt {
 		return b.state, nil
 	}
 	if b.state == nil {
@@ -54,6 +54,7 @@ func (b *BuilderStateMerge) Build() (State.IState, error) {
 		b.state.ToWait = append(b.state.ToWait, istance)
 	}
 
+	b.isbeingBuilt = true
 	if b.to.builder == nil {
 		return nil, errors.New("no builder")
 	}
@@ -68,7 +69,6 @@ func (b *BuilderStateMerge) Build() (State.IState, error) {
 	if e := b.state.TransitionTo.IsValid(); e != nil {
 		return nil, e
 	}
-	b.alreadyBuilt = true
 	return b.state, nil
 }
 

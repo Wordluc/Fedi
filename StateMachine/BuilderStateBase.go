@@ -48,6 +48,7 @@ func (b *BuilderStateBase) Build() (State.IState,error) {
 	if b.state.StateName==""{
 		return nil,errors.New("no state name")
 	}
+	b.alreadyBuilt = true
 
 	for _, t := range b.tos {
 		if t.builder == nil {
@@ -63,7 +64,6 @@ func (b *BuilderStateBase) Build() (State.IState,error) {
 		}
 	}
 	
-	b.alreadyBuilt = true
 	return b.state,nil
 }
 

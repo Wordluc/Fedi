@@ -21,6 +21,7 @@ type Element struct {
 func CreateElement(x,y int,width,height int) *Element{
 	textElement:=Drawing.CreateTextBlock(2,2,width-1,height-4,10)
 	edgeElement:=Drawing.CreateRectangle(1,1,width-2,height)
+	edgeElement.SetColor(Color.Get(Color.Gray,Color.None))
 	drawingContainer:= Drawing.CreateContainer(0,0);
    drawingContainer.AddChild(edgeElement)
 	drawingContainer.AddChild(textElement)
@@ -61,7 +62,7 @@ func CreateElement(x,y int,width,height int) *Element{
 		xPos:x,
 		yPos:y,
 		textDrawing:textElement,
-		buttons:[]*Component.Button{doneButton,deleteButton},
+		buttons:[]*Component.Button{deleteButton,doneButton},
 		indexButton:0,
 	}
 }
