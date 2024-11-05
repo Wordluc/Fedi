@@ -3,9 +3,10 @@ package main
 // callback for event on the carosello, the parameter is the index of the element
 type CallBackCarosello func(int)
 type CaroselloElement struct {
-	wakeUpCallBack func(int)
-	sleepCallBack  func(int)
-	updateCallBack func(int)
+	index int
+	wakeUpCallBack func()
+	sleepCallBack  func()
+	updateCallBack func()
 }
 
 type Carosello struct {
@@ -24,12 +25,8 @@ func CreateCarosello(x, y int, limit int) *Carosello {
 
 func (e *Carosello) AddElement(element *CaroselloElement) {
 	e.elements = append(e.elements, element)
-	if len(e.elements) >= 0 {
-		e.elements[0].updateCallBack(0)
-		e.elements[0].wakeUpCallBack(0)
-	}
-	for i := 1; i < e.limitElements && i<len(e.elements); i++ {
-		e.elements[i].updateCallBack(i)
+	for i := 0; i < e.limitElements && i<len(e.elements); i++ {
+		e.elements[i].updateCallBack()
 	}
 }
 func (e *Carosello) NextOrPre(isPre bool) {
@@ -67,10 +64,16 @@ func (e *Carosello) updateElement(updateElement bool) {
 		if i>=len(e.elements){
 			break
 		}
-		e.elements[i].sleepCallBack(i)
+		e.elements[i].sleepCallBack()
 		if updateElement{
-			e.elements[i].updateCallBack(i)
+			e.elements[i].updateCallBack()
 		}
 	}
-	e.elements[e.index].wakeUpCallBack(e.index)
+	e.elements[e.index].wakeUpCallBack()
+}
+
+func (e *Carosello) ForEachElements(action func (*CaroselloElement)) {
+	for i := 0; i < len(e.elements); i++ {
+		action(e.elements[i])
+	}
 }
