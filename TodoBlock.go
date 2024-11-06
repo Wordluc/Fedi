@@ -24,7 +24,7 @@ type TodoBlock struct {
 }
 
 func CreateElement(x,y int,width,height int) *TodoBlock{
-	textElement:=Drawing.CreateTextBlock(2,2,width-2,height-4,10)
+	textElement:=Drawing.CreateTextBlock(2,2,width-4,height-4,10)
 	edgeElement:=Drawing.CreateRectangle(1,1,width-2,height)
 	edgeElement.SetColor(Color.Get(Color.Gray,Color.None))
 	drawingContainer:= Drawing.CreateContainer(0,0);
