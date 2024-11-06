@@ -17,7 +17,8 @@ var carosello Carosello = *CreateCarosello(0, 0, 3)
 var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var keyb Keyboard.IKeyBoard
 var stataMachine *StateMachine.StateMachine
-var x,y  = 0,0
+var x, y = 0, 0
+
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
@@ -134,18 +135,22 @@ func main() {
 				todoBlock[carosello.index%3].GetCurrentBotton().OnClick(0, 0)
 			} else if keyb.IsKeySPressed(Keyboard.Left) {
 				todoBlock[carosello.index%3].ChangeButton(DeleteBotton)
-			}else if keyb.IsKeySPressed(Keyboard.Right) {
+			} else if keyb.IsKeySPressed(Keyboard.Right) {
 				todoBlock[carosello.index%3].ChangeButton(DoneBotton)
+			} else if keyb.IsKeySPressed(Keyboard.Up) {
+				carosello.NextOrPre(true)
+			} else if keyb.IsKeySPressed(Keyboard.Down) {
+				carosello.NextOrPre(false)
 			}
 			return nil
 		})
 		bottonsCaroselloState.SetEntryAction(func() error {
-			todoBlock[carosello.index%3].buttons[0].OnHover(0, 0)
+				todoBlock[carosello.index%3].Active()
 			return nil
 		})
 		bottonsCaroselloState.SetExitAction(func() error {
-			for i := 0; i < len(todoBlock[carosello.index%3].buttons); i++ {
-				todoBlock[carosello.index%3].buttons[i].OnOut(0, 0)
+			for i := 0; i < len(todoBlock); i++ {
+				todoBlock[i].Inactive()
 			}
 			return nil
 		})
@@ -277,9 +282,8 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Enter)
 		}, bottonsCaroselloState)
 		bottonsCaroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc)
+			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
 		}, caroselloState)
-
 		stataMachine.AddBuilder(todoPart)
 	}
 

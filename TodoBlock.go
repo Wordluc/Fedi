@@ -106,3 +106,13 @@ func (e *TodoBlock) ChangeButton(bottontype BottonType){
 func (e *TodoBlock) GetCurrentBotton() *Component.Button{
 	return e.buttons[e.currentBottonType]
 }
+
+func (e *TodoBlock) Active(){
+	e.ChangeButton(DeleteBotton)
+}
+func (e *TodoBlock) Inactive(){
+	for i:=range e.buttons{
+		e.buttons[i].OnOut(0,0)
+		e.buttons[i].OnRelease(0,0)
+	}
+}
