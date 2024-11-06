@@ -162,6 +162,7 @@ func main() {
 			})
 			editRect.SetColor(Color.Get(Color.White, Color.None))
 			todoRect.SetColor(Color.Get(Color.Gray, Color.None))
+			TextBox.OnOut(0,0)
 			return nil
 		})
 
@@ -192,6 +193,7 @@ func main() {
 			TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			core.SetVisibilityCursor(false)
 			TextBox.StopTyping()
+			TextBox.OnOut(0,0)
 			return nil
 		})
 
