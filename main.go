@@ -14,10 +14,10 @@ import (
 
 var core *GTUI.Gtui
 var carosello Carosello = *CreateCarosello(0, 0, 3)
-var elements []*Element = make([]*Element, 3)
+var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var keyb Keyboard.IKeyBoard
 var stataMachine *StateMachine.StateMachine
-
+var x,y  = 0,0
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
@@ -31,7 +31,7 @@ func createLabel(text string) Core.IEntity {
 func main() {
 	var e error
 	keyb = Keyboard.NewKeyboard()
-	core, e = GTUI.NewGtui(loop,keyb , &Terminal.Terminal{})
+	core, e = GTUI.NewGtui(loop, keyb, &Terminal.Terminal{})
 	if e != nil {
 		panic(e)
 	}
@@ -50,25 +50,25 @@ func main() {
 	editLabel := createLabel("Edit")
 	editLabel.SetPos(listZoneXSize+1, 1)
 	core.InsertEntity(editLabel)
-	listTexts := []string{"1", "2", "3", "4", "5", "6"}
+	listTexts := []string{"ballare la samba", "pushare tutto", "bestemiare 3 volte al giorno", "cucinare", "dormire", "6"}
 	listElementYSize := int(float32(ySize) * 0.3)
-	for i := 0; i < len(elements); i++ {
-		elements[i] = CreateElement(1, i*listElementYSize+2, listZoneXSize-4, listElementYSize)
-		core.InsertComponent(elements[i].GetComponent())
+	for i := 0; i < len(todoBlock); i++ {
+		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize)
+		core.InsertComponent(todoBlock[i].GetComponent())
 	}
 	for i := 0; i < len(listTexts); i++ {
 		caroselloEl := &CaroselloElement{
 			index: i,
 			wakeUpCallBack: func() {
-				elements[i%3].components.SetActivity(true)
-				elements[i%3].rectangle.SetColor(Color.Get(Color.White, Color.None))
+				todoBlock[i%3].components.SetActivity(true)
+				todoBlock[i%3].rectangle.SetColor(Color.Get(Color.White, Color.None))
 			},
 			sleepCallBack: func() {
-				elements[i%3].components.SetActivity(false)
-				elements[i%3].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
+				todoBlock[i%3].components.SetActivity(false)
+				todoBlock[i%3].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
 			},
 			updateCallBack: func() {
-				elements[i%3].SetText(listTexts[i])
+				todoBlock[i%3].SetText(listTexts[i])
 			},
 		}
 		carosello.AddElement(caroselloEl)
@@ -106,7 +106,7 @@ func main() {
 	stataMachine = StateMachine.CreateStateMachine()
 	{
 		todoPart := StateMachine.CreateBuilderStateBase("todoPart")
-		
+
 		todoPart.SetEntryAction(func() error {
 			todoRect.SetColor(Color.Get(Color.White, Color.None))
 			editRect.SetColor(Color.Get(Color.Gray, Color.None))
@@ -117,8 +117,7 @@ func main() {
 		caroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Up) {
 				carosello.NextOrPre(true)
-			}else
-			if keyb.IsKeySPressed(Keyboard.Down) {
+			} else if keyb.IsKeySPressed(Keyboard.Down) {
 				carosello.NextOrPre(false)
 			}
 			return nil
@@ -132,20 +131,21 @@ func main() {
 		bottonsCaroselloState := StateMachine.CreateBuilderStateBase("BottonsState")
 		bottonsCaroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
-				elements[carosello.index%3].buttons[elements[carosello.index%3].indexButton].OnClick(0,0)
-			}else
-			if keyb.IsKeySPressed(Keyboard.Left) || keyb.IsKeySPressed(Keyboard.Right)  {
-				elements[carosello.index%3].ChangeButton()
+				todoBlock[carosello.index%3].GetCurrentBotton().OnClick(0, 0)
+			} else if keyb.IsKeySPressed(Keyboard.Left) {
+				todoBlock[carosello.index%3].ChangeButton(DeleteBotton)
+			}else if keyb.IsKeySPressed(Keyboard.Right) {
+				todoBlock[carosello.index%3].ChangeButton(DoneBotton)
 			}
 			return nil
 		})
 		bottonsCaroselloState.SetEntryAction(func() error {
-			elements[carosello.index%3].buttons[0].OnHover(0,0)
+			todoBlock[carosello.index%3].buttons[0].OnHover(0, 0)
 			return nil
 		})
 		bottonsCaroselloState.SetExitAction(func() error {
-			for i := 0; i < len(elements[carosello.index%3].buttons); i++ {
-				elements[carosello.index%3].buttons[i].OnOut(0,0)
+			for i := 0; i < len(todoBlock[carosello.index%3].buttons); i++ {
+				todoBlock[carosello.index%3].buttons[i].OnOut(0, 0)
 			}
 			return nil
 		})
@@ -165,47 +165,59 @@ func main() {
 			TextBox.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
 			return nil
 		})
+		firstEdit = true
 		textBoxState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
-				TextBox.ClearAll()
-				TextBox.StartTyping()
+				if !TextBox.IsTyping() {
+					if firstEdit {
+						TextBox.ClearAll()
+						firstEdit = false
+					}
+					TextBox.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
+					core.SetVisibilityCursor(true)
+					x, y = TextBox.GetPos()
+					x++
+					y++
+					TextBox.StartTyping()
+				}
 			}
 			return nil
 		})
 		textBoxState.SetExitAction(func() error {
 			TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+			core.SetVisibilityCursor(false)
 			TextBox.StopTyping()
 			return nil
 		})
-		
-		bottonSendEditState:=StateMachine.CreateBuilderStateBase("BottonsEditState")
+
+		bottonSendEditState := StateMachine.CreateBuilderStateBase("BottonsEditState")
 		bottonSendEditState.SetEntryAction(func() error {
 			SendButton.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
 			return nil
 		})
 		bottonSendEditState.SetActionDo(func() error {
-			if keyb.IsKeySPressed(Keyboard.Enter){
-				SendButton.OnClick(0,0)
+			if keyb.IsKeySPressed(Keyboard.Enter) {
+				SendButton.OnClick(0, 0)
 			}
 			return nil
 		})
-		bottonSendEditState.SetExitAction(func () error {
+		bottonSendEditState.SetExitAction(func() error {
 			SendButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			return nil
 		})
 
-		bottonCancelEditState:=StateMachine.CreateBuilderStateBase("BottonsEditState")
+		bottonCancelEditState := StateMachine.CreateBuilderStateBase("BottonsEditState")
 		bottonCancelEditState.SetEntryAction(func() error {
 			CancelButton.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
 			return nil
 		})
 		bottonCancelEditState.SetActionDo(func() error {
-			if keyb.IsKeySPressed(Keyboard.Enter){
-				CancelButton.OnClick(0,0)
+			if keyb.IsKeySPressed(Keyboard.Enter) {
+				CancelButton.OnClick(0, 0)
 			}
 			return nil
 		})
-		bottonCancelEditState.SetExitAction(func () error {
+		bottonCancelEditState.SetExitAction(func() error {
 			CancelButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			return nil
 		})
@@ -216,12 +228,9 @@ func main() {
 		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editPart)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Down)
-		},bottonSendEditState)
 		editPart.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Left)
-		},todoPart)
+		}, todoPart)
 		bottonSendEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Right)
 		}, bottonCancelEditState)
@@ -237,9 +246,6 @@ func main() {
 		bottonSendEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Left)
 		}, todoPart)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left)
-		}, todoPart)
 		bottonCancelEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Up)
 		}, textBoxState)
@@ -249,6 +255,12 @@ func main() {
 		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editPart)
+		textBoxState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.Left) && !TextBox.IsTyping()
+		}, todoPart)
+		textBoxState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.Down) && !TextBox.IsTyping()
+		}, bottonSendEditState)
 		todoPart.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Right)
 		}, editPart)
@@ -271,15 +283,30 @@ func main() {
 		stataMachine.AddBuilder(todoPart)
 	}
 
-	defer core.Start()
+	core.SetVisibilityCursor(false)
+	core.Start()
 }
 
 func loop(keyb Keyboard.IKeyBoard) bool {
-
+	x, y = core.GetCur()
+	if keyb.IsKeySPressed(Keyboard.Left) {
+		x--
+	} else {
+		if keyb.IsKeySPressed(Keyboard.Right) {
+			x++
+		}
+	}
+	if keyb.IsKeySPressed(Keyboard.Up) {
+		y--
+	} else {
+		if keyb.IsKeySPressed(Keyboard.Down) {
+			y++
+		}
+	}
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		return false
 	}
 	stataMachine.Clock()
-   core.IRefreshAll()
+	core.SetCur(x, y)
 	return true
 }
