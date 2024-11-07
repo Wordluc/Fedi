@@ -86,15 +86,14 @@ func main() {
 			firstEdit = false
 			TextBox.ClearAll()
 		}
-	})
-	TextBox.SetOnHover(func() {
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
 	})
-
+	TextBox.SetOnHover(func() {
+		TextBox.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
+	})
 	TextBox.SetOnOut(func() {
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 	})
-
 	SendButton := Component.CreateButton(listZoneXSize+1, ySize-5, 8, 3, "Send")
 	CancelButton := Component.CreateButton(listZoneXSize+17, ySize-5, 8, 3, "Cancel")
 	CancelButton.SetOnClick(func() {
@@ -145,7 +144,7 @@ func main() {
 			return nil
 		})
 		bottonsCaroselloState.SetEntryAction(func() error {
-				todoBlock[carosello.index%3].Active()
+			todoBlock[carosello.index%3].Active()
 			return nil
 		})
 		bottonsCaroselloState.SetExitAction(func() error {
@@ -162,13 +161,12 @@ func main() {
 			})
 			editRect.SetColor(Color.Get(Color.White, Color.None))
 			todoRect.SetColor(Color.Get(Color.Gray, Color.None))
-			TextBox.OnOut(0,0)
 			return nil
 		})
 
 		textBoxState := StateMachine.CreateBuilderStateBase("TextBoxState")
 		textBoxState.SetEntryAction(func() error {
-			TextBox.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
+			TextBox.OnHover(0,0)
 			return nil
 		})
 		firstEdit = true
@@ -179,12 +177,11 @@ func main() {
 						TextBox.ClearAll()
 						firstEdit = false
 					}
-					TextBox.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
 					core.SetVisibilityCursor(true)
 					x, y = TextBox.GetPos()
 					x++
 					y++
-					TextBox.StartTyping()
+					TextBox.OnClick(0,0)
 				}
 			}
 			return nil
@@ -192,8 +189,9 @@ func main() {
 		textBoxState.SetExitAction(func() error {
 			TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			core.SetVisibilityCursor(false)
+			x, y = 0, 0
 			TextBox.StopTyping()
-			TextBox.OnOut(0,0)
+			TextBox.OnOut(0, 0)
 			return nil
 		})
 
@@ -312,6 +310,7 @@ func loop(keyb Keyboard.IKeyBoard) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		return false
 	}
+	core.SetCur(x, y)
 	stataMachine.Clock()
 	core.SetCur(x, y)
 	return true
