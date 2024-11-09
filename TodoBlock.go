@@ -19,17 +19,24 @@ type TodoBlock struct {
 	xPos int
 	yPos int
 	textDrawing *Drawing.TextBlock
+	titleDrawing *Drawing.TextField
+	lineTitle *Drawing.Line
 	buttons []*Component.Button
 	currentBottonType BottonType
 }
 
 func CreateElement(x,y int,width,height int) *TodoBlock{
-	textElement:=Drawing.CreateTextBlock(2,2,width-4,height-4,10)
+	title:=Drawing.CreateTextField(2,2)
+	line:=Drawing.CreateLine(2,3,3,0)
+	line.SetVisibility(false)
+	textElement:=Drawing.CreateTextBlock(2,4,width-4,height-4,10)
 	edgeElement:=Drawing.CreateRectangle(1,1,width-2,height)
 	edgeElement.SetColor(Color.Get(Color.Gray,Color.None))
 	drawingContainer:= Drawing.CreateContainer(0,0);
    drawingContainer.AddChild(edgeElement)
 	drawingContainer.AddChild(textElement)
+	drawingContainer.AddChild(title)
+	drawingContainer.AddChild(line)
 	doneButton:=Component.CreateButton(width/2-2,height-3,8,3,"Done")
 	doneButton.SetOnHover(func (){
 		doneButton.GetVisibleArea().SetColor(Color.Get(Color.White,Color.None))
@@ -67,6 +74,8 @@ func CreateElement(x,y int,width,height int) *TodoBlock{
 		xPos:x,
 		yPos:y,
 		textDrawing:textElement,
+		titleDrawing:title,
+		lineTitle:line,
 		buttons:[]*Component.Button{deleteButton,doneButton},
 	}
 }
@@ -88,6 +97,10 @@ func (e *TodoBlock) SetText(text string){
 	for i:=range text{
 		e.textDrawing.Type(rune(text[i]))
 	}
+}
+func (e *TodoBlock) SetTitle(text string){
+	e.titleDrawing.SetText(text)
+	e.lineTitle.SetVisibility(true)
 }
 
 func (e *TodoBlock) SetVisibility(visible bool) {

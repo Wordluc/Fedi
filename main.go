@@ -18,7 +18,7 @@ var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var keyb Keyboard.IKeyBoard
 var stataMachine *StateMachine.StateMachine
 var x, y = 0, 0
-
+var client IApi
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
@@ -28,7 +28,6 @@ func createLabel(text string) Core.IEntity {
 	container.AddChild(bottonLine)
 	return container
 }
-
 func main() {
 	var e error
 	keyb = Keyboard.NewKeyboard()
@@ -36,7 +35,7 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-
+	client,e=CreateNotionClient(".env")
 	xSize, ySize := core.Size()
 	listZoneXSize := int(float32(xSize) * 0.7)
 	todoRect := Drawing.CreateRectangle(0, 0, listZoneXSize-1, ySize)
@@ -51,13 +50,18 @@ func main() {
 	editLabel := createLabel("Edit")
 	editLabel.SetPos(listZoneXSize+1, 1)
 	core.InsertEntity(editLabel)
-	listTexts := []string{"ballare la samba", "pushare tutto", "bestemiare 3 volte al giorno", "cucinare", "dormire", "6"}
+	
+	var todos *Todos
+	todos,e=client.GetTodos()
+	if e!=nil{
+		panic(e)
+	}
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(todoBlock); i++ {
 		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize)
 		core.InsertComponent(todoBlock[i].GetComponent())
 	}
-	for i := 0; i < len(listTexts); i++ {
+	for i := 0; i < len(todos.Todos); i++ {
 		caroselloEl := &CaroselloElement{
 			index: i,
 			wakeUpCallBack: func() {
@@ -69,7 +73,8 @@ func main() {
 				todoBlock[i%3].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
 			},
 			updateCallBack: func() {
-				todoBlock[i%3].SetText(listTexts[i])
+				todoBlock[i%3].SetText(todos.Todos[i].Description)
+				todoBlock[i%3].SetTitle(todos.Todos[i].Name)
 			},
 		}
 		carosello.AddElement(caroselloEl)
