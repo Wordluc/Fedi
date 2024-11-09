@@ -56,6 +56,9 @@ func (e *Carosello) NextOrPre(isPre bool) {
 	e.updateElement(false)
 }
 func (e *Carosello) updateElement(updateElement bool) {
+	if len(e.elements) == 0 {
+		return
+	}
 	startRange:=e.index-e.index%e.limitElements
 	if startRange<0{
 		startRange=0
