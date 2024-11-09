@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 import (
 	"encoding/json"
 	"errors"
@@ -40,7 +42,7 @@ func (c *NotionClient) GetTodos() (*Todos,error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode!=200{
-		return nil,errors.New("Notion error "+string(resp.StatusCode)+":"+resp.Status)
+		return nil,errors.New("Notion error "+fmt.Sprint(resp.StatusCode)+":"+resp.Status)
 	}
 	respBodyString,err := io.ReadAll(resp.Body) 
 	if err!=nil{
