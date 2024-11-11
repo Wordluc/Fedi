@@ -8,7 +8,6 @@ import (
 
 func createCaroselloElementHelperMethods(iEl int, act *string, showOnlyUpdate bool) *CaroselloElement {
 	return &CaroselloElement{
-		index: iEl,
 		wakeUpCallBack: func(i int) {
 			if showOnlyUpdate {
 				return
