@@ -33,7 +33,7 @@ func checkresult(act string, exp string) bool {
 	act=strings.Replace(act, "	", "",-1 )
 	return act == exp
 }
-func TestCaroselloChangePageNext(t *testing.T) {
+func TestCaroselloChangePageNextFromDown(t *testing.T) {
 	carosello := CreateCarosello(0, 0, 3)
 	var result *string = new(string)
 	for i := 0; i < 5; i++ {
@@ -56,7 +56,7 @@ func TestCaroselloChangePageNext(t *testing.T) {
 		t.Errorf("expected \n%s\n got\n%s\n", exp, *result)
 	}
 }
-func TestCaroselloChange2PagesNext(t *testing.T) {
+func TestCaroselloChange2PagesNextFromDown(t *testing.T) {
 	carosello := CreateCarosello(0, 0, 3)
 	var result *string = new(string)
 	for i := 0; i < 5; i++ {
@@ -88,7 +88,7 @@ func TestCaroselloChange2PagesNext(t *testing.T) {
 		t.Errorf("expected \n%s\n got\n%s\n", exp, *result)
 	}
 }
-func TestCaroselloChange3PagesNext(t *testing.T) {
+func TestCaroselloChange3PagesNextFromDown(t *testing.T) {
 	carosello := CreateCarosello(0, 0, 3)
 	var result *string = new(string)
 	for i := 0; i < 5; i++ {
@@ -123,6 +123,46 @@ func TestCaroselloChange3PagesNext(t *testing.T) {
 *posBlock:0,updateCallCallBack,pos4
 *posBlock:1,updateCallCallBack,pos0
 *posBlock:2,updateCallCallBack,pos1
+	`
+	if checkresult(*result, exp) == false {
+		t.Errorf("expected \n%s\n got\n%s\n", exp, *result)
+	}
+}
+func TestCaroselloChangePagesNextFromUp(t *testing.T) {
+	carosello := CreateCarosello(0, 0, 3)
+	var result *string = new(string)
+	for i := 0; i < 5; i++ {
+		carosello.AddElement(createCaroselloElementHelperMethods(i, result,true))
+	}
+	(*result) += "-----------------\n"
+	carosello.NextOrPre(true)
+	carosello.NextOrPre(true)
+	carosello.NextOrPre(true)
+	(*result) += "-----------------\n"
+	carosello.NextOrPre(true)
+	carosello.NextOrPre(true)
+	carosello.NextOrPre(true)
+	(*result) += "-----------------\n"
+	carosello.NextOrPre(true)
+	carosello.NextOrPre(true)
+	carosello.NextOrPre(true)
+	exp := `
+*posBlock:0,updateCallCallBack,pos0
+*posBlock:1,updateCallCallBack,pos1
+*posBlock:2,updateCallCallBack,pos2
+-----------------
+*posBlock:0,updateCallCallBack,pos2
+*posBlock:1,updateCallCallBack,pos3
+*posBlock:2,updateCallCallBack,pos4
+-----------------
+*posBlock:0,updateCallCallBack,pos4
+*posBlock:1,updateCallCallBack,pos0
+*posBlock:2,updateCallCallBack,pos1
+-----------------
+*posBlock:0,updateCallCallBack,pos1
+*posBlock:1,updateCallCallBack,pos2
+*posBlock:2,updateCallCallBack,pos3
+
 	`
 	if checkresult(*result, exp) == false {
 		t.Errorf("expected \n%s\n got\n%s\n", exp, *result)
