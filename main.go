@@ -51,8 +51,7 @@ func main() {
 	editLabel.SetPos(listZoneXSize+1, 1)
 	core.InsertEntity(editLabel)
 	
-	var todos *Todos
-	todos,e=client.GetTodos()
+	todos,e:=client.GetTodos()
 	if e!=nil{
 		panic(e)
 	}
@@ -63,18 +62,17 @@ func main() {
 	}
 	for i := 0; i < len(todos.Todos); i++ {
 		caroselloEl := &CaroselloElement{
-			index: i,
-			wakeUpCallBack: func() {
-				todoBlock[i%3].components.SetActivity(true)
-				todoBlock[i%3].rectangle.SetColor(Color.Get(Color.White, Color.None))
+			wakeUpCallBack: func(todoBlockToUpdate int) {
+				todoBlock[todoBlockToUpdate].components.SetActivity(true)
+				todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.White, Color.None))
 			},
-			sleepCallBack: func() {
-				todoBlock[i%3].components.SetActivity(false)
-				todoBlock[i%3].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
+			sleepCallBack: func(todoBlockToUpdate int) {
+				todoBlock[todoBlockToUpdate].components.SetActivity(false)
+				todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
 			},
-			updateCallBack: func() {
-				todoBlock[i%3].SetText(todos.Todos[i].Description)
-				todoBlock[i%3].SetTitle(todos.Todos[i].Name)
+			updateCallBack: func(todoBlockToUpdate int) {
+				todoBlock[todoBlockToUpdate].SetText(todos.Todos[i].Description)
+				todoBlock[todoBlockToUpdate].SetTitle(todos.Todos[i].Name)
 			},
 		}
 		carosello.AddElement(caroselloEl)
@@ -161,8 +159,8 @@ func main() {
 		editPart := StateMachine.CreateBuilderStateBase("editPart")
 
 		editPart.SetEntryAction(func() error {
-			carosello.ForEachElements(func(element *CaroselloElement) {
-				element.sleepCallBack()
+			carosello.ForEachElements(func(element *CaroselloElement,todoBlockToUpdate int) {
+				element.sleepCallBack(todoBlockToUpdate)
 			})
 			editRect.SetColor(Color.Get(Color.White, Color.None))
 			todoRect.SetColor(Color.Get(Color.Gray, Color.None))

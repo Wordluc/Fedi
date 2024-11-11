@@ -46,7 +46,6 @@ type Property struct {
 	Select   *Select    
 	Title    []Title    
 }
-
 type RichText struct {
 	Type        string      
 	Text        Text        
