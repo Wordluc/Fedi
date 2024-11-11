@@ -1,82 +1,81 @@
 package main
 
-//import "github.com/Wordluc/GTUI/Core/Utils"
-
-// callback for event on the carosello, the parameter is the index of the element
 type CallBackCarosello func(int)
 type CaroselloElement struct {
-	index          int
+	//Is called when the element is woken up, passing the index of the block as an argument
 	wakeUpCallBack func(int)
-	sleepCallBack  func(int)
+	//Is called when the element is put to sleep, passing the index of the block as an argument
+	sleepCallBack func(int)
+	//Is called when the element needs to be updated, passing the index of the block as an argument
 	updateCallBack func(int)
 }
 
 type Carosello struct {
 	index             int
 	startRangeElement int
-	selectedElement   int
+	selectedBlock     int
 	elements          []*CaroselloElement
-	limitElements     int
+	limitBlocks       int
 }
 
-func CreateCarosello(x, y int, limit int) *Carosello {
+func CreateCarosello(x, y int, limitBlock int) *Carosello {
 	return &Carosello{
 		index:             0,
 		startRangeElement: 0,
-		selectedElement:   0,
 		elements:          make([]*CaroselloElement, 0),
-		limitElements:     limit,
+		selectedBlock:     0,
+		limitBlocks:       limitBlock,
 	}
 }
 
 func (e *Carosello) AddElement(element *CaroselloElement) {
 	e.elements = append(e.elements, element)
 	i := len(e.elements) - 1
-	if i < e.limitElements {
-		e.elements[i].updateCallBack(i % e.limitElements)
+	if i < e.limitBlocks {
+		e.elements[i].updateCallBack(i % e.limitBlocks)
 	}
 }
 func (e *Carosello) NextOrPre(isPre bool) {
-	pre_relativeIndex := e.selectedElement
+	pre_selectedBlock := e.selectedBlock
 	if isPre {
 		e.index--
-		e.selectedElement--
+		e.selectedBlock--
 	} else {
 		e.index++
-		e.selectedElement++
+		e.selectedBlock++
 	}
 
-	if e.selectedElement == -1 {
-		e.selectedElement = e.limitElements - 1
+	if e.selectedBlock == -1 {
+		e.selectedBlock = e.limitBlocks - 1
 	}
-	if e.selectedElement == e.limitElements {
-		e.selectedElement = 0
+	if e.selectedBlock == e.limitBlocks {
+		e.selectedBlock = 0
 	}
-	isGoingDown := e.selectedElement == 0 && pre_relativeIndex == e.limitElements-1
-	isGoingUp := e.selectedElement == e.limitElements-1 && pre_relativeIndex == 0
+	isGoingDown := e.selectedBlock == 0 && pre_selectedBlock == e.limitBlocks-1
+	isGoingUp := e.selectedBlock == e.limitBlocks-1 && pre_selectedBlock == 0
 	if isGoingDown {
-		e.startRangeElement = e.startRangeElement + e.limitElements
+		e.startRangeElement = e.startRangeElement + e.limitBlocks
 		if e.startRangeElement >= len(e.elements) {
 			e.startRangeElement = e.startRangeElement - len(e.elements)
 		}
-		e.updateElement(true)
+		e.UpdateElement(true)
 		return
 	}
 	if isGoingUp {
-		e.startRangeElement = e.startRangeElement - e.limitElements
+		e.startRangeElement = e.startRangeElement - e.limitBlocks
 		if e.startRangeElement < 0 {
 			e.startRangeElement = len(e.elements) + e.startRangeElement
 		}
-		e.updateElement(true)
+		e.UpdateElement(true)
 		return
 	}
-	e.updateElement(false)
+	e.UpdateElement(false)
 }
-func (e *Carosello) updateElement(updateElement bool) {
+func (e *Carosello) UpdateElement(refreshContentElement bool) {
 	iblock := 0
-	for i := e.startRangeElement; i < e.startRangeElement+e.limitElements; i++ {
+	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
 		e.elements[i%len(e.elements)].sleepCallBack(iblock)
-		if updateElement {
+		if refreshContentElement {
 			e.elements[i%len(e.elements)].updateCallBack(iblock)
 		}
 		iblock++
@@ -87,12 +86,12 @@ func (e *Carosello) updateElement(updateElement bool) {
 	if e.index == -1 {
 		e.index = len(e.elements) - 1
 	}
-	e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedElement)
+	e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedBlock)
 
 }
 
 func (e *Carosello) ForEachElements(action func(*CaroselloElement, int)) {
 	for i := 0; i < len(e.elements); i++ {
-		action(e.elements[i], i%e.limitElements)
+		action(e.elements[i], i%e.limitBlocks)
 	}
 }
