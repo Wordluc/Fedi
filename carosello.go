@@ -14,6 +14,7 @@ type CaroselloElement struct {
 type Carosello struct {
 	index             int
 	startRangeElement int
+	selectedElement   int
 	elements          []*CaroselloElement
 	limitElements     int
 }
@@ -22,6 +23,7 @@ func CreateCarosello(x, y int, limit int) *Carosello {
 	return &Carosello{
 		index:             0,
 		startRangeElement: 0,
+		selectedElement:   0,
 		elements:          make([]*CaroselloElement, 0),
 		limitElements:     limit,
 	}
@@ -29,33 +31,30 @@ func CreateCarosello(x, y int, limit int) *Carosello {
 
 func (e *Carosello) AddElement(element *CaroselloElement) {
 	e.elements = append(e.elements, element)
-	i:=len(e.elements)-1
-	if i < e.limitElements{
+	i := len(e.elements) - 1
+	if i < e.limitElements {
 		e.elements[i].updateCallBack(i % e.limitElements)
 	}
 }
 func (e *Carosello) NextOrPre(isPre bool) {
-	pre_relativeIndex := e.index % e.limitElements
+	pre_relativeIndex := e.selectedElement
 	if isPre {
 		e.index--
+		e.selectedElement--
 	} else {
 		e.index++
+		e.selectedElement++
 	}
-	//print(Utils.GetAnsiMoveTo(0,0)+ "  ",e.index,",","  ",e.startRangeElement,"  ")
-	post_relativeIndex := e.index % e.limitElements
-	if e.index < 0 {
-		e.index = len(e.elements)
-		post_relativeIndex=e.limitElements-1
+
+	if e.selectedElement == -1 {
+		e.selectedElement = e.limitElements - 1
 	}
-	if e.index >len(e.elements) {
-		e.index = 0
-		post_relativeIndex=0
+	if e.selectedElement == e.limitElements {
+		e.selectedElement = 0
 	}
-	defer func() {
-	}()
-	isGoingDown:=post_relativeIndex == 0 && pre_relativeIndex == e.limitElements-1
-	isGoingUp:=post_relativeIndex == e.limitElements-1 && pre_relativeIndex == 0
-	if  isGoingDown { //verso basso
+	isGoingDown := e.selectedElement == 0 && pre_relativeIndex == e.limitElements-1
+	isGoingUp := e.selectedElement == e.limitElements-1 && pre_relativeIndex == 0
+	if isGoingDown { //verso basso
 		e.startRangeElement = e.startRangeElement + e.limitElements
 		if e.startRangeElement >= len(e.elements) {
 			e.startRangeElement = e.startRangeElement - len(e.elements)
@@ -74,7 +73,6 @@ func (e *Carosello) NextOrPre(isPre bool) {
 	e.updateElement(false)
 }
 func (e *Carosello) updateElement(updateElement bool) {
-	selectedElement := e.index % e.limitElements
 	iblock := 0
 	for i := e.startRangeElement; i < e.startRangeElement+e.limitElements; i++ {
 		e.elements[i%len(e.elements)].sleepCallBack(iblock)
@@ -83,7 +81,13 @@ func (e *Carosello) updateElement(updateElement bool) {
 		}
 		iblock++
 	}
-	e.elements[e.index%len(e.elements)].wakeUpCallBack(selectedElement)
+	if e.index == len(e.elements) {
+		e.index = 0
+	}
+	if e.index == -1 {
+		e.index = len(e.elements) - 1
+	}
+	e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedElement)
 
 }
 
