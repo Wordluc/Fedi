@@ -1,32 +1,37 @@
 package main
 
+//import "github.com/Wordluc/GTUI/Core/Utils"
+
 // callback for event on the carosello, the parameter is the index of the element
 type CallBackCarosello func(int)
 type CaroselloElement struct {
-	index int
-	wakeUpCallBack func()
-	sleepCallBack  func()
-	updateCallBack func()
+	index          int
+	wakeUpCallBack func(int)
+	sleepCallBack  func(int)
+	updateCallBack func(int)
 }
 
 type Carosello struct {
-	index         int
-	elements      []*CaroselloElement
-	limitElements int
+	index             int
+	startRangeElement int
+	elements          []*CaroselloElement
+	limitElements     int
 }
 
 func CreateCarosello(x, y int, limit int) *Carosello {
 	return &Carosello{
-		index:         0,
-		elements:      make([]*CaroselloElement, 0),
-		limitElements: limit,
+		index:             0,
+		startRangeElement: 0,
+		elements:          make([]*CaroselloElement, 0),
+		limitElements:     limit,
 	}
 }
 
 func (e *Carosello) AddElement(element *CaroselloElement) {
 	e.elements = append(e.elements, element)
-	for i := 0; i < e.limitElements && i<len(e.elements); i++ {
-		e.elements[i].updateCallBack()
+	i:=len(e.elements)-1
+	if i < e.limitElements{
+		e.elements[i].updateCallBack(i % e.limitElements)
 	}
 }
 func (e *Carosello) NextOrPre(isPre bool) {
@@ -36,47 +41,54 @@ func (e *Carosello) NextOrPre(isPre bool) {
 	} else {
 		e.index++
 	}
-	if e.index < 0 {
-		e.index = len(e.elements) - 1
-		e.updateElement(true)
-		return
-	}
-	if e.index == len(e.elements) {
-		e.index = 0
-		e.updateElement(true)
-		return
-	}
+	//print(Utils.GetAnsiMoveTo(0,0)+ "  ",e.index,",","  ",e.startRangeElement,"  ")
 	post_relativeIndex := e.index % e.limitElements
-	if post_relativeIndex == 0 && pre_relativeIndex == e.limitElements-1 {
-		e.updateElement(true)
+	if e.index < 0 {
+		e.index = len(e.elements)
+		post_relativeIndex=e.limitElements-1
 	}
-	if post_relativeIndex == e.limitElements-1 && pre_relativeIndex == 0 {
+	if e.index >len(e.elements) {
+		e.index = 0
+		post_relativeIndex=0
+	}
+	defer func() {
+	}()
+	isGoingDown:=post_relativeIndex == 0 && pre_relativeIndex == e.limitElements-1
+	isGoingUp:=post_relativeIndex == e.limitElements-1 && pre_relativeIndex == 0
+	if  isGoingDown { //verso basso
+		e.startRangeElement = e.startRangeElement + e.limitElements
+		if e.startRangeElement >= len(e.elements) {
+			e.startRangeElement = e.startRangeElement - len(e.elements)
+		}
 		e.updateElement(true)
+		return
+	}
+	if isGoingUp { //verso il l'alto
+		e.startRangeElement = e.startRangeElement - e.limitElements
+		if e.startRangeElement < 0 {
+			e.startRangeElement = len(e.elements) + e.startRangeElement
+		}
+		e.updateElement(true)
+		return
 	}
 	e.updateElement(false)
 }
 func (e *Carosello) updateElement(updateElement bool) {
-	if len(e.elements) == 0 {
-		return
-	}
-	startRange:=e.index-e.index%e.limitElements
-	if startRange<0{
-		startRange=0
-	}
-	for i:=startRange;i<e.index+e.limitElements - e.index%e.limitElements;i++{
-		if i>=len(e.elements){
-			break
+	selectedElement := e.index % e.limitElements
+	iblock := 0
+	for i := e.startRangeElement; i < e.startRangeElement+e.limitElements; i++ {
+		e.elements[i%len(e.elements)].sleepCallBack(iblock)
+		if updateElement {
+			e.elements[i%len(e.elements)].updateCallBack(iblock)
 		}
-		e.elements[i].sleepCallBack()
-		if updateElement{
-			e.elements[i].updateCallBack()
-		}
+		iblock++
 	}
-	e.elements[e.index].wakeUpCallBack()
+	e.elements[e.index%len(e.elements)].wakeUpCallBack(selectedElement)
+
 }
 
-func (e *Carosello) ForEachElements(action func (*CaroselloElement)) {
+func (e *Carosello) ForEachElements(action func(*CaroselloElement, int)) {
 	for i := 0; i < len(e.elements); i++ {
-		action(e.elements[i])
+		action(e.elements[i], i%e.limitElements)
 	}
 }
