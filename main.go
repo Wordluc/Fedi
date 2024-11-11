@@ -127,7 +127,7 @@ func main() {
 		})
 
 		caroselloState.SetEntryAction(func() error {
-			carosello.updateElement(false)
+			carosello.UpdateElement(false)
 			return nil
 		})
 
