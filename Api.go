@@ -26,15 +26,23 @@ func CreateNotionClient(fileEnvName string) (IApi,error) {
 	
 
 }
-func (c *NotionClient) GetTodos() (*Todos,error) {
-	var url= "https://api.notion.com/v1/databases/"+c.notion_database_id+"/query"
-	var req, err = http.NewRequest("POST", url,nil)
+
+func (c *NotionClient) getRequest(url string,method string,body io.Reader) (*http.Request, error) {
+	var req, err = http.NewRequest(method, url,body)
 	if err!=nil{
 		return nil,err
 	}
 	req.Header.Add("Authorization", "Bearer "+c.notion_key)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Notion-Version", "2022-06-28")
+	return req, nil
+}
+func (c *NotionClient) GetTodos() (*Todos,error) {
+	var url= "https://api.notion.com/v1/databases/"+c.notion_database_id+"/query"
+	req,err:=c.getRequest(url,"POST",nil)
+	if err!=nil{
+		return nil,err
+	}
 	
 	resp, err := http.DefaultClient.Do(req)
 	if err!=nil{
