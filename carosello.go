@@ -54,7 +54,7 @@ func (e *Carosello) NextOrPre(isPre bool) {
 	}
 	isGoingDown := e.selectedElement == 0 && pre_relativeIndex == e.limitElements-1
 	isGoingUp := e.selectedElement == e.limitElements-1 && pre_relativeIndex == 0
-	if isGoingDown { //verso basso
+	if isGoingDown {
 		e.startRangeElement = e.startRangeElement + e.limitElements
 		if e.startRangeElement >= len(e.elements) {
 			e.startRangeElement = e.startRangeElement - len(e.elements)
@@ -62,7 +62,7 @@ func (e *Carosello) NextOrPre(isPre bool) {
 		e.updateElement(true)
 		return
 	}
-	if isGoingUp { //verso il l'alto
+	if isGoingUp {
 		e.startRangeElement = e.startRangeElement - e.limitElements
 		if e.startRangeElement < 0 {
 			e.startRangeElement = len(e.elements) + e.startRangeElement
