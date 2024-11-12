@@ -1,7 +1,16 @@
-package impl
+package Api
 
-import "time"
-
+import (
+	"time"
+)
+type TodoPost struct {
+	Properties TodosProperty
+	Parent     Parent
+}
+type TodosProperty struct {
+	Description RichText
+	Name        Title
+}
 type NotionResponse struct {
 	Object         string                 
 	Results        []Page                 

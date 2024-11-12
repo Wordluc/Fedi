@@ -3,6 +3,7 @@ package main
 import (
 	"Fedi/Api"
 	"Fedi/StateMachine"
+
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core"
 	"github.com/Wordluc/GTUI/Core/Component"
@@ -101,6 +102,16 @@ func main() {
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 	})
 	SendButton := Component.CreateButton(listZoneXSize+1, ySize-5, 8, 3, "Send")
+	SendButton.SetOnClick(func() {
+		body:=Api.Todos{Todos: 
+			[]Api.Todo {Api.Todo{Description: TextBox.GetText(), Name: "titolo"}},
+		}
+		error:=client.PostTodos(body)
+		if error!=nil{
+			panic(error)
+		}
+		TextBox.ClearAll()
+	})
 	CancelButton := Component.CreateButton(listZoneXSize+17, ySize-5, 8, 3, "Cancel")
 	CancelButton.SetOnClick(func() {
 		TextBox.ClearAll()
