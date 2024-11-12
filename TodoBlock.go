@@ -44,10 +44,13 @@ func CreateElement(x,y int,width,height int) *TodoBlock{
 	doneButton.SetOnLeave(func (){
 		doneButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
 	})
+	doneButton.SetOnRelease(func (){
+		doneButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
+	})
 	doneButton.SetOnClick(func (){
 		doneButton.GetVisibleArea().SetColor(Color.Get(Color.Blue,Color.None))
 		time.AfterFunc(time.Millisecond*1000, func() {
-			doneButton.OnRelease(0,0)
+			doneButton.OnRelease()
 		})
 	})
 	deleteButton:=Component.CreateButton(width/2-10,height-3,8,3,"Delete")
@@ -57,10 +60,13 @@ func CreateElement(x,y int,width,height int) *TodoBlock{
 	deleteButton.SetOnLeave(func (){
 		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
 	})
+	deleteButton.SetOnRelease(func (){
+		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
+	})
 	deleteButton.SetOnClick(func (){
 		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Blue,Color.None))
 		time.AfterFunc(time.Millisecond*1000, func() {
-			deleteButton.OnRelease(0,0)
+			deleteButton.OnRelease()
 		})
 	})
 	containerComponent:=Component.CreateContainer(0,0)
@@ -109,11 +115,11 @@ func (e *TodoBlock) SetVisibility(visible bool) {
 
 func (e *TodoBlock) ChangeButton(bottontype BottonType){
 	if bottontype!=e.currentBottonType{
-		e.buttons[e.currentBottonType].OnOut(0,0)
-		e.buttons[e.currentBottonType].OnRelease(0,0)
+		e.buttons[e.currentBottonType].OnRelease()
+		e.buttons[e.currentBottonType].OnRelease()
 		e.currentBottonType=bottontype
 	}
-	e.buttons[e.currentBottonType].OnHover(0,0)
+	e.buttons[e.currentBottonType].OnHover()
 }
 
 func (e *TodoBlock) GetCurrentBotton() *Component.Button{
@@ -125,7 +131,7 @@ func (e *TodoBlock) Active(){
 }
 func (e *TodoBlock) Inactive(){
 	for i:=range e.buttons{
-		e.buttons[i].OnOut(0,0)
-		e.buttons[i].OnRelease(0,0)
+		e.buttons[i].OnRelease()
+		e.buttons[i].OnRelease()
 	}
 }

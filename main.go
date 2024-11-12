@@ -3,6 +3,9 @@ package main
 import (
 	"Fedi/Api"
 	"Fedi/StateMachine"
+	"slices"
+	"strings"
+	"time"
 
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core"
@@ -20,6 +23,7 @@ var keyb Keyboard.IKeyBoard
 var stataMachine *StateMachine.StateMachine
 var x, y = 0, 0
 var client Api.IApi
+
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
@@ -36,8 +40,8 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	client,e=Api.CreateClient(".env")
-	if e!=nil{
+	client, e = Api.CreateClient(".env")
+	if e != nil {
 		panic(e)
 	}
 	xSize, ySize := core.Size()
@@ -54,9 +58,9 @@ func main() {
 	editLabel := createLabel("Edit")
 	editLabel.SetPos(listZoneXSize+1, 1)
 	core.InsertEntity(editLabel)
-	
-	todos,e:=client.GetTodos()
-	if e!=nil{
+
+	todos, e := client.GetTodos()
+	if e != nil {
 		panic(e)
 	}
 	listElementYSize := int(float32(ySize) * 0.3)
@@ -98,24 +102,43 @@ func main() {
 	TextBox.SetOnHover(func() {
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
 	})
-	TextBox.SetOnOut(func() {
+	TextBox.SetOnLeave(func() {
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 	})
 	SendButton := Component.CreateButton(listZoneXSize+1, ySize-5, 8, 3, "Send")
 	SendButton.SetOnClick(func() {
-		print("\a")
-		body:=Api.Todos{Todos: 
-			[]Api.Todo {Api.Todo{Description: TextBox.GetText(), Name: "titolo"}},
-		}
-		error:=client.PostTodos(body)
-		if error!=nil{
-			panic(error)
+		SendButton.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
+		text:=TextBox.GetText()
+		time.AfterFunc(time.Millisecond*1000, func() {
+			SendButton.OnRelease()
+		})
+		if strings.TrimFunc(text, func (r rune) bool { return slices.Contains([]rune{' ', '\t', '\n', '\r'},r)}) == "" {
+			return
 		}
 		TextBox.ClearAll()
+		go func() {
+			body := Api.Todos{Todos: []Api.Todo{{Description: text, Name: "titolo"}}}
+			error := client.PostTodos(body)
+			if error != nil {
+				panic(error)
+			}
+		}()
 	})
+	SendButton.SetOnRelease(func() {
+		SendButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+	})
+	SendButton.OnRelease()
 	CancelButton := Component.CreateButton(listZoneXSize+17, ySize-5, 8, 3, "Cancel")
+	CancelButton.SetOnRelease(func() {
+		CancelButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+	})
+	CancelButton.OnRelease()
 	CancelButton.SetOnClick(func() {
+		CancelButton.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
 		TextBox.ClearAll()
+		time.AfterFunc(time.Millisecond*1000, func() {
+			CancelButton.OnRelease()
+		})
 	})
 	core.InsertComponent(TextBox)
 	core.InsertComponent(SendButton)
@@ -149,7 +172,7 @@ func main() {
 		bottonsCaroselloState := StateMachine.CreateBuilderStateBase("BottonsState")
 		bottonsCaroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
-				todoBlock[carosello.index%3].GetCurrentBotton().OnClick(0, 0)
+				todoBlock[carosello.index%3].GetCurrentBotton().OnClick()
 			} else if keyb.IsKeySPressed(Keyboard.Left) {
 				todoBlock[carosello.index%3].ChangeButton(DeleteBotton)
 			} else if keyb.IsKeySPressed(Keyboard.Right) {
@@ -174,7 +197,7 @@ func main() {
 		editPart := StateMachine.CreateBuilderStateBase("editPart")
 
 		editPart.SetEntryAction(func() error {
-			carosello.ForEachElements(func(element *CaroselloElement,todoBlockToUpdate int) {
+			carosello.ForEachElements(func(element *CaroselloElement, todoBlockToUpdate int) {
 				element.sleepCallBack(todoBlockToUpdate)
 			})
 			editRect.SetColor(Color.Get(Color.White, Color.None))
@@ -184,13 +207,14 @@ func main() {
 
 		textBoxState := StateMachine.CreateBuilderStateBase("TextBoxState")
 		textBoxState.SetEntryAction(func() error {
-			TextBox.OnHover(0,0)
+			TextBox.OnHover()
 			return nil
 		})
 		firstEdit = true
 		textBoxState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				if !TextBox.IsTyping() {
+					TextBox.OnRelease()
 					if firstEdit {
 						TextBox.ClearAll()
 						firstEdit = false
@@ -199,7 +223,7 @@ func main() {
 					x, y = TextBox.GetPos()
 					x++
 					y++
-					TextBox.OnClick(0,0)
+					TextBox.OnClick()
 				}
 			}
 			return nil
@@ -208,8 +232,7 @@ func main() {
 			TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			core.SetVisibilityCursor(false)
 			x, y = 0, 0
-			TextBox.StopTyping()
-			TextBox.OnOut(0, 0)
+			TextBox.OnLeave()
 			return nil
 		})
 
@@ -220,8 +243,7 @@ func main() {
 		})
 		bottonSendEditState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
-				SendButton.OnClick(0, 0)
-				SendButton.OnRelease(0,0)
+				SendButton.OnClick()
 			}
 			return nil
 		})
@@ -237,7 +259,7 @@ func main() {
 		})
 		bottonCancelEditState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
-				CancelButton.OnClick(0, 0)
+				CancelButton.OnClick()
 			}
 			return nil
 		})
@@ -252,6 +274,9 @@ func main() {
 		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editPart)
+		textBoxState.AddBranch(func() bool{
+			return keyb.IsKeySPressed(Keyboard.CtrlDown)
+		},bottonSendEditState)
 		editPart.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Left)
 		}, todoPart)
