@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
 	"github.com/joho/godotenv"
 )
 type NotionClient struct {
