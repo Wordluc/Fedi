@@ -3,7 +3,6 @@ package main
 import (
 	"Fedi/Api"
 	"Fedi/StateMachine"
-
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core"
 	"github.com/Wordluc/GTUI/Core/Component"
