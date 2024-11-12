@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 import (
 	"Fedi/Api"
 	"Fedi/StateMachine"
@@ -86,6 +88,13 @@ func main() {
 		carosello.AddElement(caroselloEl)
 	}
 
+	numberOfTodoLabel := Drawing.CreateTextBlock(listZoneXSize-8,2,6,1,4)
+	numberOfTodoLabel.Type('0')
+	numberOfTodoLabel.Type('/')
+	for _,r:=range fmt.Sprint(len(carosello.elements)){
+		numberOfTodoLabel.Type(r)
+	}
+	core.InsertEntity(numberOfTodoLabel)
 	firstEdit := true
 	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 5, xSize-listZoneXSize-2, ySize-10, core.CreateStreamingCharacter())
 	if e != nil {
@@ -158,8 +167,24 @@ func main() {
 		caroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Up) {
 				carosello.NextOrPre(true)
+				numberOfTodoLabel.ClearAll()
+				for _,r:=range fmt.Sprint(carosello.index){
+					numberOfTodoLabel.Type(r)
+				}
+				numberOfTodoLabel.Type('/')
+				for _,r:=range fmt.Sprint(len(carosello.elements)){
+					numberOfTodoLabel.Type(r)
+				}
 			} else if keyb.IsKeySPressed(Keyboard.Down) {
 				carosello.NextOrPre(false)
+				numberOfTodoLabel.ClearAll()
+				for _,r:=range fmt.Sprint(carosello.index){
+					numberOfTodoLabel.Type(r)
+				}
+				numberOfTodoLabel.Type('/')
+				for _,r:=range fmt.Sprint(len(carosello.elements)){
+					numberOfTodoLabel.Type(r)
+				}
 			}
 			return nil
 		})
