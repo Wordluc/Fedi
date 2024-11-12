@@ -103,6 +103,7 @@ func main() {
 	})
 	SendButton := Component.CreateButton(listZoneXSize+1, ySize-5, 8, 3, "Send")
 	SendButton.SetOnClick(func() {
+		print("\a")
 		body:=Api.Todos{Todos: 
 			[]Api.Todo {Api.Todo{Description: TextBox.GetText(), Name: "titolo"}},
 		}
@@ -220,6 +221,7 @@ func main() {
 		bottonSendEditState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				SendButton.OnClick(0, 0)
+				SendButton.OnRelease(0,0)
 			}
 			return nil
 		})

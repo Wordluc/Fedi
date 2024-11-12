@@ -40,7 +40,9 @@ func (c *NotionClient) getRequest(url string, method string, body io.Reader) (*h
 }
 func (c *NotionClient) GetTodos() (*Todos, error) {
 	var url = "https://api.notion.com/v1/databases/" + c.Notion_database_id + "/query"
-	req, err := c.getRequest(url, "POST", nil)
+	var body=map[string]interface{}{"sorts": []map[string]string{{"property": "Name", "direction": "ascending"}}}
+	marshal, err := json.Marshal(body)
+	req, err := c.getRequest(url, "POST",bytes.NewBuffer(marshal))
 	if err != nil {
 		return nil, err
 	}
