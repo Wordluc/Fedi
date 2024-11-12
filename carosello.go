@@ -87,9 +87,14 @@ func (e *Carosello) UpdateElement(refreshContentElement bool) {
 		e.index = len(e.elements) - 1
 	}
 	e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedBlock)
-
 }
-
+func (e *Carosello) SleepAll() {
+	iblock := 0
+	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
+		e.elements[i%len(e.elements)].sleepCallBack(iblock)
+		iblock++
+	}
+}
 func (e *Carosello) ForEachElements(action func(*CaroselloElement, int)) {
 	for i := 0; i < len(e.elements); i++ {
 		action(e.elements[i], i%e.limitBlocks)
