@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Fedi/Api"
 	"Fedi/StateMachine"
 
 	"github.com/Wordluc/GTUI"
@@ -18,7 +19,7 @@ var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var keyb Keyboard.IKeyBoard
 var stataMachine *StateMachine.StateMachine
 var x, y = 0, 0
-var client IApi
+var client Api.IApi
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
@@ -35,7 +36,10 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	client,e=CreateNotionClient(".env")
+	client,e=Api.CreateClient(".env")
+	if e!=nil{
+		panic(e)
+	}
 	xSize, ySize := core.Size()
 	listZoneXSize := int(float32(xSize) * 0.7)
 	todoRect := Drawing.CreateRectangle(0, 0, listZoneXSize-1, ySize)

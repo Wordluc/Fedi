@@ -1,27 +1,27 @@
-package main
-
-import "fmt"
+package impl
 
 import (
+	"Fedi/Api/internal"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/joho/godotenv"
 )
 type NotionClient struct {
-	notion_key string
-	notion_database_id  string
+	Notion_key string
+	Notion_database_id  string
 }
-func CreateNotionClient(fileEnvName string) (IApi,error) {
+func CreateNotionClient(fileEnvName string) (*NotionClient,error) {
 	env,err:=godotenv.Read(fileEnvName)
 	if err!=nil{
 		return nil,err
 	}
 	return &NotionClient{
-		notion_key: env["NOTION_KEY"],
-		notion_database_id:  env["NOTION_DATABASE_ID"],
+		Notion_key: env["NOTION_KEY"],
+		Notion_database_id:  env["NOTION_DATABASE_ID"],
 	},nil
 	
 
@@ -32,13 +32,13 @@ func (c *NotionClient) getRequest(url string,method string,body io.Reader) (*htt
 	if err!=nil{
 		return nil,err
 	}
-	req.Header.Add("Authorization", "Bearer "+c.notion_key)
+	req.Header.Add("Authorization", "Bearer "+c.Notion_key)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Notion-Version", "2022-06-28")
 	return req, nil
 }
-func (c *NotionClient) GetTodos() (*Todos,error) {
-	var url= "https://api.notion.com/v1/databases/"+c.notion_database_id+"/query"
+func (c *NotionClient) GetTodos() (*internal.Todos,error) {
+	var url= "https://api.notion.com/v1/databases/"+c.Notion_database_id+"/query"
 	req,err:=c.getRequest(url,"POST",nil)
 	if err!=nil{
 		return nil,err
@@ -63,18 +63,21 @@ func (c *NotionClient) GetTodos() (*Todos,error) {
 	}
 	return mappingResponse(respose),nil
 }
-func (c *NotionClient) PostTodos(Todos) bool {
+
+func (c *NotionClient) PostTodos(internal.Todos) bool {
 	return true
 }
+
 func (c *NotionClient) SetAsDone() error {
 	return nil
 }
-func mappingResponse(resp *NotionResponse) *Todos{
-	var todos Todos=Todos{
-		Todos:make([]Todo,0),
+
+func mappingResponse(resp *NotionResponse) *internal.Todos{
+	var todos internal.Todos=internal.Todos{
+		Todos:make([]internal.Todo,0),
 	}
 	for _,page:=range resp.Results{
-		todo:=Todo{
+		todo:=internal.Todo{
 			Name:page.Properties["Name"].Title[0].Text.Content,
 			Description:page.Properties["Description"].Rich_Text[0].Text.Content,
 		}
