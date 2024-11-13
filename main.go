@@ -254,7 +254,6 @@ func main() {
 		textBoxState.SetExitAction(func() error {
 			TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			core.SetVisibilityCursor(false)
-			x, y = 0, 0
 			TextBox.OnLeave()
 			return nil
 		})
