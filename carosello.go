@@ -100,3 +100,9 @@ func (e *Carosello) ForEachElements(action func(*CaroselloElement, int)) {
 		action(e.elements[i], i%e.limitBlocks)
 	}
 }
+func (e *Carosello) GetIntex() int {
+	return e.startRangeElement+e.selectedBlock
+}
+func (e *Carosello) GetSelected() int {
+	return e.selectedBlock
+}
