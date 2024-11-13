@@ -48,16 +48,12 @@ func main() {
 	listZoneXSize := int(float32(xSize) * 0.7)
 	todoRect := Drawing.CreateRectangle(0, 0, listZoneXSize-1, ySize)
 	todoRect.SetColor(Color.Get(Color.Gray, Color.None))
-	core.InsertEntity(todoRect)
 	editRect := Drawing.CreateRectangle(listZoneXSize, 0, xSize-listZoneXSize, ySize)
 	editRect.SetColor(Color.Get(Color.Gray, Color.None))
-	core.InsertEntity(editRect)
 	listLabel := createLabel("To Do")
 	listLabel.SetPos(1, 1)
-	core.InsertEntity(listLabel)
 	editLabel := createLabel("Edit")
 	editLabel.SetPos(listZoneXSize+1, 1)
-	core.InsertEntity(editLabel)
 
 	todos, e := client.GetTodos()
 	if e != nil {
@@ -88,7 +84,6 @@ func main() {
 
 	numberOfTodoLabel := Drawing.CreateTextField(listZoneXSize-8,2)
 	numberOfTodoLabel.SetText(fmt.Sprint("0/",len(carosello.elements),"  "))
-	core.InsertEntity(numberOfTodoLabel)
 	firstEdit := true
 	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 5, xSize-listZoneXSize-2, ySize-10, core.CreateStreamingCharacter())
 	if e != nil {
@@ -147,8 +142,13 @@ func main() {
 	core.InsertComponent(SendButton)
 	core.InsertComponent(CancelButton)
 
+	core.InsertEntity(todoRect)
+	core.InsertEntity(editRect)
+	core.InsertEntity(listLabel)
+	core.InsertEntity(editLabel)
+	core.InsertEntity(numberOfTodoLabel)
 	stataMachine = StateMachine.CreateStateMachine()
-	{
+	{//State machine
 		todoPart := StateMachine.CreateBuilderStateBase("todoPart")
 
 		todoPart.SetEntryAction(func() error {
@@ -233,6 +233,15 @@ func main() {
 					y++
 					TextBox.OnClick()
 				}
+			}
+			if keyb.IsKeySPressed(Keyboard.CtrlC) || TextBox.IsInSelectingMode() {
+				keyb.InsertClickboard(TextBox.GetSelectedText())
+			}
+			if keyb.IsKeySPressed(Keyboard.CtrlV) {
+				TextBox.Paste(keyb.GetClickboard())
+			}
+			if keyb.IsKeySPressed(Keyboard.CtrlA){
+				TextBox.SetWrap(!TextBox.IsInSelectingMode())
 			}
 			return nil
 		})
