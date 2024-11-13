@@ -33,6 +33,23 @@ func createLabel(text string) Core.IEntity {
 	container.AddChild(bottonLine)
 	return container
 }
+func createCarosleloElement(todo Api.Todo) *CaroselloElement {
+	return &CaroselloElement{
+			wakeUpCallBack: func(todoBlockToUpdate int) {
+				todoBlock[todoBlockToUpdate].components.SetActivity(true)
+				todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.White, Color.None))
+			},
+			sleepCallBack: func(todoBlockToUpdate int) {
+				todoBlock[todoBlockToUpdate].components.SetActivity(false)
+				todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
+			},
+			updateCallBack: func(todoBlockToUpdate int) {
+				todoBlock[todoBlockToUpdate].SetText(todo.Description)
+				todoBlock[todoBlockToUpdate].SetTitle(todo.Name)
+			},
+		}
+
+}
 func main() {
 	var e error
 	keyb := Keyboard.NewKeyboard()
@@ -65,21 +82,7 @@ func main() {
 		core.InsertComponent(todoBlock[i].GetComponent())
 	}
 	for i := 0; i < len(todos.Todos); i++ {
-		caroselloEl := &CaroselloElement{
-			wakeUpCallBack: func(todoBlockToUpdate int) {
-				todoBlock[todoBlockToUpdate].components.SetActivity(true)
-				todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.White, Color.None))
-			},
-			sleepCallBack: func(todoBlockToUpdate int) {
-				todoBlock[todoBlockToUpdate].components.SetActivity(false)
-				todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
-			},
-			updateCallBack: func(todoBlockToUpdate int) {
-				todoBlock[todoBlockToUpdate].SetText(todos.Todos[i].Description)
-				todoBlock[todoBlockToUpdate].SetTitle(todos.Todos[i].Name)
-			},
-		}
-		carosello.AddElement(caroselloEl)
+		carosello.AddElement(createCarosleloElement(todos.Todos[i]))
 	}
 
 	numberOfTodoLabel := Drawing.CreateTextField(listZoneXSize-8,2)
@@ -107,9 +110,6 @@ func main() {
 	SendButton.SetOnClick(func() {
 		SendButton.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
 		text:=TextBox.GetText()
-		time.AfterFunc(time.Millisecond*1000, func() {
-			SendButton.OnRelease()
-		})
 		if strings.TrimFunc(text, func (r rune) bool { return slices.Contains([]rune{' ', '\t', '\n', '\r'},r)}) == "" {
 			return
 		}
@@ -120,6 +120,8 @@ func main() {
 			if error != nil {
 				panic(error)
 			}
+			carosello.AddElement(createCarosleloElement(Api.Todo{Description: text, Name: "titolo"}))
+			numberOfTodoLabel.SetText(fmt.Sprint(len(carosello.elements), "/", len(todos.Todos), "  "))
 		}()
 	})
 	SendButton.SetOnRelease(func() {
@@ -161,10 +163,10 @@ func main() {
 		caroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Up) {
 				carosello.NextOrPre(true)
-				numberOfTodoLabel.SetText(fmt.Sprint(carosello.index,"/", len(carosello.elements)," "))
+				numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(),"/", len(carosello.elements)," "))
 			} else if keyb.IsKeySPressed(Keyboard.Down) {
 				carosello.NextOrPre(false)
-				numberOfTodoLabel.SetText(fmt.Sprint(carosello.index,"/", len(carosello.elements)," "))
+				numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(),"/", len(carosello.elements)," "))
 			}
 			return nil
 		})
@@ -180,11 +182,11 @@ func main() {
 		bottonsCaroselloState := StateMachine.CreateBuilderStateBase("BottonsState")
 		bottonsCaroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
-				todoBlock[carosello.index%3].GetCurrentBotton().OnClick()
+				todoBlock[carosello.GetSelected()].GetCurrentBotton().OnClick()
 			} else if keyb.IsKeySPressed(Keyboard.Left) {
-				todoBlock[carosello.index%3].ChangeButton(DeleteBotton)
+				todoBlock[carosello.GetSelected()].ChangeButton(DeleteBotton)
 			} else if keyb.IsKeySPressed(Keyboard.Right) {
-				todoBlock[carosello.index%3].ChangeButton(DoneBotton)
+				todoBlock[carosello.GetSelected()].ChangeButton(DoneBotton)
 			} else if keyb.IsKeySPressed(Keyboard.Up) {
 				carosello.NextOrPre(true)
 			} else if keyb.IsKeySPressed(Keyboard.Down) {
@@ -193,7 +195,7 @@ func main() {
 			return nil
 		})
 		bottonsCaroselloState.SetEntryAction(func() error {
-			todoBlock[carosello.index%3].Active()
+			todoBlock[carosello.GetSelected()].Active()
 			return nil
 		})
 		bottonsCaroselloState.SetExitAction(func() error {
