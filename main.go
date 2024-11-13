@@ -121,7 +121,7 @@ func main() {
 				panic(error)
 			}
 			carosello.AddElement(createCarosleloElement(Api.Todo{Description: text, Name: "titolo"}))
-			numberOfTodoLabel.SetText(fmt.Sprint(len(carosello.elements), "/", len(todos.Todos), "  "))
+			numberOfTodoLabel.SetText(fmt.Sprint(len(carosello.elements), "/", len(todos.Todos), " "))
 		}()
 	})
 	SendButton.SetOnRelease(func() {
