@@ -18,10 +18,8 @@ import (
 	"github.com/Wordluc/GTUI/Terminal"
 )
 
-var core *GTUI.Gtui
 var carosello Carosello = *CreateCarosello(0, 0, 3)
 var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
-var keyb Keyboard.IKeyBoard
 var stataMachine *StateMachine.StateMachine
 var x, y = 0, 0
 var client Api.IApi
@@ -37,8 +35,8 @@ func createLabel(text string) Core.IEntity {
 }
 func main() {
 	var e error
-	keyb = Keyboard.NewKeyboard()
-	core, e = GTUI.NewGtui(loop, keyb, &Terminal.Terminal{})
+	keyb := Keyboard.NewKeyboard()
+	core, e := GTUI.NewGtui(loop, keyb, &Terminal.Terminal{})
 	if e != nil {
 		panic(e)
 	}
@@ -305,6 +303,9 @@ func main() {
 		bottonCancelEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Left)
 		}, bottonSendEditState)
+		bottonCancelEditState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+		}, todoPart)
 		bottonsCaroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlRight)
 		}, editPart)
@@ -315,7 +316,7 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editPart)
 		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left)
+			return keyb.IsKeySPressed(Keyboard.Left) || keyb.IsKeySPressed(Keyboard.CtrlLeft)
 		}, todoPart)
 		bottonCancelEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Up)
@@ -357,7 +358,7 @@ func main() {
 	core.Start()
 }
 
-func loop(keyb Keyboard.IKeyBoard) bool {
+func loop(keyb Keyboard.IKeyBoard,core *GTUI.Gtui) bool {
 	x, y = core.GetCur()
 	if keyb.IsKeySPressed(Keyboard.Left) {
 		x--

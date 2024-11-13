@@ -6,7 +6,7 @@ require github.com/google/uuid v1.6.0
 
 require (
 	atomicgo.dev/keyboard v0.2.9 // indirect
-	github.com/Wordluc/GTUI v0.0.0-20241112212225-86e46900cca5 // indirect
+	github.com/Wordluc/GTUI v0.0.0-20241113075712-dc95b858e3ad // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203 // indirect
