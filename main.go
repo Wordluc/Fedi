@@ -87,17 +87,13 @@ func main() {
 
 	numberOfTodoLabel := Drawing.CreateTextField(listZoneXSize-8, 2)
 	numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
-	firstEdit := true
-	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 5, xSize-listZoneXSize-2, ySize-10, core.CreateStreamingCharacter())
+	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 10, xSize-listZoneXSize-2, ySize-15, core.CreateStreamingCharacter())
+	LabelBox := Drawing.CreateTextField(listZoneXSize+1, 9)
+	LabelBox.SetText("Description")
 	if e != nil {
 		panic(e)
 	}
-	TextBox.Paste("Here you can write your todo")
 	TextBox.SetOnClick(func() {
-		if firstEdit {
-			firstEdit = false
-			TextBox.ClearAll()
-		}
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
 	})
 	TextBox.SetOnHover(func() {
@@ -106,21 +102,38 @@ func main() {
 	TextBox.SetOnLeave(func() {
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 	})
+	LabelTitle := Drawing.CreateTextField(listZoneXSize+1, 4)
+	LabelTitle.SetText("Title")
+
+	TitleBox, e := Component.CreateTextBox(listZoneXSize+1, 5, xSize-listZoneXSize-2, 3, core.CreateStreamingCharacter())
+
+	TitleBox.SetOnClick(func() {
+		TitleBox.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
+	})
+	TitleBox.SetOnHover(func() {
+		TitleBox.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
+	})
+	TitleBox.SetOnLeave(func() {
+		TitleBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+	})
+
 	SendButton := Component.CreateButton(listZoneXSize+1, ySize-5, 8, 3, "Send")
 	SendButton.SetOnClick(func() {
 		SendButton.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
-		text := TextBox.GetText()
-		if strings.TrimFunc(text, func(r rune) bool { return slices.Contains([]rune{' ', '\t', '\n', '\r'}, r) }) == "" {
+		title := TitleBox.GetText()
+		description := TextBox.GetText()
+		if strings.TrimFunc(description, func(r rune) bool { return slices.Contains([]rune{' ', '\t', '\n', '\r'}, r) }) == "" {
 			return
 		}
 		TextBox.ClearAll()
+		TitleBox.ClearAll()
 		go func() {
-			body := Api.Todos{Todos: []Api.Todo{{Description: text, Name: "titolo"}}}
+			body := Api.Todos{Todos: []Api.Todo{{Description: description, Name: title}}}
 			error := client.PostTodos(body)
 			if error != nil {
 				panic(error)
 			}
-			carosello.AddElement(createCarosleloElement(Api.Todo{Description: text, Name: "titolo"}))
+			carosello.AddElement(createCarosleloElement(Api.Todo{Description: description, Name: title}))
 			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 		}()
 	})
@@ -143,12 +156,15 @@ func main() {
 	core.InsertComponent(TextBox)
 	core.InsertComponent(SendButton)
 	core.InsertComponent(CancelButton)
+	core.InsertComponent(TitleBox)
 
 	core.InsertEntity(todoRect)
 	core.InsertEntity(editRect)
 	core.InsertEntity(listLabel)
 	core.InsertEntity(editLabel)
 	core.InsertEntity(numberOfTodoLabel)
+	core.InsertEntity(LabelBox)
+	core.InsertEntity(LabelTitle)
 	stataMachine = StateMachine.CreateStateMachine()
 	{ //State machine
 		todoPart := StateMachine.CreateBuilderStateBase("todoPart")
@@ -163,13 +179,14 @@ func main() {
 		caroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Up) {
 				carosello.NextOrPre(true)
-				numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 			} else if keyb.IsKeySPressed(Keyboard.Down) {
 				carosello.NextOrPre(false)
-				numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 			} else if keyb.IsKeySPressed(Keyboard.CtrlUp) {
 				carosello.SetIndex(0)
+			}else if keyb.IsKeySPressed(Keyboard.CtrlDown) {
+				carosello.SetIndex(len(carosello.elements)-1)
 			}
+			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 			return nil
 		})
 
@@ -202,7 +219,7 @@ func main() {
 		})
 		bottonsCaroselloState.SetExitAction(func() error {
 			for i := 0; i < len(todoBlock); i++ {
-				todoBlock[i].Inactive()
+				todoBlock[i].ReleaseAll()
 			}
 			return nil
 		})
@@ -222,15 +239,10 @@ func main() {
 			TextBox.OnHover()
 			return nil
 		})
-		firstEdit = true
 		textBoxState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				if !TextBox.IsTyping() {
 					TextBox.OnRelease()
-					if firstEdit {
-						TextBox.ClearAll()
-						firstEdit = false
-					}
 					core.SetVisibilityCursor(true)
 					x, y = TextBox.GetPos()
 					x++
@@ -252,9 +264,30 @@ func main() {
 			return nil
 		})
 		textBoxState.SetExitAction(func() error {
-			TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			core.SetVisibilityCursor(false)
 			TextBox.OnLeave()
+			return nil
+		})
+		titleBoxState:=StateMachine.CreateBuilderStateBase("TextBoxState")
+		titleBoxState.SetEntryAction(func() error {
+			TitleBox.OnHover()
+			return nil
+		})
+		titleBoxState.SetActionDo(func() error {
+			if keyb.IsKeySPressed(Keyboard.Enter) {
+				if !TitleBox.IsTyping() {
+					core.SetVisibilityCursor(true)
+					x, y = TitleBox.GetPos()
+					x++
+					y++
+					TitleBox.OnClick()
+				}
+			}
+			return nil
+		})
+		titleBoxState.SetExitAction(func() error {
+			core.SetVisibilityCursor(false)
+			TitleBox.OnLeave()
 			return nil
 		})
 
@@ -292,22 +325,37 @@ func main() {
 
 		editPart.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Enter)
-		}, textBoxState)
+		}, titleBoxState)
 		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editPart)
+		textBoxState.AddBranch(func () bool {
+			return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
+		}, titleBoxState)
+		textBoxState.AddBranch(func () bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlUp)
+		}, titleBoxState)
+		titleBoxState.AddBranch(func () bool {
+			return keyb.IsKeySPressed(Keyboard.Down) || keyb.IsKeySPressed(Keyboard.CtrlDown)
+		}, textBoxState)
+		titleBoxState.AddBranch(func () bool {
+			return keyb.IsKeySPressed(Keyboard.Esc) 
+		}, editPart)
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlDown)
+			return keyb.IsKeySPressed(Keyboard.CtrlDown) && TextBox.IsTyping()
 		}, bottonSendEditState)
 		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
 		}, caroselloState)
+		textBoxState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
+		}, titleBoxState)
 		editPart.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Left)
 		}, todoPart)
 		bottonsCaroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlRight)
-		}, textBoxState)
+		}, titleBoxState)
 		bottonSendEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Right)
 		}, bottonCancelEditState)
@@ -355,7 +403,7 @@ func main() {
 		}, todoPart)
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlRight)
-		}, textBoxState)
+		}, titleBoxState)
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Right)
 		}, editPart)

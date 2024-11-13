@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type CallBackCarosello func(int)
 type CaroselloElement struct {
 	//Is called when the element is woken up, passing the index of the block as an argument
@@ -88,12 +90,18 @@ func (e *Carosello) UpdateElement(refreshContentElement bool) {
 	}
 	e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedBlock)
 }
-func (e *Carosello) SetIndex(iNeeded int) {
-	for i :=e.index; i == iNeeded; i++ {
+func (e *Carosello) SetIndex(iNeeded int)error {
+	i:=e.index
+	startI:=e.index
+	for {
 		if i==iNeeded{
-			return
+			return nil
 		}
-		e.NextOrPre(i>iNeeded)
+		e.NextOrPre(i<iNeeded)
+		i=e.index
+		if startI==i{
+			return fmt.Errorf("index not found")
+		}
 	}
 }
 func (e *Carosello) SleepAll() {
