@@ -302,11 +302,8 @@ func main() {
 		editPart.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Left)
 		}, todoPart)
-		caroselloState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlE)
-		},textBoxState)
 		bottonsCaroselloState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlE)
+			return keyb.IsKeySPressed(Keyboard.CtrlRight)
 		},textBoxState)
 		bottonSendEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Right)
@@ -316,10 +313,7 @@ func main() {
 		}, bottonSendEditState)
 		bottonCancelEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
-		}, todoPart)
-		bottonsCaroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlRight)
-		}, editPart)
+		}, caroselloState)
 		bottonCancelEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editPart)
@@ -327,8 +321,11 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editPart)
 		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left) || keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			return keyb.IsKeySPressed(Keyboard.Left) 
 		}, todoPart)
+		bottonSendEditState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+		},caroselloState)
 		bottonCancelEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Up)
 		}, textBoxState)
@@ -353,6 +350,9 @@ func main() {
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, todoPart)
+		caroselloState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlRight)
+		}, textBoxState)
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Right)
 		}, editPart)
