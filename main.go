@@ -121,7 +121,7 @@ func main() {
 				panic(error)
 			}
 			carosello.AddElement(createCarosleloElement(Api.Todo{Description: text, Name: "titolo"}))
-			numberOfTodoLabel.SetText(fmt.Sprint(len(carosello.elements), "/", len(todos.Todos), " "))
+			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 		}()
 	})
 	SendButton.SetOnRelease(func() {
@@ -167,7 +167,9 @@ func main() {
 			} else if keyb.IsKeySPressed(Keyboard.Down) {
 				carosello.NextOrPre(false)
 				numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(),"/", len(carosello.elements)," "))
-			}
+			} else if keyb.IsKeySPressed(Keyboard.CtrlUp) {
+				carosello.SetIndex(0)
+			  }
 			return nil
 		})
 
@@ -388,7 +390,6 @@ func loop(keyb Keyboard.IKeyBoard,core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		return false
 	}
-	core.SetCur(x, y)
 	stataMachine.Clock()
 	core.SetCur(x, y)
 	return true

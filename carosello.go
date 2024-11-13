@@ -88,6 +88,14 @@ func (e *Carosello) UpdateElement(refreshContentElement bool) {
 	}
 	e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedBlock)
 }
+func (e *Carosello) SetIndex(iNeeded int) {
+	for i :=e.index; i == iNeeded; i++ {
+		if i==iNeeded{
+			return
+		}
+		e.NextOrPre(i>iNeeded)
+	}
+}
 func (e *Carosello) SleepAll() {
 	iblock := 0
 	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
