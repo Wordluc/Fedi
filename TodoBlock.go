@@ -29,7 +29,7 @@ func CreateElement(x,y int,width,height int) *TodoBlock{
 	title:=Drawing.CreateTextField(2,2)
 	line:=Drawing.CreateLine(2,3,3,0)
 	line.SetVisibility(false)
-	textElement:=Drawing.CreateTextBlock(2,4,width-4,height-4,10)
+	textElement:=Drawing.CreateTextBlock(3,4,width-5,height-4,10)
 	edgeElement:=Drawing.CreateRectangle(1,1,width-2,height)
 	edgeElement.SetColor(Color.Get(Color.Gray,Color.None))
 	drawingContainer:= Drawing.CreateContainer(0,0);
@@ -116,7 +116,6 @@ func (e *TodoBlock) SetVisibility(visible bool) {
 func (e *TodoBlock) ChangeButton(bottontype BottonType){
 	if bottontype!=e.currentBottonType{
 		e.buttons[e.currentBottonType].OnRelease()
-		e.buttons[e.currentBottonType].OnRelease()
 		e.currentBottonType=bottontype
 	}
 	e.buttons[e.currentBottonType].OnHover()
@@ -126,10 +125,10 @@ func (e *TodoBlock) GetCurrentBotton() *Component.Button{
 	return e.buttons[e.currentBottonType]
 }
 
-func (e *TodoBlock) Active(){
+func (e *TodoBlock) Active(){//todo: da togliere
 	e.ChangeButton(DeleteBotton)
 }
-func (e *TodoBlock) Inactive(){
+func (e *TodoBlock) ReleaseAll(){
 	for i:=range e.buttons{
 		e.buttons[i].OnRelease()
 		e.buttons[i].OnRelease()
