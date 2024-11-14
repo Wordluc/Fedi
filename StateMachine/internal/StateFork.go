@@ -46,19 +46,20 @@ func (s *StateFork) SetHeadsStateMachine(headsStateMachine *HeadsStateMachine) {
 	s.HeadsStateMachine = headsStateMachine
 }
 
-func (s *StateFork) CheckTransition() (error) {
+func (s *StateFork) CheckTransition() (bool,error) {
 	for _, transition := range s.Transitions {
 		if transition.IsDone() {
 			continue
 		}
 		ok, err := transition.TryTransition()
 		if err != nil {
-			return err
+			return false,err
 		}
 		if ok {
 			s.passedState++
 			if s.passedState==len(s.Transitions){
 				s.HeadsStateMachine.RemoveHead(s)
+				return true,nil
 			}else{
 				s.ExitAction()
 			}
@@ -67,6 +68,7 @@ func (s *StateFork) CheckTransition() (error) {
 	}
 	if len(s.Transitions) == 0 {
 		s.HeadsStateMachine.RemoveHead(s)
+		return true,nil
 	}
-	return nil
+	return false,nil
 }

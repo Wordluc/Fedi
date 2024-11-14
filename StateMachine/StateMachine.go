@@ -5,7 +5,7 @@ import (
 )
 
 type StateMachine struct {
-	begin State.IState
+	stateToAdd State.IState
 	heads *State.HeadsStateMachine
 }
 
@@ -16,11 +16,15 @@ func CreateStateMachine() *StateMachine {
 }
 
 func (m *StateMachine) Clock()error {
+
 	for _, head := range m.heads.GetHeads() {
 		head.SetHeadsStateMachine(m.heads)
-		e:=head.CheckTransition()
+		pass,e:=head.CheckTransition()
 		if e!=nil{
 			return e
+		}
+		if pass{
+			continue
 		}
 		e=head.DoAction()
 		if e!=nil{

@@ -5,6 +5,6 @@ type IState interface {
 	ExitAction() error
 	DoAction() error
 	SetHeadsStateMachine(headsStateMachine *HeadsStateMachine)
-	CheckTransition() (error)
+	CheckTransition() (bool,error)
 	GetTransitionsTo() []*Transition
 }
