@@ -46,22 +46,23 @@ func (s *StateMerge) SetHeadsStateMachine(headsStateMachine *HeadsStateMachine) 
 func (s *StateMerge) GetTransitionsTo() []*Transition {
 	return []*Transition{s.TransitionTo}
 }
-func (s *StateMerge) CheckTransition() error {
+func (s *StateMerge) CheckTransition() (bool,error) {
 	for _, state := range s.ToWait {
 		tran:=state.GetTransitionsTo()
 		for _, transition := range tran {
 			if !transition.IsDone() {
-				return nil
+				return false,nil
 			}
 		}
 	}
 	ok, err := s.TransitionTo.TryTransition()
 	if err != nil {
-		return err
+		return false,err
 	}
 	if ok {
 		s.HeadsStateMachine.RemoveHead(s)
 		s.HeadsStateMachine.AddHead(s.TransitionTo.to)
+		return true,nil
 	}
-	return err
+	return false,nil
 }

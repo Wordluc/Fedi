@@ -242,7 +242,6 @@ func main() {
 		textBoxState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				if !TextBox.IsTyping() {
-					TextBox.OnRelease()
 					x, y = TextBox.GetPos()
 					x++
 					y++
@@ -276,20 +275,21 @@ func main() {
 		titleBoxState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				if !TitleBox.IsTyping() {
-					core.SetVisibilityCursor(true)
 					x, y = TitleBox.GetPos()
 					x++
 					y++
+					core.SetVisibilityCursor(true)
 					TitleBox.OnClick()
 				}
 			}
 			return nil
 		})
 		titleBoxState.SetExitAction(func() error {
-			TitleBox.OnLeave()
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				TitleBox.DeleteLastCharacter()//delete last /n
 			}
+			print("\a")
+			TitleBox.OnLeave()
 			core.SetVisibilityCursor(false)
 			return nil
 		})
@@ -347,6 +347,12 @@ func main() {
 		titleBoxState.AddBranch(func () bool {
 			return keyb.IsKeySPressed(Keyboard.Esc) 
 		}, editPart)
+		titleBoxState.AddBranch(func () bool {
+			return keyb.IsKeySPressed(Keyboard.Left) && !TitleBox.IsTyping()
+		}, todoPart)
+		titleBoxState.AddBranch(func () bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+		}, caroselloState)
 		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlDown) && TextBox.IsTyping()
 		}, bottonSendEditState)
@@ -419,7 +425,7 @@ func main() {
 		bottonsCaroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
 		}, caroselloState)
-		stataMachine.AddBuilder(todoPart)
+		stataMachine.AddBuilder(titleBoxState)
 	}
 
 	core.SetVisibilityCursor(false)

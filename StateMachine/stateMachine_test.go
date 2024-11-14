@@ -7,6 +7,7 @@ import (
 //a->b->c
 func TestStateMachineLinearStates(t *testing.T) {
 	stateMachine := CreateStateMachine()
+	var trigger=false
 	var res string =""
 
 	builderA:=CreateBuilderStateBase("a")
@@ -38,15 +39,17 @@ func TestStateMachineLinearStates(t *testing.T) {
 	})
 
 
-	builderA.AddBranch(func() bool {return true },builderB)
+	builderA.AddBranch(func() bool {return trigger },builderB)
 	stateMachine.AddBuilder(builderA)
 	stateMachine.Clock()
-	if res!="entryA->doA->exitA->entryB->"{
-		t.Fail()
+	if res!="entryA->doA->"{
+		t.Fatalf("expected: entryA->doA->, got: %s",res)
 	}
+	trigger=true
 	stateMachine.Clock()
-	if res!="entryA->doA->exitA->entryB->doB->exitB->"{
-		t.Fail()
+	stateMachine.Clock()
+	if res!="entryA->doA->exitA->entryB->exitB->"{
+		t.Fatalf("expected: entryA->doA->exitA->entryB->exitB->, got: %s",res)
 	}
 }
 
@@ -141,7 +144,7 @@ func TestStateMachineFork(t *testing.T) {
 		}
 	}
 
-	exp:="entryA->doA->exitA->entryFork->exitFork->entryC->exitFork->entryB->doC->exitC->doB->exitB->entryE->exitE->"
+	exp:="entryA->exitA->entryFork->exitFork->entryC->exitFork->exitC->"
 	if res!=exp{
 		t.Fatalf("got: %s, expected: %s",res,exp)
 	}
@@ -294,8 +297,8 @@ func TestStateMachineWithDualPathTakeE(t *testing.T) {
 	stateMachine.Clock()
 	stateMachine.Clock()
 	stateMachine.Clock()
-	if res!="entryA->doA->exitA->entryE->doE->exitE->"{
-		t.Fatalf("expected: entryA->doA->exitA->entryE->doE->exitE->, got: %s",res)
+	if res!="entryA->exitA->entryE->exitE->"{
+		t.Fatalf("expected: entryA->exitA->entryE->exitE->, got: %s",res)
 	}
 }
 func TestStateMachineWithDualPathTakeB(t *testing.T) {
@@ -304,7 +307,7 @@ func TestStateMachineWithDualPathTakeB(t *testing.T) {
 	stateMachine.Clock()
 	stateMachine.Clock()
 	stateMachine.Clock()
-	if res!="entryA->doA->exitA->entryB->doB->exitB->"{
-		t.Fatalf("expected: entryA->doA->exitA->entryB->doB->exitB->, got: %s",res)
+	if res!="entryA->exitA->entryB->exitB->"{
+		t.Fatalf("expected: entryA->doA->exitA->entryB->exitB->, got: %s",res)
 	}
 }

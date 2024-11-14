@@ -37,20 +37,21 @@ func (s *StateBase) SetHeadsStateMachine(headsStateMachine *HeadsStateMachine) {
 	s.HeadsStateMachine = headsStateMachine
 }
 
-func (s *StateBase) CheckTransition() error {
+func (s *StateBase) CheckTransition() (bool,error) {
 	for _, transition := range s.TransitionTo {
 		ok, err := transition.TryTransition()
 		if err != nil {
-			return err
+			return false,err
 		}
 		if ok {
 			s.HeadsStateMachine.RemoveHead(s)
 			s.HeadsStateMachine.AddHead(transition.to)
-			return nil
+			return true,nil
 		}
 	}
 	if len(s.TransitionTo) == 0 {
 		s.HeadsStateMachine.RemoveHead(s)
+		return true,nil
 	}
-	return nil
+	return false,nil
 }
