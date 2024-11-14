@@ -18,11 +18,11 @@ func CreateStateMachine() *StateMachine {
 func (m *StateMachine) Clock()error {
 	for _, head := range m.heads.GetHeads() {
 		head.SetHeadsStateMachine(m.heads)
-		e:=head.DoAction()
+		e:=head.CheckTransition()
 		if e!=nil{
 			return e
 		}
-		e=head.CheckTransition()
+		e=head.DoAction()
 		if e!=nil{
 			return e
 		}
