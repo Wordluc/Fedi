@@ -243,10 +243,10 @@ func main() {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				if !TextBox.IsTyping() {
 					TextBox.OnRelease()
-					core.SetVisibilityCursor(true)
 					x, y = TextBox.GetPos()
 					x++
 					y++
+					core.SetVisibilityCursor(true)
 					TextBox.OnClick()
 				}
 			}
@@ -286,8 +286,11 @@ func main() {
 			return nil
 		})
 		titleBoxState.SetExitAction(func() error {
-			core.SetVisibilityCursor(false)
 			TitleBox.OnLeave()
+			if keyb.IsKeySPressed(Keyboard.Enter) {
+				TitleBox.DeleteLastCharacter()//delete last /n
+			}
+			core.SetVisibilityCursor(false)
 			return nil
 		})
 
@@ -337,6 +340,9 @@ func main() {
 		}, titleBoxState)
 		titleBoxState.AddBranch(func () bool {
 			return keyb.IsKeySPressed(Keyboard.Down) || keyb.IsKeySPressed(Keyboard.CtrlDown)
+		}, textBoxState)
+		titleBoxState.AddBranch(func () bool {
+			return keyb.IsKeySPressed(Keyboard.Enter) && TitleBox.IsTyping()
 		}, textBoxState)
 		titleBoxState.AddBranch(func () bool {
 			return keyb.IsKeySPressed(Keyboard.Esc) 
