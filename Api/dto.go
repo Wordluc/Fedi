@@ -4,6 +4,7 @@ import (
 	"time"
 )
 type TodoPost struct {
+	Id          string
 	Properties TodosProperty
 	Parent     Parent
 }
