@@ -1,10 +1,9 @@
 package main
 
-import "fmt"
-
 import (
 	"Fedi/Api"
 	"Fedi/StateMachine"
+	"fmt"
 	"slices"
 	"strings"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/Wordluc/GTUI/Core"
 	"github.com/Wordluc/GTUI/Core/Component"
 	"github.com/Wordluc/GTUI/Core/Drawing"
+	"github.com/Wordluc/GTUI/Core/EventManager"
 	"github.com/Wordluc/GTUI/Core/Utils/Color"
 	"github.com/Wordluc/GTUI/Keyboard"
 	"github.com/Wordluc/GTUI/Terminal"
@@ -28,6 +28,7 @@ func refreshCarosello(carosello **Carosello,todos *Api.Todos) {
 	for i := 0; i < len(todos.Todos); i++ {
 		(*carosello).AddElement(createCarosleloElement(todos.Todos[i]))
 	}
+	(*carosello).UpdateElementState(true,false)
 }
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
@@ -80,6 +81,8 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
+	numberOfTodoLabel := Drawing.CreateTextField(listZoneXSize-8, 2)
+
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(todoBlock); i++ {
 		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize, func() {
@@ -90,12 +93,13 @@ func main() {
 				panic(e)
 			}
 			refreshCarosello(&carosello, todos)
+			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), len(carosello.elements), "  "))
+			EventManager.Call(EventManager.Refresh,todoBlock[i].GetComponent())
 		})
 		core.InsertComponent(todoBlock[i].GetComponent())
 	}
 	refreshCarosello(&carosello,todos)
 
-	numberOfTodoLabel := Drawing.CreateTextField(listZoneXSize-8, 2)
 	numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
 	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 10, xSize-listZoneXSize-2, ySize-15, core.CreateStreamingCharacter())
 	LabelBox := Drawing.CreateTextField(listZoneXSize+1, 9)
@@ -139,15 +143,11 @@ func main() {
 		TitleBox.ClearAll()
 		go func() {
 			body := Api.Todos{Todos: []Api.Todo{{Description: description, Name: title}}}
-			error := client.PostTodos(body)
+			response,error := client.PostTodos(body)
 			if error != nil {
 				panic(error)
 			}
-			todos, error = client.GetTodos()
-			if error != nil {
-				return
-			}
-			refreshCarosello(&carosello, todos)
+			carosello.AddElement(createCarosleloElement(Api.Todo{Description: description, Name: title,Id: response.Id}))
 			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 		}()
 	})
@@ -205,7 +205,7 @@ func main() {
 		})
 
 		caroselloState.SetEntryAction(func() error {
-			carosello.UpdateElement(false)
+			carosello.UpdateElementState(false,true)
 			return nil
 		})
 		caroselloState.SetExitAction(func() error {
@@ -302,7 +302,6 @@ func main() {
 			if keyb.IsKeySPressed(Keyboard.Enter) {
 				TitleBox.DeleteLastCharacter()//delete last /n
 			}
-			print("\a")
 			TitleBox.OnLeave()
 			core.SetVisibilityCursor(false)
 			return nil

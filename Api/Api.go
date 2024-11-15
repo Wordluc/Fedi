@@ -67,7 +67,7 @@ func (c *NotionClient) GetTodos() (*Todos, error) {
 	return mappingResponse(respose), nil
 }
 
-func (c *NotionClient) PostTodos(todos Todos) error {
+func (c *NotionClient) PostTodos(todos Todos) (TodoPost, error) {
 	url := "https://api.notion.com/v1/pages"
 
 	property := map[string]interface{}{
@@ -99,23 +99,25 @@ func (c *NotionClient) PostTodos(todos Todos) error {
 	}
 	marshal, err := json.Marshal(requestBody)
 	if err != nil {
-		return err
+		return TodoPost{},err
 	}
 
 	request, err := c.getRequest(url, "POST", bytes.NewBuffer(marshal))
 	if err != nil {
-		return err
+		return TodoPost{},err
 	}
 	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
-		return err
+		return TodoPost{},err
 	}
 	defer resp.Body.Close()
-	response, err := io.ReadAll(resp.Body)
+	responseByte, err := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		return errors.New("Notion error " + fmt.Sprint(resp.StatusCode) + ":" + string(response))
+		return TodoPost{},errors.New("Notion error " + fmt.Sprint(resp.StatusCode) + ":" + string(responseByte))
 	}
-	return nil
+	response := &TodoPost{}
+	err=json.Unmarshal(responseByte, response)
+	return *response, err
 }
 
 func (c *NotionClient) SetAsDone() error {

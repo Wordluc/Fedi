@@ -38,7 +38,7 @@ func TestCaroselloChangePageNextFromDown(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		carosello.AddElement(createCaroselloElementHelperMethods(i, result, false))
 	}
-	carosello.UpdateElement(false)
+	carosello.UpdateElementState(false)
 	(*result) += "-----------------\n"
 	carosello.NextOrPre(false)
 	carosello.NextOrPre(false)
@@ -78,7 +78,7 @@ func TestCaroselloChange2PagesNextFromDown(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		carosello.AddElement(createCaroselloElementHelperMethods(i, result, false))
 	}
-	carosello.UpdateElement(false)
+	carosello.UpdateElementState(false)
 	(*result) += "-----------------\n"
 	carosello.NextOrPre(false)
 	carosello.NextOrPre(false)
@@ -138,7 +138,7 @@ func TestCaroselloChange3PagesNextFromDown(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		carosello.AddElement(createCaroselloElementHelperMethods(i, result, false))
 	}
-	carosello.UpdateElement(false)
+	carosello.UpdateElementState(false)
 	(*result) += "-----------------\n"
 	carosello.NextOrPre(false)
 	carosello.NextOrPre(false)

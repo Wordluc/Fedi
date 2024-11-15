@@ -67,10 +67,12 @@ func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
 	})
 	deleteButton.SetOnClick(func (){
 		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Blue,Color.None))
-		toDelete()
-		time.AfterFunc(time.Millisecond*1000, func() {
-			deleteButton.OnRelease()
-		})
+		go func (){
+			toDelete()
+			time.AfterFunc(time.Millisecond*1000, func() {
+				deleteButton.OnRelease()
+			})
+		}()
 	})
 	containerComponent:=Component.CreateContainer(0,0)
 	containerComponent.AddComponent(doneButton)

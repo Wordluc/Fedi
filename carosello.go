@@ -60,20 +60,20 @@ func (e *Carosello) NextOrPre(isPre bool) {
 		if e.startRangeElement >= len(e.elements) {
 			e.startRangeElement = e.startRangeElement - len(e.elements)
 		}
-		e.UpdateElement(true)
+		e.UpdateElementState(true,true)
 		return
 	}
 	if isGoingUp {
 		e.startRangeElement = e.startRangeElement - e.limitBlocks
-		if e.startRangeElement < 0 {
+		for e.startRangeElement < 0 {
 			e.startRangeElement = len(e.elements) + e.startRangeElement
 		}
-		e.UpdateElement(true)
+		e.UpdateElementState(true,true)
 		return
 	}
-	e.UpdateElement(false)
+	e.UpdateElementState(false,true)
 }
-func (e *Carosello) UpdateElement(refreshContentElement bool) {
+func (e *Carosello) UpdateElementState(refreshContentElement bool, setWakeup bool) {
 	iblock := 0
 	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
 		e.elements[i%len(e.elements)].sleepCallBack(iblock)
@@ -88,18 +88,20 @@ func (e *Carosello) UpdateElement(refreshContentElement bool) {
 	if e.index == -1 {
 		e.index = len(e.elements) - 1
 	}
-	e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedBlock)
+	if setWakeup {
+		e.elements[e.index%len(e.elements)].wakeUpCallBack(e.selectedBlock)
+	}
 }
-func (e *Carosello) SetIndex(iNeeded int)error {
-	i:=e.index
-	startI:=e.index
+func (e *Carosello) SetIndex(iNeeded int) error {
+	i := e.index
+	startI := e.index
 	for {
-		if i==iNeeded{
+		if i == iNeeded {
 			return nil
 		}
-		e.NextOrPre(i<iNeeded)
-		i=e.index
-		if startI==i{
+		e.NextOrPre(i < iNeeded)
+		i = e.index
+		if startI == i {
 			return fmt.Errorf("index not found")
 		}
 	}
@@ -117,7 +119,7 @@ func (e *Carosello) ForEachElements(action func(*CaroselloElement, int)) {
 	}
 }
 func (e *Carosello) GetIntex() int {
-	return e.startRangeElement+e.selectedBlock
+	return e.index
 }
 func (e *Carosello) GetSelected() int {
 	return e.selectedBlock

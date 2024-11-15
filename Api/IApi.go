@@ -11,7 +11,7 @@ type Todo struct {
 type IApi interface {
 	GetTodos() (*Todos, error)
 	SetAsDone() error
-	PostTodos(Todos) error
+	PostTodos(Todos)(TodoPost, error)
 	Delete(Todo) error
 }
 
