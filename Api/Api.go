@@ -121,13 +121,30 @@ func (c *NotionClient) PostTodos(todos Todos) error {
 func (c *NotionClient) SetAsDone() error {
 	return nil
 }
-
+func (c *NotionClient) Delete(todos Todo) error {
+	url := "https://api.notion.com/v1/blocks/"+todos.Id
+	request, err := c.getRequest(url, "DELETE",nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	response, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return errors.New("Notion error " + fmt.Sprint(resp.StatusCode) + ":" + string(response))
+	}
+	return nil
+}
 func mappingResponse(resp *NotionResponse) *Todos {
 	var todos Todos = Todos{
 		Todos: make([]Todo, 0),
 	}
 	for _, page := range resp.Results {
 		todo := Todo{
+			Id:          page.ID,
 			Name:        page.Properties["Name"].Title[0].Text.Content,
 			Description: page.Properties["Description"].Rich_Text[0].Text.Content,
 		}
