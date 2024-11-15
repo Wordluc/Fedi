@@ -18,12 +18,17 @@ import (
 	"github.com/Wordluc/GTUI/Terminal"
 )
 
-var carosello Carosello = *CreateCarosello(0, 0, 3)
+var carosello *Carosello
 var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var stataMachine *StateMachine.StateMachine
 var x, y = 0, 0
 var client Api.IApi
-
+func refreshCarosello(carosello **Carosello,todos *Api.Todos) {
+	(*carosello)=CreateCarosello(0, 0, 3)
+	for i := 0; i < len(todos.Todos); i++ {
+		(*carosello).AddElement(createCarosleloElement(todos.Todos[i]))
+	}
+}
 func createLabel(text string) Core.IEntity {
 	labelList := Drawing.CreateTextField(0, 0)
 	labelList.SetText(text)
@@ -44,8 +49,7 @@ func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 			todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
 		},
 		updateCallBack: func(todoBlockToUpdate int) {
-			todoBlock[todoBlockToUpdate].SetText(todo.Description)
-			todoBlock[todoBlockToUpdate].SetTitle(todo.Name)
+			todoBlock[todoBlockToUpdate].SetCurrentTodo(&todo)
 		},
 	}
 
@@ -78,12 +82,18 @@ func main() {
 	}
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(todoBlock); i++ {
-		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize)
+		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize, func() {
+			currentTodo := todoBlock[i].GetTodo()
+			client.Delete(*currentTodo)
+			todos, e = client.GetTodos()
+			if e != nil {
+				panic(e)
+			}
+			refreshCarosello(&carosello, todos)
+		})
 		core.InsertComponent(todoBlock[i].GetComponent())
 	}
-	for i := 0; i < len(todos.Todos); i++ {
-		carosello.AddElement(createCarosleloElement(todos.Todos[i]))
-	}
+	refreshCarosello(&carosello,todos)
 
 	numberOfTodoLabel := Drawing.CreateTextField(listZoneXSize-8, 2)
 	numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
@@ -133,7 +143,11 @@ func main() {
 			if error != nil {
 				panic(error)
 			}
-			carosello.AddElement(createCarosleloElement(Api.Todo{Description: description, Name: title}))
+			todos, error = client.GetTodos()
+			if error != nil {
+				return
+			}
+			refreshCarosello(&carosello, todos)
 			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 		}()
 	})

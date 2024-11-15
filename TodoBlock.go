@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Fedi/Api"
 	"time"
 
 	"github.com/Wordluc/GTUI/Core/Component"
@@ -23,9 +24,10 @@ type TodoBlock struct {
 	lineTitle *Drawing.Line
 	buttons []*Component.Button
 	currentBottonType BottonType
+	currentTodo *Api.Todo
 }
 
-func CreateElement(x,y int,width,height int) *TodoBlock{
+func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
 	title:=Drawing.CreateTextField(2,2)
 	line:=Drawing.CreateLine(2,3,3,0)
 	line.SetVisibility(false)
@@ -65,6 +67,7 @@ func CreateElement(x,y int,width,height int) *TodoBlock{
 	})
 	deleteButton.SetOnClick(func (){
 		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Blue,Color.None))
+		toDelete()
 		time.AfterFunc(time.Millisecond*1000, func() {
 			deleteButton.OnRelease()
 		})
@@ -98,13 +101,13 @@ func (e *TodoBlock) GetPos() (int,int){
 func (e *TodoBlock) GetComponent() *Component.Container{
 	return e.components
 }
-func (e *TodoBlock) SetText(text string){
+func (e *TodoBlock) setText(text string){
 	e.textDrawing.ClearAll()
 	for i:=range text{
 		e.textDrawing.Type(rune(text[i]))
 	}
 }
-func (e *TodoBlock) SetTitle(text string){
+func (e *TodoBlock) setTitle(text string){
 	e.titleDrawing.SetText(text)
 	e.lineTitle.SetVisibility(true)
 }
@@ -124,7 +127,14 @@ func (e *TodoBlock) ChangeButton(bottontype BottonType){
 func (e *TodoBlock) GetCurrentBotton() *Component.Button{
 	return e.buttons[e.currentBottonType]
 }
-
+func (e *TodoBlock) SetCurrentTodo(todo *Api.Todo){
+	e.currentTodo=todo
+	e.setTitle(todo.Name)
+	e.setText(todo.Description)
+}
+func (e *TodoBlock) GetTodo() *Api.Todo{
+	return e.currentTodo
+}
 func (e *TodoBlock) Active(){//todo: da togliere
 	e.ChangeButton(DeleteBotton)
 }
