@@ -38,6 +38,9 @@ func (e *Carosello) AddElement(element *CaroselloElement) {
 	}
 }
 func (e *Carosello) NextOrPre(isPre bool) {
+	if len(e.elements)==0{
+		return
+	}
 	pre_selectedBlock := e.selectedBlock
 	if isPre {
 		e.index--
@@ -75,6 +78,9 @@ func (e *Carosello) NextOrPre(isPre bool) {
 }
 func (e *Carosello) UpdateElementState(refreshContentElement bool, setWakeup bool) {
 	iblock := 0
+	if len(e.elements)==0{
+		return
+	}
 	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
 		e.elements[i%len(e.elements)].sleepCallBack(iblock)
 		if refreshContentElement {
@@ -108,12 +114,18 @@ func (e *Carosello) SetIndex(iNeeded int) error {
 }
 func (e *Carosello) SleepAll() {
 	iblock := 0
+	if len(e.elements)==0{
+		return
+	}
 	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
 		e.elements[i%len(e.elements)].sleepCallBack(iblock)
 		iblock++
 	}
 }
 func (e *Carosello) ForEachElements(action func(*CaroselloElement, int)) {
+	if len(e.elements)==0{
+		return
+	}
 	for i := 0; i < len(e.elements); i++ {
 		action(e.elements[i], i%e.limitBlocks)
 	}
@@ -123,4 +135,7 @@ func (e *Carosello) GetIntex() int {
 }
 func (e *Carosello) GetSelected() int {
 	return e.selectedBlock
+}
+func (e *Carosello) GetElementsNumber() (i int) {
+	return len(e.elements)
 }
