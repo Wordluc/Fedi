@@ -20,7 +20,7 @@ type TodoBlock struct {
 	xPos int
 	yPos int
 	textDrawing *Drawing.TextBlock
-	titleDrawing *Drawing.TextField
+	titleDrawing *Drawing.TextBlock
 	lineTitle *Drawing.Line
 	buttons []*Component.Button
 	currentBottonType BottonType
@@ -28,7 +28,7 @@ type TodoBlock struct {
 }
 
 func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
-	title:=Drawing.CreateTextField(2,2)
+	title:=Drawing.CreateTextBlock(2,2,width-5,3,10)
 	line:=Drawing.CreateLine(2,3,3,0)
 	line.SetVisibility(false)
 	textElement:=Drawing.CreateTextBlock(3,4,width-5,height-4,10)
@@ -114,8 +114,10 @@ func (e *TodoBlock) setTitle(text string){
 	e.lineTitle.SetVisibility(true)
 }
 
-func (e *TodoBlock) SetVisibility(visible bool) {
-	e.components.GetGraphics().SetVisibility(visible)
+func (e *TodoBlock) Clean() {
+	e.setText("")
+	e.setTitle("")
+	e.lineTitle.SetVisibility(false)
 }
 
 func (e *TodoBlock) ChangeButton(bottontype BottonType){

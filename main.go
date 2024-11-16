@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strings"
 	"time"
-
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core"
 	"github.com/Wordluc/GTUI/Core/Component"
@@ -23,16 +22,8 @@ var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var stataMachine *StateMachine.StateMachine
 var x, y = 0, 0
 var client Api.IApi
-func refreshCarosello(carosello **Carosello,todos *Api.Todos) {
-	(*carosello)=CreateCarosello(0, 0, 3)
-	for i := 0; i < len(todos.Todos); i++ {
-		(*carosello).AddElement(createCarosleloElement(todos.Todos[i]))
-	}
-	(*carosello).UpdateElementState(true,false)
-}
-func createLabel(text string) Core.IEntity {
-	labelList := Drawing.CreateTextField(0, 0)
-	labelList.SetText(text)
+func createLabel(text string) Core.IDrawing {
+	labelList := Drawing.CreateTextField(0, 0,text)
 	bottonLine := Drawing.CreateLine(0, 1, len(text)+1, 0)
 	container := Drawing.CreateContainer(0, 0)
 	container.AddChild(labelList)
@@ -54,6 +45,13 @@ func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 		},
 	}
 
+}
+func refreshCarosello(carosello **Carosello,todos *Api.Todos) {
+	(*carosello)=CreateCarosello(0, 0, 3)
+	for i := 0; i < len(todos.Todos); i++ {
+		(*carosello).AddElement(createCarosleloElement(todos.Todos[i]))
+	}
+	(*carosello).UpdateElementState(true,false)
 }
 func main() {
 	var e error
@@ -81,7 +79,7 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	numberOfTodoLabel := Drawing.CreateTextField(listZoneXSize-8, 2)
+	numberOfTodoLabel := Drawing.CreateTextBlock(listZoneXSize-8, 2,5,3,10)
 
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(todoBlock); i++ {
@@ -93,8 +91,13 @@ func main() {
 				panic(e)
 			}
 			refreshCarosello(&carosello, todos)
-			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), len(carosello.elements), "  "))
-			EventManager.Call(EventManager.Refresh,todoBlock[i].GetComponent())
+			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(),"/", len(carosello.elements), "  "))
+			if carosello.GetElementsNumber()==0{
+				for i := 0; i < len(todoBlock); i++ {
+					todoBlock[i].Clean()
+				}
+			}
+			EventManager.Call(EventManager.Refresh,[]any{todoBlock[i].GetComponent()})
 		})
 		core.InsertComponent(todoBlock[i].GetComponent())
 	}
@@ -102,8 +105,7 @@ func main() {
 
 	numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
 	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 10, xSize-listZoneXSize-2, ySize-15, core.CreateStreamingCharacter())
-	LabelBox := Drawing.CreateTextField(listZoneXSize+1, 9)
-	LabelBox.SetText("Description")
+	LabelBox := Drawing.CreateTextField(listZoneXSize+1, 9,"Description")
 	if e != nil {
 		panic(e)
 	}
@@ -116,8 +118,7 @@ func main() {
 	TextBox.SetOnLeave(func() {
 		TextBox.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 	})
-	LabelTitle := Drawing.CreateTextField(listZoneXSize+1, 4)
-	LabelTitle.SetText("Title")
+	LabelTitle := Drawing.CreateTextField(listZoneXSize+1, 4,"Title")
 
 	TitleBox, e := Component.CreateTextBox(listZoneXSize+1, 5, xSize-listZoneXSize-2, 3, core.CreateStreamingCharacter())
 
@@ -149,6 +150,7 @@ func main() {
 			}
 			carosello.AddElement(createCarosleloElement(Api.Todo{Description: description, Name: title,Id: response.Id}))
 			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
+			EventManager.Call(EventManager.Refresh,[]any{todoBlock[carosello.GetIntex()].GetComponent()})
 		}()
 	})
 	SendButton.SetOnRelease(func() {
@@ -424,7 +426,7 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Enter)
 		}, caroselloState)
 		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc)
+			return keyb.IsKeySPressed(Keyboard.Esc) || carosello.GetElementsNumber() == 0
 		}, todoPart)
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlRight)
