@@ -433,7 +433,7 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Right)
 		}, editPart)
 		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Enter)
+			return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0
 		}, bottonsCaroselloState)
 		bottonsCaroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
