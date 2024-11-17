@@ -16,7 +16,6 @@ func CreateStateMachine() *StateMachine {
 }
 
 func (m *StateMachine) Clock()error {
-
 	for _, head := range m.heads.GetHeads() {
 		head.SetHeadsStateMachine(m.heads)
 		pass,e:=head.CheckTransition()

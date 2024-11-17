@@ -149,6 +149,7 @@ func main() {
 				panic(error)
 			}
 			carosello.AddElement(createCarosleloElement(Api.Todo{Description: description, Name: title,Id: response.Id}))
+			carosello.UpdateElementState(true,false)
 			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
 			EventManager.Call(EventManager.Refresh,[]any{todoBlock[carosello.GetIntex()].GetComponent()})
 		}()
@@ -183,9 +184,9 @@ func main() {
 	core.InsertEntity(LabelTitle)
 	stataMachine = StateMachine.CreateStateMachine()
 	{ //State machine
-		todoPart := StateMachine.CreateBuilderStateBase("todoPart")
+		todoState := StateMachine.CreateBuilderStateBase("todoPart")
 
-		todoPart.SetEntryAction(func() error {
+		todoState.SetEntryAction(func() error {
 			todoRect.SetColor(Color.Get(Color.White, Color.None))
 			editRect.SetColor(Color.Get(Color.Gray, Color.None))
 			return nil
@@ -239,9 +240,9 @@ func main() {
 			}
 			return nil
 		})
-		editPart := StateMachine.CreateBuilderStateBase("editPart")
+		editState := StateMachine.CreateBuilderStateBase("editPart")
 
-		editPart.SetEntryAction(func() error {
+		editState.SetEntryAction(func() error {
 			carosello.ForEachElements(func(element *CaroselloElement, todoBlockToUpdate int) {
 				element.sleepCallBack(todoBlockToUpdate)
 			})
@@ -340,107 +341,120 @@ func main() {
 			CancelButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
 			return nil
 		})
+		isOk,errors:=StateMachine.Do(
+			//EDITPART
+			editState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Enter)
+			}, titleBoxState),
+			editState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Left)
+			}, todoState),
+			//TEXTBOXSTATE
+			textBoxState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Esc)
+			}, editState),
+			textBoxState.AddBranch(func () bool {
+				return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
+			}, titleBoxState),
+			textBoxState.AddBranch(func () bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlUp)
+			}, titleBoxState),
+			textBoxState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlDown) && TextBox.IsTyping()
+			}, bottonSendEditState),
+			textBoxState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			}, caroselloState),
+			textBoxState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
+			}, titleBoxState),
+			textBoxState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Esc)
+			}, editState),
+			textBoxState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Left) && !TextBox.IsTyping()
+			}, todoState),
+			textBoxState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Down) && !TextBox.IsTyping()
+			}, bottonSendEditState),
+			//TITLEBOXSTATE
+			titleBoxState.AddBranch(func () bool {
+				return keyb.IsKeySPressed(Keyboard.Down) || keyb.IsKeySPressed(Keyboard.CtrlDown)
+			}, textBoxState),
+			titleBoxState.AddBranch(func () bool {
+				return keyb.IsKeySPressed(Keyboard.Enter) && TitleBox.IsTyping()
+			}, textBoxState),
+			titleBoxState.AddBranch(func () bool {
+				return keyb.IsKeySPressed(Keyboard.Esc) 
+			}, editState),
+			titleBoxState.AddBranch(func () bool {
+				return keyb.IsKeySPressed(Keyboard.Left) && !TitleBox.IsTyping()
+			}, todoState),
+			titleBoxState.AddBranch(func () bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			}, caroselloState),
+			//BOTTONSCAROSSELLOSTATE
+			bottonsCaroselloState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlRight)
+			}, titleBoxState),
+			bottonsCaroselloState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
+			}, caroselloState),
+			//BOTTONSENDEDITSTATE
+			bottonSendEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Right)
+			}, bottonCancelEditState),
+			bottonSendEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Esc)
+			}, editState),
+			bottonSendEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Left)
+			}, todoState),
+			bottonSendEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			}, caroselloState),
+			bottonSendEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Up)
+			}, textBoxState),
+			//BOTTONCANCELEDITSTATE
+			bottonCancelEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Left)
+			}, bottonSendEditState),
+			bottonCancelEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			}, caroselloState),
+			bottonCancelEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Esc)
+			}, editState),
+			bottonCancelEditState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Up)
+			}, textBoxState),
+			//TODOSTATE
+			todoState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Right)
+			}, editState),
+			todoState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Enter)
+			}, caroselloState),
+			//CAROSSELLOSTATE
+			caroselloState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Esc) || carosello.GetElementsNumber() == 0
+			}, todoState),
+			caroselloState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.CtrlRight)
+			}, titleBoxState),
+			caroselloState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Right)
+			}, editState),
+			caroselloState.AddBranch(func() bool {
+				return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0
+			}, bottonsCaroselloState),
 
-		editPart.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Enter)
-		}, titleBoxState)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc)
-		}, editPart)
-		textBoxState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
-		}, titleBoxState)
-		textBoxState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlUp)
-		}, titleBoxState)
-		titleBoxState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.Down) || keyb.IsKeySPressed(Keyboard.CtrlDown)
-		}, textBoxState)
-		titleBoxState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.Enter) && TitleBox.IsTyping()
-		}, textBoxState)
-		titleBoxState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.Esc) 
-		}, editPart)
-		titleBoxState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.Left) && !TitleBox.IsTyping()
-		}, todoPart)
-		titleBoxState.AddBranch(func () bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
-		}, caroselloState)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlDown) && TextBox.IsTyping()
-		}, bottonSendEditState)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
-		}, caroselloState)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
-		}, titleBoxState)
-		editPart.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left)
-		}, todoPart)
-		bottonsCaroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlRight)
-		}, titleBoxState)
-		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Right)
-		}, bottonCancelEditState)
-		bottonCancelEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left)
-		}, bottonSendEditState)
-		bottonCancelEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
-		}, caroselloState)
-		bottonCancelEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc)
-		}, editPart)
-		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc)
-		}, editPart)
-		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left)
-		}, todoPart)
-		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
-		}, caroselloState)
-		bottonCancelEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Up)
-		}, textBoxState)
-		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Up)
-		}, textBoxState)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc)
-		}, editPart)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left) && !TextBox.IsTyping()
-		}, todoPart)
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Down) && !TextBox.IsTyping()
-		}, bottonSendEditState)
-		todoPart.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Right)
-		}, editPart)
-		todoPart.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Enter)
-		}, caroselloState)
-		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc) || carosello.GetElementsNumber() == 0
-		}, todoPart)
-		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlRight)
-		}, titleBoxState)
-		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Right)
-		}, editPart)
-		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0
-		}, bottonsCaroselloState)
-		bottonsCaroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
-		}, caroselloState)
-		stataMachine.AddBuilder(titleBoxState)
+			stataMachine.AddBuilder(titleBoxState),
+		)
+		if !isOk{
+			panic(errors)
+		}
 	}
 
 	core.SetVisibilityCursor(false)
