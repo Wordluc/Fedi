@@ -11,7 +11,7 @@ type StateMachine struct {
 
 func CreateStateMachine() *StateMachine {
 	return &StateMachine{
-		heads: &State.HeadsStateMachine{Heads: make([]State.IState, 0)},
+		heads: &State.HeadsStateMachine{State: make([]State.IState, 0)},
 	}
 }
 
@@ -39,5 +39,13 @@ func (m *StateMachine) AddBuilder(state IBuilder)error {
 		return err
 	}
 	m.heads.AddHead(build)
+	return nil
+}
+func (m *StateMachine) AddBuilderComposite(state *StateCompositeBuilder)error {
+	build, err := state.Build()
+	if err != nil {
+		return err
+	}
+	m.heads.WaitingStatesComposite = append(m.heads.WaitingStatesComposite, build.(*State.StateComposite))
 	return nil
 }

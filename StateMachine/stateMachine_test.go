@@ -311,3 +311,96 @@ func TestStateMachineWithDualPathTakeB(t *testing.T) {
 		t.Fatalf("expected: entryA->doA->exitA->entryB->exitB->, got: %s",res)
 	}
 }
+func TestCompositeState(t *testing.T) {
+	res:=""
+	stateA:=CreateBuilderStateBase("a")
+	stateA.SetActionDo(func() error {
+		res+="doA->"
+		return nil
+	})
+	stateA.SetExitAction(func() error {
+		res+="exitA->"
+		return nil
+	})
+	stateA.SetEntryAction(func() error {
+		res+="entryA->"
+		return nil
+	})
+	stateB:=CreateBuilderStateBase("b")
+	stateB.SetEntryAction(func() error {
+		res+="entryB->"
+		return nil
+	})
+	stateB.SetActionDo(func() error {
+		res+="doB->"
+		return nil
+	})
+	stateB.SetExitAction(func() error {
+		res+="exitB->"
+		return nil
+	})
+	stateC:=CreateBuilderStateBase("c")
+	stateC.SetEntryAction(func() error {
+		res+="entryC->"
+		return nil
+	})
+	stateC.SetActionDo(func() error {
+		res+="doC->"
+		return nil
+	})
+	stateC.SetExitAction(func() error {
+		res+="exitC->"
+		return nil
+	})
+	stateD:=CreateBuilderStateBase("D")
+	stateD.SetEntryAction(func() error {
+		res+="entryD->"
+		return nil
+	})
+	stateD.SetActionDo(func() error {
+		res+="doD->"
+		return nil
+	})
+	stateD.SetExitAction(func() error {
+		res+="exitD->"
+		return nil
+	})
+
+	composite:=CreateBuilderStateComposite("prova")
+	composite.SetEntryAction(func() error {
+		res+="entryComp->"
+		return nil
+	})
+	composite.SetExitAction(func() error {
+		res+="exitComp->"
+		return nil
+	})
+	composite.SetActionDo(func() error {
+		res+="doComp->"
+		return nil
+	})
+	composite.AddState(stateB)
+	composite.AddState(stateC)
+
+	stateA.AddBranch(func () bool{return true},stateB)
+	stateB.AddBranch(func () bool{return true},stateC)
+	stateC.AddBranch(func () bool{return true},stateD)
+	stateD.AddBranch(func () bool{return true},composite)
+
+	stateMachine:=CreateStateMachine()
+	stateMachine.AddBuilder(stateA)
+	stateMachine.AddBuilderComposite(composite)
+	stateMachine.Clock()
+	stateMachine.Clock()
+	stateMachine.Clock()
+	stateMachine.Clock()
+	stateMachine.Clock()
+	stateMachine.Clock()
+
+	if res!="entryA->exitA->entryComp->entryB->exitB->entryC->exitC->exitComp->entryD->exitD->entryComp->entryB->exitB->entryC->exitC->exitComp->entryD->"{
+		t.Fatalf("entryA->exitA->entryComp->entryB->exitB->entryC->exitC->exitComp->entryD->exitD->entryComp->entryB->exitB->entryC->exitC->exitComp->entryD->, but got %s ",res)
+	}
+
+}
+
+

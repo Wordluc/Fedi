@@ -1,27 +1,60 @@
 package State
+
+import "slices"
+
 type HeadsStateMachine struct {
-	Heads []IState
+	State                  []IState
+	ActiveStatesComposite  []*StateComposite
+	WaitingStatesComposite []*StateComposite
 }
 
 func (h *HeadsStateMachine) AddHead(state IState) {
-	for _, head := range h.Heads {
-		if head == state {
+	defer func() {
+		h.State = append(h.State, state)
+		state.EntryAction()
+	}()
+	if stateC, ok := state.(*StateComposite); ok {
+		var err error
+		state, err = stateC.GetHead()
+		if err != nil {
 			return
 		}
 	}
-	h.Heads = append(h.Heads, state)
-	state.EntryAction()
+	for i, stateComposite := range h.WaitingStatesComposite {
+		if stateComposite==nil{
+			continue
+		}
+		if stateComposite.isInside(state) {
+			stateComposite.EntryAction()
+			h.ActiveStatesComposite = append(h.ActiveStatesComposite, stateComposite)
+			h.WaitingStatesComposite = slices.Delete(h.WaitingStatesComposite, i, i+1)
+		}
+	}
+	for i, stateComposite := range h.ActiveStatesComposite {
+		if stateComposite==nil{
+			continue
+		}
+		if !stateComposite.isInside(state) {
+			stateComposite.ExitAction()
+			h.WaitingStatesComposite = append(h.WaitingStatesComposite, stateComposite)
+			h.ActiveStatesComposite = slices.Delete(h.ActiveStatesComposite, i, i+1)
+		}
+	}
 }
 
 func (h *HeadsStateMachine) RemoveHead(state IState) {
-	for i := 0; i < len(h.Heads); i++ {
-		if h.Heads[i] == state {
+	for i := 0; i < len(h.State); i++ {
+		if h.State[i] == state {
 			state.ExitAction()
-			h.Heads = append(h.Heads[:i], h.Heads[i+1:]...)
+			h.State = slices.Delete(h.State, i, 1)
+			if comp, ok := state.(*StateComposite); ok {
+				h.WaitingStatesComposite = append(h.WaitingStatesComposite, comp)
+				h.ActiveStatesComposite = slices.Delete(h.ActiveStatesComposite, i, i+1)
+			}
 		}
 	}
 }
 
 func (h *HeadsStateMachine) GetHeads() []IState {
-	return h.Heads
+	return h.State
 }

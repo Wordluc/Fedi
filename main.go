@@ -184,14 +184,19 @@ func main() {
 	core.InsertEntity(LabelTitle)
 	stataMachine = StateMachine.CreateStateMachine()
 	{ //State machine
-		todoState := StateMachine.CreateBuilderStateBase("todoPart")
+		todoState := StateMachine.CreateBuilderStateComposite("todoPart")
 
 		todoState.SetEntryAction(func() error {
+			carosello.ForEachElements(func(element *CaroselloElement, todoBlockToUpdate int) {
+				element.sleepCallBack(todoBlockToUpdate)
+			})
 			todoRect.SetColor(Color.Get(Color.White, Color.None))
-			editRect.SetColor(Color.Get(Color.Gray, Color.None))
 			return nil
 		})
-
+		todoState.SetExitAction(func() error {
+			todoRect.SetColor(Color.Get(Color.Gray, Color.None))
+			return nil
+		})
 		caroselloState := StateMachine.CreateBuilderStateBase("caroselloState")
 		caroselloState.SetActionDo(func() error {
 			if keyb.IsKeySPressed(Keyboard.Up) {
@@ -240,17 +245,16 @@ func main() {
 			}
 			return nil
 		})
-		editState := StateMachine.CreateBuilderStateBase("editPart")
+		editState := StateMachine.CreateBuilderStateComposite("editPart")
 
 		editState.SetEntryAction(func() error {
-			carosello.ForEachElements(func(element *CaroselloElement, todoBlockToUpdate int) {
-				element.sleepCallBack(todoBlockToUpdate)
-			})
 			editRect.SetColor(Color.Get(Color.White, Color.None))
-			todoRect.SetColor(Color.Get(Color.Gray, Color.None))
 			return nil
 		})
-
+		editState.SetExitAction(func() error {
+			editRect.SetColor(Color.Get(Color.Gray, Color.None))
+			return nil
+		})
 		textBoxState := StateMachine.CreateBuilderStateBase("TextBoxState")
 		textBoxState.SetEntryAction(func() error {
 			TextBox.OnHover()
@@ -343,12 +347,12 @@ func main() {
 		})
 		isOk,errors:=StateMachine.Do(
 			//EDITPART
-			editState.AddBranch(func() bool {
-				return keyb.IsKeySPressed(Keyboard.Enter)
-			}, titleBoxState),
-			editState.AddBranch(func() bool {
-				return keyb.IsKeySPressed(Keyboard.Left)
-			}, todoState),
+			editState.AddState(titleBoxState),
+			editState.AddState(textBoxState),
+			editState.AddState(bottonSendEditState),
+			editState.AddState(bottonCancelEditState),
+			//TODOSTATE
+			todoState.AddState(caroselloState),
 			//TEXTBOXSTATE
 			textBoxState.AddBranch(func() bool {
 				return keyb.IsKeySPressed(Keyboard.Esc)
@@ -429,13 +433,6 @@ func main() {
 			bottonCancelEditState.AddBranch(func() bool {
 				return keyb.IsKeySPressed(Keyboard.Up)
 			}, textBoxState),
-			//TODOSTATE
-			todoState.AddBranch(func() bool {
-				return keyb.IsKeySPressed(Keyboard.Right)
-			}, editState),
-			todoState.AddBranch(func() bool {
-				return keyb.IsKeySPressed(Keyboard.Enter)
-			}, caroselloState),
 			//CAROSSELLOSTATE
 			caroselloState.AddBranch(func() bool {
 				return keyb.IsKeySPressed(Keyboard.Esc) || carosello.GetElementsNumber() == 0
@@ -451,6 +448,8 @@ func main() {
 			}, bottonsCaroselloState),
 
 			stataMachine.AddBuilder(titleBoxState),
+			stataMachine.AddBuilderComposite(editState),
+			stataMachine.AddBuilderComposite(todoState),
 		)
 		if !isOk{
 			panic(errors)
