@@ -2,11 +2,13 @@ package StateMachine
 
 import (
 	State "Fedi/StateMachine/internal"
+	"errors"
 )
 
 type StateMachine struct {
 	stateToAdd State.IState
 	heads *State.HeadsStateMachine
+	toActivate []State.IState
 }
 
 func CreateStateMachine() *StateMachine {
@@ -14,8 +16,21 @@ func CreateStateMachine() *StateMachine {
 		heads: &State.HeadsStateMachine{State: make([]State.IState, 0)},
 	}
 }
+func (m *StateMachine) Start()error {
+	if m.toActivate==nil{
+		return nil
+	}
+	for _, state := range m.toActivate {
+		m.heads.AddHead(state)
+	}
+	m.toActivate = nil
+	return nil
+}
 
 func (m *StateMachine) Clock()error {
+	if m.toActivate!=nil{
+		return errors.New("Machine is not started")
+	}
 	for _, head := range m.heads.GetHeads() {
 		head.SetHeadsStateMachine(m.heads)
 		pass,e:=head.CheckTransition()
@@ -38,9 +53,10 @@ func (m *StateMachine) AddBuilder(state IBuilder)error {
 	if err != nil {
 		return err
 	}
-	m.heads.AddHead(build)
+	m.toActivate = append(m.toActivate, build)
 	return nil
 }
+
 func (m *StateMachine) AddBuilderComposite(state *StateCompositeBuilder)error {
 	build, err := state.Build()
 	if err != nil {
