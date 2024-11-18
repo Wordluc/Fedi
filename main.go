@@ -19,7 +19,7 @@ import (
 
 var carosello *Carosello
 var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
-var stataMachine *StateMachine.StateMachine
+var stateMachine *StateMachine.StateMachine
 var x, y = 0, 0
 var client Api.IApi
 func createLabel(text string) Core.IDrawing {
@@ -182,7 +182,7 @@ func main() {
 	core.InsertEntity(numberOfTodoLabel)
 	core.InsertEntity(LabelBox)
 	core.InsertEntity(LabelTitle)
-	stataMachine = StateMachine.CreateStateMachine()
+	stateMachine = StateMachine.CreateStateMachine()
 	{ //State machine
 		todoState := StateMachine.CreateBuilderStateComposite("todoPart")
 
@@ -447,9 +447,9 @@ func main() {
 				return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0
 			}, bottonsCaroselloState),
 
-			stataMachine.AddBuilder(titleBoxState),
-			stataMachine.AddBuilderComposite(editState),
-			stataMachine.AddBuilderComposite(todoState),
+			stateMachine.AddBuilderComposite(editState),
+			stateMachine.AddBuilderComposite(todoState),
+			stateMachine.AddBuilder(titleBoxState),
 		)
 		if !isOk{
 			panic(errors)
@@ -457,6 +457,7 @@ func main() {
 	}
 
 	core.SetVisibilityCursor(false)
+	stateMachine.Start()
 	core.Start()
 }
 
@@ -479,7 +480,9 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		return false
 	}
-	stataMachine.Clock()
+	if e:=stateMachine.Clock();e!=nil {
+		panic(e)
+	}
 	core.SetCur(x, y)
 	return true
 }
