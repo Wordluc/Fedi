@@ -41,6 +41,7 @@ func TestStateMachineLinearStates(t *testing.T) {
 
 	builderA.AddBranch(func() bool {return trigger },builderB)
 	stateMachine.AddBuilder(builderA)
+	stateMachine.Start()
 	stateMachine.Clock()
 	if res!="entryA->doA->"{
 		t.Fatalf("expected: entryA->doA->, got: %s",res)
@@ -135,6 +136,7 @@ func TestStateMachineFork(t *testing.T) {
 
 	mergeBuilder.SetNext(func () bool{return true},builderE)
 	error=stateMachine.AddBuilder(builderA)
+	stateMachine.Start()
 	if error!=nil{
 		t.Fatalf("builder: %s",error)
 	}
@@ -230,6 +232,7 @@ func TestStateMachineForkWaitWrongState(t *testing.T) {
 	if error!=nil{
 		t.Fatalf("error: %s",error)
 	}
+	stateMachine.Start()
 	for i:=0;i<5;i++{
 		e:=stateMachine.Clock()
 		if e!=nil{
@@ -294,6 +297,7 @@ func StateMachineWithDualPathTakeEandB(res *string,takeB bool) StateMachine{
 func TestStateMachineWithDualPathTakeE(t *testing.T) {
 	res:=""
 	stateMachine:=StateMachineWithDualPathTakeEandB(&res,false)
+	stateMachine.Start()
 	stateMachine.Clock()
 	stateMachine.Clock()
 	stateMachine.Clock()
@@ -304,6 +308,7 @@ func TestStateMachineWithDualPathTakeE(t *testing.T) {
 func TestStateMachineWithDualPathTakeB(t *testing.T) {
 	res:=""
 	stateMachine:=StateMachineWithDualPathTakeEandB(&res,true)
+	stateMachine.Start()
 	stateMachine.Clock()
 	stateMachine.Clock()
 	stateMachine.Clock()
@@ -390,6 +395,7 @@ func TestCompositeState(t *testing.T) {
 	stateMachine:=CreateStateMachine()
 	stateMachine.AddBuilder(stateA)
 	stateMachine.AddBuilderComposite(composite)
+	stateMachine.Start()
 	stateMachine.Clock()
 	stateMachine.Clock()
 	stateMachine.Clock()

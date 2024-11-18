@@ -460,7 +460,7 @@ func main() {
 		stateMachine.AddBuilderComposite(todoState),
 		stateMachine.AddBuilder(titleBoxState),
 		stateMachine.Start(),
-		EventManager.Subscribe(ClockEvent,100, func(_ []any) {
+		EventManager.Subscribe(ClockEvent,500, func(_ []any) {
 			stateMachine.Clock()
 		}),
 	)
