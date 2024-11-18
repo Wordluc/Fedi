@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 type CallBackCarosello func(int)
 type CaroselloElement struct {
@@ -138,4 +141,12 @@ func (e *Carosello) GetSelected() int {
 }
 func (e *Carosello) GetElementsNumber() (i int) {
 	return len(e.elements)
+}
+func (e *Carosello) DeleteElement(ele *CaroselloElement){
+	for i:=range e.elements{
+		if e.elements[i]==ele{
+			e.elements=slices.Delete(e.elements,i,i+1)
+			return 
+		}
+	}
 }

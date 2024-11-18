@@ -22,6 +22,7 @@ var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var stateMachine *StateMachine.StateMachine
 var x, y = 0, 0
 var client Api.IApi
+const ClockEvent EventManager.EventType = 10
 
 func createLabel(text string) Core.IDrawing {
 	labelList := Drawing.CreateTextField(0, 0, text)
@@ -47,12 +48,12 @@ func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 	}
 
 }
-func refreshCarosello(carosello **Carosello, todos *Api.Todos) {
+func refreshCarosello(carosello **Carosello, todos *Api.Todos,setWakeup bool) {
 	(*carosello) = CreateCarosello(0, 0, 3)
 	for i := 0; i < len(todos.Todos); i++ {
 		(*carosello).AddElement(createCarosleloElement(todos.Todos[i]))
 	}
-	(*carosello).UpdateElementState(true, false)
+	(*carosello).UpdateElementState(true, setWakeup)
 }
 func main() {
 	var e error
@@ -86,23 +87,26 @@ func main() {
 	for i := 0; i < len(todoBlock); i++ {
 		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize, func() {
 			currentTodo := todoBlock[i].GetTodo()
-			client.Delete(*currentTodo)
-			todos, e = client.GetTodos()
-			if e != nil {
+			if e:=client.Delete(*currentTodo);e!=nil{
 				panic(e)
 			}
-			refreshCarosello(&carosello, todos)
+			if carosello.GetElementsNumber() == 0 {
+				return
+			}
+			carosello.DeleteElement(carosello.elements[carosello.index%len(carosello.elements)])
+			refreshCarosello(&carosello, todos,true)
 			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), "  "))
 			if carosello.GetElementsNumber() == 0 {
 				for i := 0; i < len(todoBlock); i++ {
 					todoBlock[i].Clean()
 				}
 			}
+			EventManager.Call(ClockEvent,nil)
 			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
 		})
 		core.InsertComponent(todoBlock[i].GetComponent())
 	}
-	refreshCarosello(&carosello, todos)
+	refreshCarosello(&carosello, todos,false)
 
 	numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
 	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 10, xSize-listZoneXSize-2, ySize-15, core.CreateStreamingCharacter())
@@ -354,6 +358,7 @@ func main() {
 		editState.AddState(bottonCancelEditState),
 		//TODOSTATE
 		todoState.AddState(caroselloState),
+		todoState.AddState(bottonsCaroselloState),
 		//TEXTBOXSTATE
 		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
@@ -405,6 +410,9 @@ func main() {
 		bottonsCaroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
 		}, caroselloState),
+		bottonsCaroselloState.AddBranch(func() bool {
+			return carosello.GetElementsNumber() == 0
+		}, editState),
 		//BOTTONSENDEDITSTATE
 		bottonSendEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Right)
@@ -436,8 +444,8 @@ func main() {
 		}, textBoxState),
 		//CAROSSELLOSTATE
 		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc) || carosello.GetElementsNumber() == 0
-		}, todoState),
+			return carosello.GetElementsNumber() == 0
+		}, editState),
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.CtrlRight)
 		}, titleBoxState),
@@ -452,6 +460,9 @@ func main() {
 		stateMachine.AddBuilderComposite(todoState),
 		stateMachine.AddBuilder(titleBoxState),
 		stateMachine.Start(),
+		EventManager.Subscribe(ClockEvent,100, func(_ []any) {
+			stateMachine.Clock()
+		}),
 	)
 
 	if !isOk {
