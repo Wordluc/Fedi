@@ -2,8 +2,6 @@ package main
 
 import (
 	"Fedi/Api"
-	"time"
-
 	"github.com/Wordluc/GTUI/Core/Component"
 	"github.com/Wordluc/GTUI/Core/Drawing"
 	"github.com/Wordluc/GTUI/Core/Utils/Color"
@@ -51,9 +49,6 @@ func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
 	})
 	doneButton.SetOnClick(func (){
 		doneButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Blue,Color.None))
-		time.AfterFunc(time.Millisecond*1000, func() {
-			doneButton.OnRelease()
-		})
 	})
 	deleteButton:=Component.CreateButton(width/2-10,height-3,8,3,"Delete")
 	deleteButton.SetOnHover(func (){
@@ -67,12 +62,9 @@ func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
 	})
 	deleteButton.SetOnClick(func (){
 		deleteButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Blue,Color.None))
-		go func (){
-			toDelete()
-			time.AfterFunc(time.Millisecond*1000, func() {
-				deleteButton.OnRelease()
-			})
-		}()
+			go func (){
+				toDelete()
+			}()
 	})
 	containerComponent:=Component.CreateContainer(0,0)
 	containerComponent.AddComponent(doneButton)

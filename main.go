@@ -48,13 +48,16 @@ func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 	}
 
 }
+
 func refreshCarosello(carosello **Carosello, todos *Api.Todos,setWakeup bool) {
-	(*carosello) = CreateCarosello(0, 0, 3)
+	newCarosello := CreateCarosello(0, 0, 3)
 	for i := 0; i < len(todos.Todos); i++ {
-		(*carosello).AddElement(createCarosleloElement(todos.Todos[i]))
+		newCarosello.AddElement(createCarosleloElement(todos.Todos[i]))
 	}
-	(*carosello).UpdateElementState(true, setWakeup)
+	newCarosello.UpdateElementState(true, setWakeup)
+	*carosello = newCarosello
 }
+
 func main() {
 	var e error
 	keyb := Keyboard.NewKeyboard()
@@ -84,22 +87,23 @@ func main() {
 
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(todoBlock); i++ {
-		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize, func() {
-			currentTodo := todoBlock[i].GetTodo()
-			if e:=client.Delete(*currentTodo);e!=nil{
-				panic(e)
-			}
+		todoBlock[i] = CreateElement(1, i*listElementYSize+3, listZoneXSize-4, listElementYSize, func() {//da ottimizzare
 			if carosello.GetElementsNumber() == 0 {
 				return
 			}
-			carosello.DeleteElement(carosello.elements[carosello.index])
-			refreshCarosello(&carosello, todos,true)
-			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), "  "))
-			if carosello.GetElementsNumber() == 0 {
-				for i := 0; i < len(todoBlock); i++ {
-					todoBlock[i].Clean()
-				}
+			currentTodo := todoBlock[i].GetTodo()
+			if e:=client.Delete(*currentTodo);e!=nil{
 			}
+			todos, e = client.GetTodos()
+			if e != nil {
+				panic(e)
+			}
+			for i := 0; i < len(todoBlock); i++ {
+				todoBlock[i].Clean()
+			}
+			refreshCarosello(&carosello, todos,true)
+			numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
+			keyb.Clean()
 			EventManager.Call(ClockEvent,nil)
 			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
 		})
@@ -269,6 +273,7 @@ func main() {
 				x, y = TextBox.GetPos()
 				x++
 				y++
+				core.SetCur(x, y)
 				core.SetVisibilityCursor(true)
 				TextBox.OnClick()
 			}
@@ -302,6 +307,7 @@ func main() {
 				x, y = TitleBox.GetPos()
 				x++
 				y++
+				core.SetCur(x, y)
 				core.SetVisibilityCursor(true)
 				TitleBox.OnClick()
 			}
@@ -378,9 +384,6 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
 		}, titleBoxState),
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc)
-		}, editState),
-		textBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Left) && !TextBox.IsTyping()
 		}, todoState),
 		textBoxState.AddBranch(func() bool {
@@ -410,7 +413,7 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
 		}, caroselloState),
 		bottonsCaroselloState.AddBranch(func() bool {
-			return carosello.GetElementsNumber() == 0
+			return carosello.GetElementsNumber() == 0 
 		}, editState),
 		//BOTTONSENDEDITSTATE
 		bottonSendEditState.AddBranch(func() bool {
