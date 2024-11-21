@@ -41,32 +41,32 @@ func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
 	drawingContainer.AddChild(line)
 	doneButton:=Component.CreateButton(width/2-2,height-3,8,3,"Done")
 	doneButton.SetOnHover(func (){
-		doneButton.GetVisibleArea().SetColor(Color.Get(Color.White,Color.None))
+		doneButton.GetVisibleArea().SetBorderColor(Color.Get(Color.White,Color.None))
 	})
 	doneButton.SetOnLeave(func (){
-		doneButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
+		doneButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray,Color.None))
 	})
 	doneButton.SetOnRelease(func (){
-		doneButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
+		doneButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray,Color.None))
 	})
 	doneButton.SetOnClick(func (){
-		doneButton.GetVisibleArea().SetColor(Color.Get(Color.Blue,Color.None))
+		doneButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Blue,Color.None))
 		time.AfterFunc(time.Millisecond*1000, func() {
 			doneButton.OnRelease()
 		})
 	})
 	deleteButton:=Component.CreateButton(width/2-10,height-3,8,3,"Delete")
 	deleteButton.SetOnHover(func (){
-		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.White,Color.None))
+		deleteButton.GetVisibleArea().SetBorderColor(Color.Get(Color.White,Color.None))
 	})
 	deleteButton.SetOnLeave(func (){
-		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
+		deleteButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray,Color.None))
 	})
 	deleteButton.SetOnRelease(func (){
-		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Gray,Color.None))
+		deleteButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray,Color.None))
 	})
 	deleteButton.SetOnClick(func (){
-		deleteButton.GetVisibleArea().SetColor(Color.Get(Color.Blue,Color.None))
+		deleteButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Blue,Color.None))
 		go func (){
 			toDelete()
 			time.AfterFunc(time.Millisecond*1000, func() {

@@ -76,7 +76,6 @@ func main() {
 	listLabel.SetPos(1, 1)
 	editLabel := createLabel("Edit")
 	editLabel.SetPos(listZoneXSize+1, 1)
-
 	todos, e := client.GetTodos()
 	if e != nil {
 		panic(e)
@@ -93,7 +92,7 @@ func main() {
 			if carosello.GetElementsNumber() == 0 {
 				return
 			}
-			carosello.DeleteElement(carosello.elements[carosello.index%len(carosello.elements)])
+			carosello.DeleteElement(carosello.elements[carosello.index])
 			refreshCarosello(&carosello, todos,true)
 			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), "  "))
 			if carosello.GetElementsNumber() == 0 {
@@ -104,7 +103,7 @@ func main() {
 			EventManager.Call(ClockEvent,nil)
 			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
 		})
-		core.InsertComponent(todoBlock[i].GetComponent())
+		core.AddComponent(todoBlock[i].GetComponent())
 	}
 	refreshCarosello(&carosello, todos,false)
 
@@ -139,7 +138,7 @@ func main() {
 
 	SendButton := Component.CreateButton(listZoneXSize+1, ySize-5, 8, 3, "Send")
 	SendButton.SetOnClick(func() {
-		SendButton.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
+		SendButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Green, Color.None))
 		title := TitleBox.GetText()
 		description := TextBox.GetText()
 		if strings.TrimFunc(description, func(r rune) bool { return slices.Contains([]rune{' ', '\t', '\n', '\r'}, r) }) == "" {
@@ -160,33 +159,33 @@ func main() {
 		}()
 	})
 	SendButton.SetOnRelease(func() {
-		SendButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+		SendButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray, Color.None))
 	})
 	SendButton.OnRelease()
 	CancelButton := Component.CreateButton(listZoneXSize+17, ySize-5, 8, 3, "Cancel")
 	CancelButton.SetOnRelease(func() {
-		CancelButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+		CancelButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray, Color.None))
 	})
 	CancelButton.OnRelease()
 	CancelButton.SetOnClick(func() {
-		CancelButton.GetVisibleArea().SetColor(Color.Get(Color.Green, Color.None))
+		CancelButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Green, Color.None))
 		TextBox.ClearAll()
 		time.AfterFunc(time.Millisecond*1000, func() {
 			CancelButton.OnRelease()
 		})
 	})
-	core.InsertComponent(TextBox)
-	core.InsertComponent(SendButton)
-	core.InsertComponent(CancelButton)
-	core.InsertComponent(TitleBox)
+	core.AddComponent(TextBox)
+	core.AddComponent(SendButton)
+	core.AddComponent(CancelButton)
+	core.AddComponent(TitleBox)
 
-	core.InsertEntity(todoRect)
-	core.InsertEntity(editRect)
-	core.InsertEntity(listLabel)
-	core.InsertEntity(editLabel)
-	core.InsertEntity(numberOfTodoLabel)
-	core.InsertEntity(LabelBox)
-	core.InsertEntity(LabelTitle)
+	core.AddDrawing(todoRect)
+	core.AddDrawing(editRect)
+	core.AddDrawing(listLabel)
+	core.AddDrawing(editLabel)
+	core.AddDrawing(numberOfTodoLabel)
+	core.AddDrawing(LabelBox)
+	core.AddDrawing(LabelTitle)
 	stateMachine = StateMachine.CreateStateMachine()
 	todoState := StateMachine.CreateBuilderStateComposite("todoPart")
 
@@ -320,7 +319,7 @@ func main() {
 
 	bottonSendEditState := StateMachine.CreateBuilderStateBase("BottonsEditState")
 	bottonSendEditState.SetEntryAction(func() error {
-		SendButton.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
+		SendButton.GetVisibleArea().SetBorderColor(Color.Get(Color.White, Color.None))
 		return nil
 	})
 	bottonSendEditState.SetActionDo(func() error {
@@ -330,13 +329,13 @@ func main() {
 		return nil
 	})
 	bottonSendEditState.SetExitAction(func() error {
-		SendButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+		SendButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray, Color.None))
 		return nil
 	})
 
 	bottonCancelEditState := StateMachine.CreateBuilderStateBase("BottonsEditState")
 	bottonCancelEditState.SetEntryAction(func() error {
-		CancelButton.GetVisibleArea().SetColor(Color.Get(Color.White, Color.None))
+		CancelButton.GetVisibleArea().SetBorderColor(Color.Get(Color.White, Color.None))
 		return nil
 	})
 	bottonCancelEditState.SetActionDo(func() error {
@@ -346,7 +345,7 @@ func main() {
 		return nil
 	})
 	bottonCancelEditState.SetExitAction(func() error {
-		CancelButton.GetVisibleArea().SetColor(Color.Get(Color.Gray, Color.None))
+		CancelButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray, Color.None))
 		return nil
 	})
 
