@@ -8,12 +8,14 @@ type StateBase struct {
 	IEntryAction func() error
 	IExitAction  func() error
 	IDoAction    func() error
+	nCallTimes    int
 }
 
 func (s *StateBase) EntryAction() error {
 	if s.IEntryAction == nil {
 		return nil
 	}
+	s.nCallTimes=0
 	return s.IEntryAction()
 }
 func (s *StateBase) GetTransitionsTo() []*Transition {
