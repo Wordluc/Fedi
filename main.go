@@ -103,7 +103,6 @@ func main() {
 			}
 			refreshCarosello(&carosello, todos,true)
 			numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
-			keyb.Clean()
 			EventManager.Call(ClockEvent,nil)
 			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
 		})
@@ -463,6 +462,7 @@ func main() {
 		stateMachine.AddBuilder(titleBoxState),
 		stateMachine.Start(),
 		EventManager.Subscribe(ClockEvent,500, func(_ []any) {
+			keyb.CleanKeyboardState()
 			stateMachine.Clock()
 		}),
 	)
