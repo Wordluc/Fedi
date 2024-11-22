@@ -7,10 +7,11 @@ type Todo struct {
 	Id          string
 	Name        string
 	Description string
+	Status      string
 }
 type IApi interface {
 	GetTodos() (*Todos, error)
-	SetAsDone() error
+	SetAsDone(Todo) error
 	PostTodos(Todos)(TodoPost, error)
 	Delete(Todo) error
 }

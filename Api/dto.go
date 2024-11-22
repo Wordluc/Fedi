@@ -79,7 +79,7 @@ type Annotations struct {
 }
 
 type Select struct {
-	// Add fields as needed
+	Name string
 }
 
 type Title struct {

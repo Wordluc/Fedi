@@ -4,6 +4,8 @@ go 1.22.1
 
 require github.com/google/uuid v1.6.0
 
+require github.com/jomei/notionapi v1.13.2 // indirect
+
 require (
 	atomicgo.dev/keyboard v0.2.9 // indirect
 	github.com/Wordluc/GTUI v0.0.0-20241122171924-751f94f146dd // indirect
