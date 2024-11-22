@@ -26,7 +26,7 @@ const ClockEvent EventManager.EventType = 10
 
 func createLabel(text string) Core.IDrawing {
 	labelList := Drawing.CreateTextField(0, 0, text)
-	bottonLine := Drawing.CreateLine(0, 1, len(text)+1, 0)
+	bottonLine := Drawing.CreateLine(0, 1, len(text)+1)
 	container := Drawing.CreateContainer(0, 0)
 	container.AddChild(labelList)
 	container.AddChild(bottonLine)

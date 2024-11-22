@@ -27,7 +27,7 @@ type TodoBlock struct {
 
 func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
 	title:=Drawing.CreateTextBlock(2,2,width-5,3,10)
-	line:=Drawing.CreateLine(2,3,3,0)
+	line:=Drawing.CreateLine(2,3,3)
 	line.SetVisibility(false)
 	textElement:=Drawing.CreateTextBlock(3,4,width-5,height-4,10)
 	edgeElement:=Drawing.CreateRectangle(1,1,width-2,height)
