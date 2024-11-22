@@ -25,7 +25,7 @@ type TodoBlock struct {
 	currentTodo *Api.Todo
 }
 
-func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
+func CreateElement(x,y int,width,height int,toDelete func (),setAsDone func ()) *TodoBlock{
 	title:=Drawing.CreateTextBlock(2,2,width-5,3,10)
 	line:=Drawing.CreateLine(2,3,3)
 	line.SetVisibility(false)
@@ -49,6 +49,9 @@ func CreateElement(x,y int,width,height int,toDelete func ()) *TodoBlock{
 	})
 	doneButton.SetOnClick(func (){
 		doneButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Blue,Color.None))
+		go func (){
+			setAsDone()
+		}()
 	})
 	deleteButton:=Component.CreateButton(width/2-10,height-3,8,3,"Delete")
 	deleteButton.SetOnHover(func (){

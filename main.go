@@ -46,7 +46,6 @@ func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 			todoBlock[todoBlockToUpdate].SetCurrentTodo(&todo)
 		},
 	}
-
 }
 
 func refreshCarosello(carosello **Carosello, todos *Api.Todos,setWakeup bool) {
@@ -109,6 +108,10 @@ func main() {
 			numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
 			EventManager.Call(ClockEvent,nil)
 			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
+		}, func() {
+			if e:=client.SetAsDone(*todoBlock[i].GetTodo());e!=nil{
+				panic(e)
+			}
 		})
 		core.AddComponent(todoBlock[i].GetComponent())
 	}
