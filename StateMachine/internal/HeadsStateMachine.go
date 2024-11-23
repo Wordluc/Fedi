@@ -7,6 +7,19 @@ type HeadsStateMachine struct {
 	ActiveStatesComposite  []*StateComposite
 	WaitingStatesComposite []*StateComposite
 }
+func (h *HeadsStateMachine) isActive(stateToTest IState) bool {
+	for _,state:=range h.State{
+		if state==stateToTest{
+			return true
+		}
+	}
+	for _,state:=range h.ActiveStatesComposite{
+		if state==stateToTest{
+			return true
+		}
+	}
+	return false
+}
 
 func (h *HeadsStateMachine) AddHead(state IState) {
 	defer func() {
