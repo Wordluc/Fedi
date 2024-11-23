@@ -18,10 +18,13 @@ func(s *StateComposite)	EntryAction() error{
 	return s.IEntryAction()
 }
 func(s *StateComposite)	ExitAction() error{
-	if s.IExitAction == nil {
-		return nil
+	for _, state := range s.InternalStates {
+		state.ExitAction()
 	}
-	return s.IExitAction()
+	if s.IExitAction != nil {
+		s.IExitAction()
+	}
+	return nil
 }
 func(s *StateComposite)	DoAction() error{
 	if s.IDoAction == nil {
