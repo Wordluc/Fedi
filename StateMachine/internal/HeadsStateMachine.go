@@ -46,7 +46,7 @@ func (h *HeadsStateMachine) RemoveHead(state IState) {
 	for i := 0; i < len(h.State); i++ {
 		if h.State[i] == state {
 			state.ExitAction()
-			h.State = slices.Delete(h.State, i, 1)
+			h.State = slices.Delete(h.State, i, i+1)
 			if comp, ok := state.(*StateComposite); ok {
 				h.WaitingStatesComposite = append(h.WaitingStatesComposite, comp)
 				h.ActiveStatesComposite = slices.Delete(h.ActiveStatesComposite, i, i+1)
