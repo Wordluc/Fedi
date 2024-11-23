@@ -225,6 +225,16 @@ func main() {
 		return nil
 	})
 
+	showTodoState := StateMachine.CreateBuilderStateBase("ShowTodoState")
+	showTodoState.SetEntryAction(func() error {
+		typeTodoLavel.SetText("To do")
+		return nil
+	})
+	showDoneState := StateMachine.CreateBuilderStateBase("ShowDoneState")
+	showDoneState.SetEntryAction(func() error {
+		typeTodoLavel.SetText("Done")
+		return nil
+	})
 	caroselloState.SetEntryAction(func() error {
 		carosello.UpdateElementState(false, true)
 		return nil
@@ -360,7 +370,6 @@ func main() {
 		CancelButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray, Color.None))
 		return nil
 	})
-
 	isOk, errors := StateMachine.Do(
 		//EDITPART
 		editState.AddState(titleBoxState),
@@ -463,10 +472,19 @@ func main() {
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0
 		}, bottonsCaroselloState),
+		//STATESHOWTODO
+		showTodoState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlD)
+		},showDoneState),
+		showDoneState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlD)
+		},showTodoState),
 
 		stateMachine.AddBuilderComposite(editState),
 		stateMachine.AddBuilderComposite(todoState),
 		stateMachine.AddBuilder(titleBoxState),
+		stateMachine.AddBuilder(showDoneState),
+
 		stateMachine.Start(),
 		EventManager.Subscribe(ClockEvent,500, func(_ []any) {
 			keyb.CleanKeyboardState()
