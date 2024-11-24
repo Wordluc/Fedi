@@ -22,11 +22,13 @@ var todoBlock []*TodoBlock = make([]*TodoBlock, 3)
 var stateMachine *StateMachine.StateMachine
 var x, y = 0, 0
 var client Api.IApi
+var isInDoneState = false
 
 const ClockEvent EventManager.EventType = 10
 
+var numberOfTodoLabel *Drawing.TextBlock
 var todos *Api.Todos
-var showedTodos *Api.Todos
+var textWarning *Drawing.TextBlock
 
 func createLabel(text string) Core.IDrawing {
 	labelList := Drawing.CreateTextField(0, 0, text)
@@ -52,14 +54,23 @@ func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 	}
 }
 
-func refreshCarosello(carosello **Carosello, todos *Api.Todos, setWakeup bool) {
+func refreshCarosello(carosello **Carosello, allltodos *Api.Todos, setWakeup bool) {
+	var filteFor string
+	if isInDoneState {
+		filteFor = "Done"
+	} else {
+		filteFor = "Todo"
+	}
+	todosToShow := filterTodo(allltodos, filteFor)
 	newCarosello := CreateCarosello(0, 0, 3)
-	for i := 0; i < len(todos.Todos); i++ {
-		newCarosello.AddElement(createCarosleloElement(todos.Todos[i]))
+	for i := 0; i < len(todosToShow.Todos); i++ {
+		newCarosello.AddElement(createCarosleloElement(todosToShow.Todos[i]))
 	}
 	newCarosello.UpdateElementState(true, setWakeup)
 	*carosello = newCarosello
+	numberOfTodoLabel.SetText(fmt.Sprint("0/", len(newCarosello.elements), "  "))
 }
+
 func filterTodo(todos *Api.Todos, on string) *Api.Todos {
 	var filteredTodos *Api.Todos = &Api.Todos{}
 	for _, todo := range todos.Todos {
@@ -94,12 +105,12 @@ func main() {
 	typeTodoLavel.SetText("To do")
 	typeTodoLavel.SetColor(Color.Get(Color.Red, Color.None))
 	core.AddDrawing(typeTodoLavel)
+
 	todos, e = client.GetTodos()
-	showedTodos = filterTodo(todos, "Todo")
 	if e != nil {
 		panic(e)
 	}
-	numberOfTodoLabel := Drawing.CreateTextBlock(listZoneXSize-8, 2, 5, 3, 10)
+	numberOfTodoLabel = Drawing.CreateTextBlock(listZoneXSize-8, 2, 6, 3, 10)
 
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(todoBlock); i++ {
@@ -110,28 +121,31 @@ func main() {
 			currentTodo := todoBlock[i].GetTodo()
 			if e := client.Delete(*currentTodo); e != nil {
 			}
-			todos, e = client.GetTodos()
-			showedTodos = filterTodo(todos, currentTodo.Status)
-			if e != nil {
-				panic(e)
-			}
 			for i := 0; i < len(todoBlock); i++ {
 				todoBlock[i].Clean()
 			}
-			refreshCarosello(&carosello, showedTodos, true)
-			numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
+			todos, e = client.GetTodos()
+			if e != nil {
+				panic(e)
+			}
+			refreshCarosello(&carosello, todos, true)
 			EventManager.Call(ClockEvent, nil)
 			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
 		}, func() {
 			if e := client.SetAsDone(*todoBlock[i].GetTodo()); e != nil {
 				panic(e)
 			}
+			todos, e = client.GetTodos()
+			if e != nil {
+				panic(e)
+			}
+			refreshCarosello(&carosello, todos, true)
+			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
 		})
 		core.AddComponent(todoBlock[i].GetComponent())
 	}
-	refreshCarosello(&carosello, showedTodos, false)
+	refreshCarosello(&carosello, todos, false)
 
-	numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
 	TextBox, e := Component.CreateTextBox(listZoneXSize+1, 10, xSize-listZoneXSize-2, ySize-15, core.CreateStreamingCharacter())
 	LabelBox := Drawing.CreateTextField(listZoneXSize+1, 9, "Description")
 	if e != nil {
@@ -176,10 +190,10 @@ func main() {
 			if error != nil {
 				panic(error)
 			}
-			carosello.AddElement(createCarosleloElement(Api.Todo{Description: description, Name: title, Id: response.Id}))
+			todos.Todos = append(todos.Todos, Api.Todo{Description: description, Name: title, Id: response.Id, Status: "Todo"})
+			refreshCarosello(&carosello, todos, true)
 			carosello.UpdateElementState(true, false)
-			numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
-			EventManager.Call(EventManager.Refresh, []any{todoBlock[carosello.GetIntex()].GetComponent()})
+			EventManager.Call(EventManager.Refresh, nil)
 		}()
 	})
 	SendButton.SetOnRelease(func() {
@@ -241,12 +255,19 @@ func main() {
 
 	showTodoState := StateMachine.CreateBuilderStateBase("ShowTodoState")
 	showTodoState.SetEntryAction(func() error {
+		isInDoneState = false
 		keyb.CleanKeyboardState()
 		for i := 0; i < len(todoBlock); i++ {
 			todoBlock[i].Clean()
 		}
-		showedTodos = filterTodo(todos, "Todo")
-		refreshCarosello(&carosello, showedTodos, false)
+		todos, _ := client.GetTodos()
+		refreshCarosello(&carosello, todos, false)
+		for i := 0; i < len(todoBlock); i++ {
+			for _, b := range todoBlock[i].buttons {
+				b.SetActive(true)
+				b.GetGraphics().SetVisibility(true)
+			}
+		}
 		typeTodoLavel.SetText("To do")
 		EventManager.Call(ClockEvent, []any{todoBlock[carosello.GetSelected()].GetComponent()})
 		EventManager.Call(EventManager.Refresh, []any{todoBlock[carosello.GetSelected()].GetComponent()})
@@ -255,12 +276,19 @@ func main() {
 	})
 	showDoneState := StateMachine.CreateBuilderStateBase("ShowDoneState")
 	showDoneState.SetEntryAction(func() error {
+		isInDoneState = true
 		keyb.CleanKeyboardState()
 		for i := 0; i < len(todoBlock); i++ {
 			todoBlock[i].Clean()
 		}
-		showedTodos = filterTodo(todos, "Done")
-		refreshCarosello(&carosello, showedTodos, false)
+		todos, _ = client.GetTodos()
+		refreshCarosello(&carosello, todos, false)
+		for i := 0; i < len(todoBlock); i++ {
+			for _, b := range todoBlock[i].buttons {
+				b.SetActive(false)
+				b.GetGraphics().SetVisibility(false)
+			}
+		}
 		typeTodoLavel.SetText("Done")
 		EventManager.Call(ClockEvent, []any{todoBlock[carosello.GetSelected()].GetComponent()})
 		EventManager.Call(EventManager.Refresh, []any{todoBlock[carosello.GetSelected()].GetComponent()})
@@ -402,7 +430,7 @@ func main() {
 		CancelButton.GetVisibleArea().SetBorderColor(Color.Get(Color.Gray, Color.None))
 		return nil
 	})
-	isOk, errors := StateMachine.Do(
+	isOk, err := StateMachine.Do(
 		//EDITPART
 		editState.AddState(titleBoxState),
 		editState.AddState(textBoxState),
@@ -502,7 +530,7 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Right)
 		}, editState),
 		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0
+			return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0 && !isInDoneState
 		}, bottonsCaroselloState),
 		//STATEShow
 		showTodoState.AddBranch(func() bool {
@@ -515,7 +543,7 @@ func main() {
 		stateMachine.AddBuilderComposite(editState),
 		stateMachine.AddBuilderComposite(todoState),
 		stateMachine.AddBuilder(titleBoxState),
-		stateMachine.AddBuilder(showDoneState),
+		stateMachine.AddBuilder(showTodoState),
 
 		stateMachine.Start(),
 		EventManager.Subscribe(ClockEvent, 500, func(_ []any) {
@@ -525,7 +553,7 @@ func main() {
 	)
 
 	if !isOk {
-		panic(errors)
+		panic(err)
 	}
 
 	core.SetVisibilityCursor(false)
@@ -551,9 +579,7 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		return false
 	}
-	if e := stateMachine.Clock(); e != nil {
-		panic(e)
-	}
+	stateMachine.Clock()
 	core.SetCur(x, y)
 	return true
 }
