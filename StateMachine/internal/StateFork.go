@@ -63,7 +63,7 @@ func (s *StateFork) CheckTransition() (bool,error) {
 			}else{
 				s.ExitAction()
 			}
-			s.HeadsStateMachine.AddHead(transition.to)
+			s.HeadsStateMachine.AddHead(s,transition.to)
 		}
 	}
 	if len(s.Transitions) == 0 {

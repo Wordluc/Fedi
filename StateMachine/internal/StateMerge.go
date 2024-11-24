@@ -61,7 +61,7 @@ func (s *StateMerge) CheckTransition() (bool,error) {
 	}
 	if ok {
 		s.HeadsStateMachine.RemoveHead(s)
-		s.HeadsStateMachine.AddHead(s.TransitionTo.to)
+		s.HeadsStateMachine.AddHead(s,s.TransitionTo.to)
 		return true,nil
 	}
 	return false,nil

@@ -21,7 +21,7 @@ func (m *StateMachine) Start()error {
 		return nil
 	}
 	for _, state := range m.toActivate {
-		m.heads.AddHead(state)
+		m.heads.AddHead(nil,state)
 	}
 	m.toActivate = nil
 	return nil

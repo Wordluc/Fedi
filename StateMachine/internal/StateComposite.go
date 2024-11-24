@@ -17,6 +17,7 @@ func(s *StateComposite)	EntryAction() error{
 	}
 	return s.IEntryAction()
 }
+
 func(s *StateComposite)	ExitAction() error{
 	for _, state := range s.InternalStates {
 		if s.HeadsStateMachine==nil{

@@ -47,7 +47,7 @@ func (s *StateBase) CheckTransition() (bool,error) {
 		}
 		if ok {
 			s.HeadsStateMachine.RemoveHead(s)
-			s.HeadsStateMachine.AddHead(transition.to)
+			s.HeadsStateMachine.AddHead(s,transition.to)
 			return true,nil
 		}
 	}

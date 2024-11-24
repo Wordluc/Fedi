@@ -21,7 +21,7 @@ func (h *HeadsStateMachine) isActive(stateToTest IState) bool {
 	return false
 }
 
-func (h *HeadsStateMachine) AddHead(state IState) {
+func (h *HeadsStateMachine) AddHead(caller IState,state IState) {
 	defer func() {
 		h.State = append(h.State, state)
 		state.EntryAction()
@@ -45,6 +45,9 @@ func (h *HeadsStateMachine) AddHead(state IState) {
 	}
 	for i, stateComposite := range h.ActiveStatesComposite {
 		if stateComposite==nil{
+			continue
+		}
+		if !stateComposite.isInside(caller) {
 			continue
 		}
 		if !stateComposite.isInside(state) {
