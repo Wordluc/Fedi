@@ -91,7 +91,7 @@ func (c *NotionClient) PostTodos(todos Todos) (TodoPost, error) {
 		},
 		"Status": map[string]interface{}{
 			"select": map[string]string{
-				"name": "Done",
+				"name": "Todo",
 			},
 		},
 	}

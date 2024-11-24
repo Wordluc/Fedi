@@ -79,6 +79,10 @@ github.com/Wordluc/GTUI v0.0.0-20241122170757-81787df0057d h1:jdRi1G8V5R/Sk9sav4
 github.com/Wordluc/GTUI v0.0.0-20241122170757-81787df0057d/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
 github.com/Wordluc/GTUI v0.0.0-20241122171924-751f94f146dd h1:eIg1Qxt6l2iHsm1KZB0ULxZ6fS0Y+ab6Eyl269yMI6g=
 github.com/Wordluc/GTUI v0.0.0-20241122171924-751f94f146dd/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
+github.com/Wordluc/GTUI v0.0.0-20241124192448-86d0e5601ccd h1:pk7k3zFHpqIVY+7XlPS9RwQ1uB+f0md0VQ/IOF28V8w=
+github.com/Wordluc/GTUI v0.0.0-20241124192448-86d0e5601ccd/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
+github.com/Wordluc/GTUI v0.0.0-20241124200326-81f0ed28c355 h1:q5FYt3yu4xeLpeCWk7V8MzYb3O0YuHdgNKHlZQ+pP/o=
+github.com/Wordluc/GTUI v0.0.0-20241124200326-81f0ed28c355/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
 github.com/atomicgo/cursor v0.0.1/go.mod h1:cBON2QmmrysudxNBFthvMtN32r3jxVRIvzkUiF/RuIk=
 github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
