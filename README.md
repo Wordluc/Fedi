@@ -13,5 +13,5 @@ NOTION_DATABASE_ID="id database where you will write on"
 for help follow https://developers.notion.com/docs/create-a-notion-integration
 
 ## Database schema
-Database schema ![image](https://github.com/user-attachments/assets/75f28eac-7c70-4e29-aaf1-21f1c130ef3d)
+![image](https://github.com/user-attachments/assets/75f28eac-7c70-4e29-aaf1-21f1c130ef3d)
 
