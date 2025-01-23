@@ -1,5 +1,5 @@
 # Todo app
-It's a test for the framework GTUI, that allow you to buid terminal application.
+It's a test for the framework [GTUI](https://github.com/Wordluc/GTUI), that allow you to buid terminal application.
 The Todo app, use Notion as a db, so you need to create the .env file and create the page inside notion.
 # Showcase
 ![image](https://github.com/user-attachments/assets/f608f7b6-4a39-465c-b1b5-e33dd88e1a87)
