@@ -6,7 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -17,7 +21,12 @@ type NotionClient struct {
 }
 
 func CreateNotionClient(fileEnvName string) (*NotionClient, error) {
-	env, err := godotenv.Read(fileEnvName)
+	p, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	p = filepath.Dir(p)
+	env, err := godotenv.Read(path.Join(p, ".env"))
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +192,7 @@ func mappingResponse(resp *NotionResponse) *Todos {
 			Id:          page.ID,
 			Name:        page.Properties["Name"].Title[0].Text.Content,
 			Description: page.Properties["Description"].Rich_Text[0].Text.Content,
-			Status:       page.Properties["Status"].Select.Name,
+			Status:      page.Properties["Status"].Select.Name,
 		}
 		todos.Todos = append(todos.Todos, todo)
 	}
