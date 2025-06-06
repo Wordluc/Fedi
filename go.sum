@@ -83,6 +83,12 @@ github.com/Wordluc/GTUI v0.0.0-20241124192448-86d0e5601ccd h1:pk7k3zFHpqIVY+7XlP
 github.com/Wordluc/GTUI v0.0.0-20241124192448-86d0e5601ccd/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
 github.com/Wordluc/GTUI v0.0.0-20241124200326-81f0ed28c355 h1:q5FYt3yu4xeLpeCWk7V8MzYb3O0YuHdgNKHlZQ+pP/o=
 github.com/Wordluc/GTUI v0.0.0-20241124200326-81f0ed28c355/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
+github.com/Wordluc/GTUI v0.0.0-20250606143454-566310971fbc h1:eypjpgnWAYbawDRJniv9vxtt23Z6sAEwu9yLdVVVfsc=
+github.com/Wordluc/GTUI v0.0.0-20250606143454-566310971fbc/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
+github.com/Wordluc/GTUI v0.0.0-20250606144137-f4e9e847c369 h1:deEkKRcE9x12dxtllBNOiTVAroDfa6rpR+/4I0jwng8=
+github.com/Wordluc/GTUI v0.0.0-20250606144137-f4e9e847c369/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
+github.com/Wordluc/GTUI v0.0.0-20250606144400-833bfdb29907 h1:XHRoAdaIcb5YBiAQOtqYosJ62mr/0OBxF0ohl5fXHjg=
+github.com/Wordluc/GTUI v0.0.0-20250606144400-833bfdb29907/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
 github.com/atomicgo/cursor v0.0.1/go.mod h1:cBON2QmmrysudxNBFthvMtN32r3jxVRIvzkUiF/RuIk=
 github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
