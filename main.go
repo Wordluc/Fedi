@@ -5,7 +5,6 @@ import (
 	"Fedi/StateMachine"
 	"fmt"
 	"github.com/Wordluc/GTUI"
-	"github.com/Wordluc/GTUI/Core"
 	"github.com/Wordluc/GTUI/Core/Component"
 	"github.com/Wordluc/GTUI/Core/Drawing"
 	"github.com/Wordluc/GTUI/Core/EventManager"
@@ -30,22 +29,19 @@ var numberOfTodoLabel *Drawing.TextBlock
 var todos *Api.Todos
 var textWarning *Drawing.TextBlock
 
-func createLabel(text string) Core.IDrawing {
+func createLabel(text string) *Drawing.Container {
 	labelList := Drawing.CreateTextField(0, 0, text)
 	bottonLine := Drawing.CreateLine(0, 1, len(text)+1)
 	container := Drawing.CreateContainer(0, 0)
-	container.AddChild(labelList)
-	container.AddChild(bottonLine)
+	container.AddDrawings(labelList, bottonLine)
 	return container
 }
 func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 	return &CaroselloElement{
 		wakeUpCallBack: func(todoBlockToUpdate int) {
-			todoBlock[todoBlockToUpdate].components.SetActivity(true)
 			todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.White, Color.None))
 		},
 		sleepCallBack: func(todoBlockToUpdate int) {
-			todoBlock[todoBlockToUpdate].components.SetActivity(false)
 			todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.Gray, Color.None))
 		},
 		updateCallBack: func(todoBlockToUpdate int) {
@@ -142,7 +138,7 @@ func main() {
 			refreshCarosello(&carosello, todos, true)
 			EventManager.Call(EventManager.Refresh, []any{todoBlock[i].GetComponent()})
 		})
-		core.AddComponent(todoBlock[i].GetComponent())
+		core.AddContainer(todoBlock[i].GetComponent())
 	}
 	refreshCarosello(&carosello, todos, false)
 
@@ -219,8 +215,8 @@ func main() {
 
 	core.AddDrawing(todoRect)
 	core.AddDrawing(editRect)
-	core.AddDrawing(listLabel)
-	core.AddDrawing(editLabel)
+	core.AddContainer(listLabel)
+	core.AddContainer(editLabel)
 	core.AddDrawing(numberOfTodoLabel)
 	core.AddDrawing(LabelBox)
 	core.AddDrawing(LabelTitle)
@@ -231,6 +227,9 @@ func main() {
 		carosello.ForEachElements(func(element *CaroselloElement, todoBlockToUpdate int) {
 			element.sleepCallBack(todoBlockToUpdate)
 		})
+		carosello.ForSelectedElement(func(element *CaroselloElement, todoBlockToUpdate int) {
+			element.wakeUpCallBack(todoBlockToUpdate)
+		})
 		todoRect.SetColor(Color.Get(Color.White, Color.None))
 		return nil
 	})
@@ -240,13 +239,13 @@ func main() {
 	})
 	caroselloState := StateMachine.CreateBuilderStateBase("caroselloState")
 	caroselloState.SetActionDo(func() error {
-		if keyb.IsKeySPressed(Keyboard.Up) {
+		if keyb.IsKeyPressed('k') {
 			carosello.NextOrPre(true)
-		} else if keyb.IsKeySPressed(Keyboard.Down) {
+		} else if keyb.IsKeyPressed('j') {
 			carosello.NextOrPre(false)
-		} else if keyb.IsKeySPressed(Keyboard.CtrlUp) {
+		} else if keyb.IsKeySPressed(Keyboard.CtrlK) {
 			carosello.SetIndex(0)
-		} else if keyb.IsKeySPressed(Keyboard.CtrlDown) {
+		} else if keyb.IsKeySPressed(Keyboard.CtrlH) {
 			carosello.SetIndex(len(carosello.elements) - 1)
 		}
 		numberOfTodoLabel.SetText(fmt.Sprint(carosello.GetIntex(), "/", len(carosello.elements), " "))
@@ -264,11 +263,9 @@ func main() {
 		refreshCarosello(&carosello, todos, false)
 		for i := 0; i < len(todoBlock); i++ {
 			for _, b := range todoBlock[i].buttons {
-				b.SetActive(true)
-				b.GetGraphics().SetVisibility(true)
+				b.GetGraphic().SetVisibility(true)
 			}
 		}
-		typeTodoLavel.SetText("To do")
 		EventManager.Call(ClockEvent, []any{todoBlock[carosello.GetSelected()].GetComponent()})
 		EventManager.Call(EventManager.Refresh, []any{todoBlock[carosello.GetSelected()].GetComponent()})
 		numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
@@ -285,8 +282,7 @@ func main() {
 		refreshCarosello(&carosello, todos, false)
 		for i := 0; i < len(todoBlock); i++ {
 			for _, b := range todoBlock[i].buttons {
-				b.SetActive(false)
-				b.GetGraphics().SetVisibility(false)
+				b.GetGraphic().SetVisibility(false)
 			}
 		}
 		typeTodoLavel.SetText("Done")
@@ -307,19 +303,24 @@ func main() {
 	bottonsCaroselloState.SetActionDo(func() error {
 		if keyb.IsKeySPressed(Keyboard.Enter) {
 			todoBlock[carosello.GetSelected()].GetCurrentBotton().OnClick()
-		} else if keyb.IsKeySPressed(Keyboard.Left) {
+		} else if keyb.IsKeyPressed('h') {
 			todoBlock[carosello.GetSelected()].ChangeButton(DeleteBotton)
-		} else if keyb.IsKeySPressed(Keyboard.Right) {
+		} else if keyb.IsKeyPressed('l') {
 			todoBlock[carosello.GetSelected()].ChangeButton(DoneBotton)
-		} else if keyb.IsKeySPressed(Keyboard.Up) {
+		} else if keyb.IsKeyPressed('k') {
 			carosello.NextOrPre(true)
-		} else if keyb.IsKeySPressed(Keyboard.Down) {
+		} else if keyb.IsKeyPressed('j') {
 			carosello.NextOrPre(false)
 		}
 		return nil
 	})
 	bottonsCaroselloState.SetEntryAction(func() error {
 		todoBlock[carosello.GetSelected()].Active()
+
+		carosello.ForSelectedElement(func(element *CaroselloElement, todoBlockToUpdate int) {
+			element.sleepCallBack(todoBlockToUpdate)
+		})
+		//		carosello.SleepAll()
 		return nil
 	})
 	bottonsCaroselloState.SetExitAction(func() error {
@@ -444,29 +445,35 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editState),
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
+			return keyb.IsKeyPressed('k') && !TextBox.IsTyping() && !TitleBox.IsTyping()
 		}, titleBoxState),
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlUp)
+			return keyb.IsKeySPressed(Keyboard.CtrlK)
 		}, titleBoxState),
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlDown) && TextBox.IsTyping()
+			return keyb.IsKeySPressed(Keyboard.CtrlJ)
 		}, bottonSendEditState),
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
-		}, caroselloState),
-		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Up) && !TextBox.IsTyping()
+			return keyb.IsKeyPressed('k') && !TextBox.IsTyping() && !TitleBox.IsTyping()
 		}, titleBoxState),
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left) && !TextBox.IsTyping()
+			return keyb.IsKeySPressed(Keyboard.CtrlH)
 		}, todoState),
 		textBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Down) && !TextBox.IsTyping()
+			return keyb.IsKeyPressed('h') && !TextBox.IsTyping() && !TitleBox.IsTyping()
+		}, todoState),
+		textBoxState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlH)
+		}, todoState),
+		textBoxState.AddBranch(func() bool {
+			return keyb.IsKeyPressed('j') && !TextBox.IsTyping() && !TitleBox.IsTyping()
 		}, bottonSendEditState),
 		//TITLEBOXSTATE
+		textBoxState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlH)
+		}, todoState),
 		titleBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Down) || keyb.IsKeySPressed(Keyboard.CtrlDown)
+			return keyb.IsKeySPressed(Keyboard.CtrlJ)
 		}, textBoxState),
 		titleBoxState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Enter) && TitleBox.IsTyping()
@@ -475,59 +482,62 @@ func main() {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editState),
 		titleBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left) && !TitleBox.IsTyping()
+			return keyb.IsKeyPressed('h') && !TitleBox.IsTyping() && !TitleBox.IsTyping()
 		}, todoState),
 		titleBoxState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			return keyb.IsKeyPressed('j') && !TitleBox.IsTyping() && !TitleBox.IsTyping()
+		}, textBoxState),
+		titleBoxState.AddBranch(func() bool {
+			return keyb.IsKeySPressed(Keyboard.CtrlH)
 		}, caroselloState),
 		//BOTTONSCAROSSELLOSTATE
 		bottonsCaroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlRight)
+			return keyb.IsKeySPressed(Keyboard.CtrlL)
 		}, titleBoxState),
 		bottonsCaroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeySPressed(Keyboard.Up) || keyb.IsKeySPressed(Keyboard.Down)
+			return keyb.IsKeySPressed(Keyboard.Esc) || keyb.IsKeyPressed('k') || keyb.IsKeyPressed('j')
 		}, caroselloState),
 		bottonsCaroselloState.AddBranch(func() bool {
 			return carosello.GetElementsNumber() == 0
 		}, editState),
 		//BOTTONSENDEDITSTATE
 		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Right)
+			return keyb.IsKeyPressed('l')
 		}, bottonCancelEditState),
 		bottonSendEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editState),
 		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left)
+			return keyb.IsKeyPressed('h')
 		}, todoState),
 		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			return keyb.IsKeySPressed(Keyboard.CtrlH)
 		}, caroselloState),
 		bottonSendEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Up)
+			return keyb.IsKeyPressed('k')
 		}, textBoxState),
 		//BOTTONCANCELEDITSTATE
 		bottonCancelEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Left)
+			return keyb.IsKeyPressed('h')
 		}, bottonSendEditState),
 		bottonCancelEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlLeft)
+			return keyb.IsKeySPressed(Keyboard.CtrlH)
 		}, caroselloState),
 		bottonCancelEditState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Esc)
 		}, editState),
 		bottonCancelEditState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Up)
+			return keyb.IsKeyPressed('k')
 		}, textBoxState),
 		//CAROSSELLOSTATE
 		caroselloState.AddBranch(func() bool {
 			return carosello.GetElementsNumber() == 0
 		}, editState),
 		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.CtrlRight)
+			return keyb.IsKeySPressed(Keyboard.CtrlL)
 		}, titleBoxState),
 		caroselloState.AddBranch(func() bool {
-			return keyb.IsKeySPressed(Keyboard.Right)
+			return keyb.IsKeyPressed('l')
 		}, editState),
 		caroselloState.AddBranch(func() bool {
 			return keyb.IsKeySPressed(Keyboard.Enter) && carosello.GetElementsNumber() > 0 && !isInDoneState

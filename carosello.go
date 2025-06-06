@@ -41,7 +41,7 @@ func (e *Carosello) AddElement(element *CaroselloElement) {
 	}
 }
 func (e *Carosello) NextOrPre(isPre bool) {
-	if len(e.elements)==0{
+	if len(e.elements) == 0 {
 		return
 	}
 	pre_selectedBlock := e.selectedBlock
@@ -66,7 +66,7 @@ func (e *Carosello) NextOrPre(isPre bool) {
 		if e.startRangeElement >= len(e.elements) {
 			e.startRangeElement = e.startRangeElement - len(e.elements)
 		}
-		e.UpdateElementState(true,true)
+		e.UpdateElementState(true, true)
 		return
 	}
 	if isGoingUp {
@@ -74,14 +74,14 @@ func (e *Carosello) NextOrPre(isPre bool) {
 		for e.startRangeElement < 0 {
 			e.startRangeElement = len(e.elements) + e.startRangeElement
 		}
-		e.UpdateElementState(true,true)
+		e.UpdateElementState(true, true)
 		return
 	}
-	e.UpdateElementState(false,true)
+	e.UpdateElementState(false, true)
 }
 func (e *Carosello) UpdateElementState(refreshContentElement bool, setWakeup bool) {
 	iblock := 0
-	if len(e.elements)==0{
+	if len(e.elements) == 0 {
 		return
 	}
 	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
@@ -117,7 +117,7 @@ func (e *Carosello) SetIndex(iNeeded int) error {
 }
 func (e *Carosello) SleepAll() {
 	iblock := 0
-	if len(e.elements)==0{
+	if len(e.elements) == 0 {
 		return
 	}
 	for i := e.startRangeElement; i < e.startRangeElement+e.limitBlocks; i++ {
@@ -126,12 +126,19 @@ func (e *Carosello) SleepAll() {
 	}
 }
 func (e *Carosello) ForEachElements(action func(*CaroselloElement, int)) {
-	if len(e.elements)==0{
+	if len(e.elements) == 0 {
 		return
 	}
 	for i := 0; i < len(e.elements); i++ {
 		action(e.elements[i], i%e.limitBlocks)
 	}
+}
+
+func (e *Carosello) ForSelectedElement(action func(*CaroselloElement, int)) {
+	if len(e.elements) == 0 {
+		return
+	}
+	action(e.elements[e.index], e.GetSelected())
 }
 func (e *Carosello) GetIntex() int {
 	return e.index
@@ -142,11 +149,11 @@ func (e *Carosello) GetSelected() int {
 func (e *Carosello) GetElementsNumber() (i int) {
 	return len(e.elements)
 }
-func (e *Carosello) DeleteElement(ele *CaroselloElement){
-	for i:=range e.elements{
-		if e.elements[i]==ele{
-			e.elements=slices.Delete(e.elements,i,i+1)
-			return 
+func (e *Carosello) DeleteElement(ele *CaroselloElement) {
+	for i := range e.elements {
+		if e.elements[i] == ele {
+			e.elements = slices.Delete(e.elements, i, i+1)
+			return
 		}
 	}
 }
