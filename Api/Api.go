@@ -28,7 +28,10 @@ func CreateNotionClient(fileEnvName string) (*NotionClient, error) {
 	p = filepath.Dir(p)
 	env, err := godotenv.Read(path.Join(p, ".env"))
 	if err != nil {
-		return nil, err
+		env, err = godotenv.Read(".env")
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &NotionClient{
 		Notion_key:         env["NOTION_KEY"],
