@@ -31,7 +31,10 @@ var textWarning *Drawing.TextBlock
 
 func createLabel(text string) *Drawing.Container {
 	labelList := Drawing.CreateTextField(0, 0, text)
+	labelList.SetLayer(2)
 	bottonLine := Drawing.CreateLine(0, 1, len(text)+1)
+	bottonLine.SetLayer(2)
+
 	container := Drawing.CreateContainer(0, 0)
 	container.AddDrawings(labelList, bottonLine)
 	return container
@@ -39,6 +42,8 @@ func createLabel(text string) *Drawing.Container {
 func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 	return &CaroselloElement{
 		wakeUpCallBack: func(todoBlockToUpdate int) {
+			GTUI.Logf("rect:%v", int(todoBlock[todoBlockToUpdate].rectangle.GetLayer()))
+			GTUI.Logf("text:%v", int(todoBlock[todoBlockToUpdate].textDrawing.GetLayer()))
 			todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.White, Color.None))
 		},
 		sleepCallBack: func(todoBlockToUpdate int) {
@@ -98,6 +103,7 @@ func main() {
 	editLabel := createLabel("Edit")
 	editLabel.SetPos(listZoneXSize+1, 1)
 	typeTodoLavel := Drawing.CreateTextBlock(13, 1, 5, 3, 10)
+	typeTodoLavel.SetLayer(2)
 	typeTodoLavel.SetText("To do")
 	typeTodoLavel.SetColor(Color.Get(Color.Red, Color.None))
 	core.AddDrawing(typeTodoLavel)
@@ -106,7 +112,8 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	numberOfTodoLabel = Drawing.CreateTextBlock(listZoneXSize-8, 2, 6, 3, 10)
+	numberOfTodoLabel = Drawing.CreateTextBlock(listZoneXSize-8, 2, 6, 1, 10)
+	numberOfTodoLabel.SetLayer(2)
 
 	listElementYSize := int(float32(ySize) * 0.3)
 	for i := 0; i < len(todoBlock); i++ {
@@ -266,9 +273,8 @@ func main() {
 				b.GetGraphic().SetVisibility(true)
 			}
 		}
-		EventManager.Call(ClockEvent, []any{todoBlock[carosello.GetSelected()].GetComponent()})
-		EventManager.Call(EventManager.Refresh, []any{todoBlock[carosello.GetSelected()].GetComponent()})
 		numberOfTodoLabel.SetText(fmt.Sprint("0/", len(carosello.elements), "  "))
+		EventManager.Call(EventManager.Refresh, []any{todoBlock[carosello.GetSelected()].GetComponent()})
 		return nil
 	})
 	showDoneState := StateMachine.CreateBuilderStateBase("ShowDoneState")
