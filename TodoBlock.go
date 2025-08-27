@@ -28,14 +28,12 @@ type TodoBlock struct {
 }
 
 func CreateElement(x, y int, width, height int, toDelete func(), setAsDone func()) *TodoBlock {
-	title := Drawing.CreateTextBlock(2, 2, width-5, 3, 10)
+	title := Drawing.CreateTextBlock(2, 2, width-5, 1, 10)
 	line := Drawing.CreateLine(2, 3, 3)
-	line.SetVisibility(false)
-	textElement := Drawing.CreateTextBlock(3, 4, width-5, height-4, 10)
+	textElement := Drawing.CreateTextBlock(3, 4, width-5, height-10, 10)
 	edgeElement := Drawing.CreateRectangle(1, 1, width-2, height)
 	edgeElement.SetColor(Color.Get(Color.Gray, Color.None))
 	drawingContainer := Drawing.CreateContainer(0, 0)
-	drawingContainer.AddDrawings(edgeElement, textElement, title, line)
 	doneButton := Component.CreateButton(width/2-2, height-3, 8, 3, "Done")
 	doneButton.SetOnHover(func() {
 		doneButton.GetVisibleArea().SetBorderColor(Color.Get(Color.White, Color.None))
@@ -68,11 +66,17 @@ func CreateElement(x, y int, width, height int, toDelete func(), setAsDone func(
 			toDelete()
 		}()
 	})
+	textElement.SetLayer(2)
+	title.SetLayer(2)
+	line.SetLayer(2)
+	doneButton.SetLayer(3)
+	deleteButton.SetLayer(3)
 	containerComponent := Component.CreateContainer(0, 0)
-	containerComponent.AddComponent(doneButton)
-	containerComponent.AddComponent(deleteButton)
+	drawingContainer.AddDrawings(edgeElement, textElement, title, line)
+	containerComponent.AddComponent(doneButton, deleteButton)
 	containerComponent.AddContainer(drawingContainer)
 	containerComponent.SetPos(x, y)
+	drawingContainer.SetLayer(2)
 	return &TodoBlock{
 		components:   containerComponent,
 		rectangle:    edgeElement,

@@ -10,6 +10,8 @@ github.com/MarvinJWendt/testza v0.4.2 h1:Vbw9GkSB5erJI2BPnBL9SVGV9myE+XmUSFahBGU
 github.com/MarvinJWendt/testza v0.4.2/go.mod h1:mSdhXiKH8sg/gQehJ63bINcCKp7RtYewEjXsvsVUPbE=
 github.com/Wordluc/GTUI v0.0.0-20250606144400-833bfdb29907 h1:XHRoAdaIcb5YBiAQOtqYosJ62mr/0OBxF0ohl5fXHjg=
 github.com/Wordluc/GTUI v0.0.0-20250606144400-833bfdb29907/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
+github.com/Wordluc/GTUI v0.0.0-20250827143830-e74fa4fca1ff h1:xZjDThcvSgWn6CsCAvt7Eu2QgkW1Xbbi5HyuOF9VW+8=
+github.com/Wordluc/GTUI v0.0.0-20250827143830-e74fa4fca1ff/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
 github.com/atomicgo/cursor v0.0.1 h1:xdogsqa6YYlLfM+GyClC/Lchf7aiMerFiZQn7soTOoU=
 github.com/atomicgo/cursor v0.0.1/go.mod h1:cBON2QmmrysudxNBFthvMtN32r3jxVRIvzkUiF/RuIk=
 github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
