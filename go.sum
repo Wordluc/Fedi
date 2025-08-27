@@ -12,6 +12,8 @@ github.com/Wordluc/GTUI v0.0.0-20250606144400-833bfdb29907 h1:XHRoAdaIcb5YBiAQOt
 github.com/Wordluc/GTUI v0.0.0-20250606144400-833bfdb29907/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
 github.com/Wordluc/GTUI v0.0.0-20250827143830-e74fa4fca1ff h1:xZjDThcvSgWn6CsCAvt7Eu2QgkW1Xbbi5HyuOF9VW+8=
 github.com/Wordluc/GTUI v0.0.0-20250827143830-e74fa4fca1ff/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
+github.com/Wordluc/GTUI v0.0.0-20250827155341-874977af02c8 h1:1l6KtDeDWBkIcAvhUyqNHnEnDYSeh8lmY2K4t0WDPrc=
+github.com/Wordluc/GTUI v0.0.0-20250827155341-874977af02c8/go.mod h1:D2mSJ4vcNUKpFBX6KH8XWoAylkgDHqJ7iXUbjPp+XR8=
 github.com/atomicgo/cursor v0.0.1 h1:xdogsqa6YYlLfM+GyClC/Lchf7aiMerFiZQn7soTOoU=
 github.com/atomicgo/cursor v0.0.1/go.mod h1:cBON2QmmrysudxNBFthvMtN32r3jxVRIvzkUiF/RuIk=
 github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=

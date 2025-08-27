@@ -42,8 +42,6 @@ func createLabel(text string) *Drawing.Container {
 func createCarosleloElement(todo Api.Todo) *CaroselloElement {
 	return &CaroselloElement{
 		wakeUpCallBack: func(todoBlockToUpdate int) {
-			GTUI.Logf("rect:%v", int(todoBlock[todoBlockToUpdate].rectangle.GetLayer()))
-			GTUI.Logf("text:%v", int(todoBlock[todoBlockToUpdate].textDrawing.GetLayer()))
 			todoBlock[todoBlockToUpdate].rectangle.SetColor(Color.Get(Color.White, Color.None))
 		},
 		sleepCallBack: func(todoBlockToUpdate int) {
