@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/google/uuid"
+	"time"
 
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core/Drawing"
@@ -9,13 +11,9 @@ import (
 	"github.com/Wordluc/GTUI/Terminal"
 )
 
-func initCarosello(width int) *Carosello[*TodoBlock, []string] {
-	updateCallback := func(display *TodoBlock, data []string) {
-		if len(data) != 2 {
-			display.SetElement("", "")
-			return
-		}
-		display.SetElement(data[0], data[1])
+func initCarosello(width int) *Carosello[*TodoBlock, TODO] {
+	updateCallback := func(display *TodoBlock, data TODO) {
+		display.SetElement(data.Title, data.Text, data.Date)
 	}
 	newCallback := func(nDisplay int) *TodoBlock {
 		return CreateTodoBlock(0, 3*nDisplay, width-7)
@@ -26,7 +24,7 @@ func initCarosello(width int) *Carosello[*TodoBlock, []string] {
 	deselectCallback := func(display *TodoBlock) {
 		display.Deselect()
 	}
-	callback := Callbacks[*TodoBlock, []string]{
+	callback := Callbacks[*TodoBlock, TODO]{
 		updateDisplay:   updateCallback,
 		newDisplay:      newCallback,
 		selectDisplay:   selectCallback,
@@ -37,10 +35,10 @@ func initCarosello(width int) *Carosello[*TodoBlock, []string] {
 	return carosello
 }
 
-var carosello *Carosello[*TodoBlock, []string]
+var carosello *Carosello[*TodoBlock, TODO]
 var edit *EditBlock
 var numberTodos *Drawing.TextField
-var repository *Repositoty[[]string]
+var repository *Repositoty[TODO]
 
 func main() {
 	keyb := Keyboard.Keyboard{}
@@ -60,9 +58,22 @@ func main() {
 	if edit == nil {
 		panic("")
 	}
-	repository = NewRepositoty("prova.csv", func(s []string) []string {
-		return s
-	})
+	repository = NewRepositoty("prova.csv",
+		func(s []string) TODO {
+			return TODO{
+				Id:    s[0],
+				Title: s[1],
+				Text:  s[2],
+				Date:  s[3],
+			}
+		},
+		func(t TODO) []string {
+			return []string{t.Id, t.Title, t.Text, t.Date}
+		},
+		func(t1, t2 TODO) bool {
+			return t1.Id == t2.Id
+		},
+	)
 	data, err := repository.Get()
 	if err != nil {
 		panic(err)
@@ -114,17 +125,25 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	}
 
 	if keyb.IsKeySPressed(Keyboard.CtrlD) {
-		i, _ := carosello.GetSelectedElement()
-		carosello.DeleteData(i)
+		i, ele := carosello.GetSelectedElement()
+		if err := repository.Remove(ele); err == nil {
+			carosello.DeleteData(i)
+		}
 		numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 	}
 	if keyb.IsKeySPressed(Keyboard.CtrlS) {
 		isOn := edit.Toggle()
 		if !isOn {
 			if title, text := edit.GetContent(); text != "" || title != "" {
-				GTUI.Log(title)
-				repository.Add([]string{title, text})
-				carosello.AddData([]string{title, text})
+				ele := TODO{
+					Id:    uuid.NewString(),
+					Title: title,
+					Text:  text,
+					Date:  time.Now().Format(time.RFC850),
+				}
+				if err := repository.Add(ele); err == nil {
+					carosello.AddData(ele)
+				}
 				numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 			}
 		}
