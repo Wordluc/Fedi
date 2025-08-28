@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core/Drawing"
 	"github.com/Wordluc/GTUI/Keyboard"
@@ -37,6 +39,7 @@ func initCarosello(width int) *Carosello[*TodoBlock, []string] {
 
 var carosello *Carosello[*TodoBlock, []string]
 var edit *EditBlock
+var numberTodos *Drawing.TextField
 
 func main() {
 	keyb := Keyboard.Keyboard{}
@@ -48,7 +51,7 @@ func main() {
 	core.SetVisibilityCursor(false)
 	wid, hig := core.Size()
 	outline := Drawing.CreateRectangleFull(0, 0, wid, hig)
-	title := Drawing.CreateTextField(0, 0, "TODO")
+	title := Drawing.CreateTextField(0, 0, "TODO:")
 	title.SetLayer(2)
 	todos := [][]string{}
 	carosello = initCarosello(wid)
@@ -61,7 +64,9 @@ func main() {
 		carosello.AddData(todos[i])
 	}
 
-	core.AddDrawing(outline, title)
+	numberTodos = Drawing.CreateTextField(5, 0, "0")
+
+	core.AddDrawing(outline, title, numberTodos)
 	core.AddContainer(carosello)
 	core.AddContainer(edit.container)
 	core.Start()
@@ -73,7 +78,6 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		if edit.IsOn() {
 			edit.Toggle()
-			core.SetVisibilityCursor(false)
 			return true
 		}
 		return false
@@ -81,22 +85,31 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlK) {
 		if edit.IsOn() {
 			edit.ActiveTitle()
+		} else {
+			carosello.Pre()
 		}
 	}
 	if keyb.IsKeySPressed(Keyboard.CtrlJ) {
 		if edit.IsOn() {
 			edit.ActiveText()
+		} else {
+			carosello.Next()
 		}
 	}
-	if keyb.IsKeyPressed('l') || keyb.IsKeyPressed('j') {
-		carosello.Next()
+
+	if !edit.IsOn() {
+		if keyb.IsKeyPressed('l') || keyb.IsKeyPressed('j') {
+			carosello.Next()
+		}
+		if keyb.IsKeyPressed('h') || keyb.IsKeyPressed('k') {
+			carosello.Pre()
+		}
 	}
-	if keyb.IsKeyPressed('h') || keyb.IsKeyPressed('k') {
-		carosello.Pre()
-	}
-	if keyb.IsKeyPressed('d') {
+
+	if keyb.IsKeySPressed(Keyboard.CtrlD) {
 		i, _ := carosello.GetSelectedElement()
 		carosello.DeleteData(i)
+		numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 	}
 	if keyb.IsKeySPressed(Keyboard.CtrlS) {
 		isOn := edit.Toggle()
@@ -104,6 +117,7 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 			if title, text := edit.GetContent(); text != "" || title != "" {
 				GTUI.Log(title)
 				carosello.AddData([]string{title, text})
+				numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 			}
 		}
 	}
