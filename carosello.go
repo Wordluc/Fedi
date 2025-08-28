@@ -40,22 +40,23 @@ func CreateCarosello[tDisplay Core.IContainer, tdata any](nDisplayElements int, 
 
 func (c *Carosello[tDisplay, tdata]) AddData(data tdata) {
 	c.dataElements = append(c.dataElements, data)
-	if len(c.dataElements) >= len(c.displayElements) {
+	if len(c.dataElements) > 0 {
 		for i := range c.displayElements {
-			c.callback.updateDisplay(c.displayElements[i], c.dataElements[i])
+			c.callback.updateDisplay(c.displayElements[i], c.dataElements[i%len(c.dataElements)])
 		}
 	}
-	if len(c.dataElements) == 1 {
-		c.callback.selectDisplay(c.displayElements[0])
+	if len(c.dataElements) == 0 {
+		return
 	}
+	c.callback.selectDisplay(c.displayElements[c.currentDisplaySelected])
 }
 
 func (c *Carosello[tDisplay, tdata]) DeleteData(i int) {
+	c.callback.deselectDisplay(c.displayElements[c.currentDisplaySelected])
 	if i < 0 || i >= len(c.dataElements) {
 		return
 	}
 	c.dataElements = append(c.dataElements[:i], c.dataElements[i+1:]...)
-	c.callback.deselectDisplay(c.displayElements[c.currentDisplaySelected])
 	c.currentDataSelected--
 	c.currentDisplaySelected--
 	if c.currentDisplaySelected < 0 {
@@ -70,6 +71,9 @@ func (c *Carosello[tDisplay, tdata]) DeleteData(i int) {
 }
 func (c *Carosello[tDisplay, tdata]) Next() {
 	c.callback.deselectDisplay(c.displayElements[c.currentDisplaySelected])
+	if len(c.dataElements) == 0 {
+		return
+	}
 	c.currentDisplaySelected++
 	c.currentDataSelected++
 	if c.currentDisplaySelected >= len(c.displayElements) {
@@ -85,6 +89,9 @@ func (c *Carosello[tDisplay, tdata]) Next() {
 }
 func (c *Carosello[tDisplay, tdata]) Pre() {
 	c.callback.deselectDisplay(c.displayElements[c.currentDisplaySelected])
+	if len(c.dataElements) == 0 {
+		return
+	}
 	c.currentDisplaySelected--
 	c.currentDataSelected--
 	if c.currentDisplaySelected < 0 {
@@ -100,11 +107,18 @@ func (c *Carosello[tDisplay, tdata]) Pre() {
 }
 
 func (c *Carosello[tDisplay, tdata]) GetSelectedElement() (int, tdata) {
+	if len(c.dataElements) == 0 {
+		return 0, *new(tdata)
+	}
 	return c.currentDataSelected, c.dataElements[c.currentDataSelected]
 }
 
 func (c *Carosello[tDisplay, tdata]) updateDisplay() {
 	for iDisplay := range c.displayElements {
+		if len(c.dataElements) == 0 {
+			c.callback.updateDisplay(c.displayElements[iDisplay], *new(tdata))
+			continue
+		}
 		data := c.dataElements[(c.currentDataSelected+iDisplay)%len(c.dataElements)]
 		c.callback.updateDisplay(c.displayElements[iDisplay], data)
 	}
