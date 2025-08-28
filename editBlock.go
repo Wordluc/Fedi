@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core/Component"
+	"github.com/Wordluc/GTUI/Core/Drawing"
 )
 
 type EditBlock struct {
@@ -22,12 +23,14 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	x := widScreen/2 - widBlock/2
 	y := heightScreen - heighetBlock
 	container := Component.CreateContainer(x, y)
-	title, err := Component.CreateTextBox(x+1, y, widBlock-1, 3, core.CreateStreamingCharacter())
+	outline := Drawing.CreateRectangle(x, y, widBlock, heighetBlock-1)
+	title, err := Component.CreateTextBox(x+1, y+1, widBlock-2, 3, core.CreateStreamingCharacter())
 	title.IsOneLine = true
-	text, err := Component.CreateTextBox(x+1, y+3, widBlock-1, heighetBlock-3, core.CreateStreamingCharacter())
+	text, err := Component.CreateTextBox(x+1, y+4, widBlock-2, heighetBlock-6, core.CreateStreamingCharacter())
 	if err != nil {
 		return nil
 	}
+	container.AddDrawing(outline)
 	container.AddComponent(text)
 	container.AddComponent(title)
 	container.SetLayer(2)
@@ -55,6 +58,7 @@ func (e *EditBlock) Toggle() bool {
 	}
 	return e.container.GetActivity()
 }
+
 func (e *EditBlock) ActiveText() {
 	x, y := e.text.GetPos()
 	e.text.OnClick()
@@ -74,5 +78,5 @@ func (e *EditBlock) IsOn() bool {
 }
 
 func (e *EditBlock) GetContent() (string, string) {
-	return e.title.GetRawText(), e.text.GetRawText()
+	return e.title.GetText(), e.text.GetText()
 }

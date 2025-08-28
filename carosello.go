@@ -113,6 +113,10 @@ func (c *Carosello[tDisplay, tdata]) GetSelectedElement() (int, tdata) {
 	return c.currentDataSelected, c.dataElements[c.currentDataSelected]
 }
 
+func (c *Carosello[tDisplay, tdata]) GetElements() []tdata {
+	return c.dataElements
+}
+
 func (c *Carosello[tDisplay, tdata]) updateDisplay() {
 	for iDisplay := range c.displayElements {
 		if len(c.dataElements) == 0 {
