@@ -40,6 +40,7 @@ func initCarosello(width int) *Carosello[*TodoBlock, []string] {
 var carosello *Carosello[*TodoBlock, []string]
 var edit *EditBlock
 var numberTodos *Drawing.TextField
+var repository *Repositoty[[]string]
 
 func main() {
 	keyb := Keyboard.Keyboard{}
@@ -53,15 +54,21 @@ func main() {
 	outline := Drawing.CreateRectangleFull(0, 0, wid, hig)
 	title := Drawing.CreateTextField(0, 0, "TODO:")
 	title.SetLayer(2)
-	todos := [][]string{}
 	carosello = initCarosello(wid)
 	carosello.SetPos(2, 2)
 	edit = CreateEditBlock(wid, hig, 40, 10, core)
 	if edit == nil {
 		panic("")
 	}
-	for i := range todos {
-		carosello.AddData(todos[i])
+	repository = NewRepositoty("prova.csv", func(s []string) []string {
+		return s
+	})
+	data, err := repository.Get()
+	if err != nil {
+		panic(err)
+	}
+	for i := range data {
+		carosello.AddData(data[i])
 	}
 
 	numberTodos = Drawing.CreateTextField(5, 0, "0")
@@ -116,6 +123,7 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		if !isOn {
 			if title, text := edit.GetContent(); text != "" || title != "" {
 				GTUI.Log(title)
+				repository.Add([]string{title, text})
 				carosello.AddData([]string{title, text})
 				numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 			}
