@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/google/uuid"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core/Drawing"
@@ -83,7 +85,7 @@ func main() {
 	}
 
 	numberTodos = Drawing.CreateTextField(5, 0, "0")
-
+	numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 	core.AddDrawing(outline, title, numberTodos)
 	core.AddContainer(carosello)
 	core.AddContainer(edit.container)
@@ -100,26 +102,33 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		}
 		return false
 	}
-	if keyb.IsKeySPressed(Keyboard.CtrlK) {
-		if edit.IsOn() {
+	if edit.IsOn() {
+		if keyb.IsKeySPressed(Keyboard.CtrlK) {
 			edit.ActiveTitle()
-		} else {
-			carosello.Pre()
-		}
-	}
-	if keyb.IsKeySPressed(Keyboard.CtrlJ) {
-		if edit.IsOn() {
+		} else if keyb.IsKeySPressed(Keyboard.CtrlJ) {
 			edit.ActiveText()
-		} else {
-			carosello.Next()
 		}
+		var x, y = core.GetCur()
+		if keyb.IsKeySPressed(Keyboard.Down) {
+			y++
+		}
+		if keyb.IsKeySPressed(Keyboard.Up) {
+			y--
+		}
+		if keyb.IsKeySPressed(Keyboard.Right) {
+			x++
+		}
+		if keyb.IsKeySPressed(Keyboard.Left) {
+			x--
+		}
+		core.SetCur(x, y)
+
 	}
 
 	if !edit.IsOn() {
-		if keyb.IsKeyPressed('l') || keyb.IsKeyPressed('j') {
+		if keyb.IsKeyPressed('l') || keyb.IsKeyPressed('j') || keyb.IsKeySPressed(Keyboard.Down) {
 			carosello.Next()
-		}
-		if keyb.IsKeyPressed('h') || keyb.IsKeyPressed('k') {
+		} else if keyb.IsKeyPressed('h') || keyb.IsKeyPressed('k') || keyb.IsKeySPressed(Keyboard.Up) {
 			carosello.Pre()
 		}
 	}
@@ -135,6 +144,7 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		isOn := edit.Toggle()
 		if !isOn {
 			if title, text := edit.GetContent(); text != "" || title != "" {
+				text = strings.ReplaceAll(text, "\n", ";")
 				ele := TODO{
 					Id:    uuid.NewString(),
 					Title: title,
