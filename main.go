@@ -32,7 +32,7 @@ func main() {
 	outline := Drawing.CreateRectangleFull(0, 0, wid, hig)
 	title := Drawing.CreateTextField(0, 0, "TODO:")
 	title.SetLayer(2)
-	carosello = initCarosello(wid)
+	carosello = initCarosello(wid, hig)
 	carosello.SetPos(2, 2)
 	edit = CreateEditBlock(wid, hig, 40, 10, core)
 	if edit == nil {
