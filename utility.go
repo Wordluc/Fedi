@@ -121,6 +121,7 @@ func saveContentEditBlock() {
 }
 
 func setIconMark(mark *Drawing.TextBlock, icon string) {
+	mark.SetText("")
 	switch icon {
 	case Ready:
 		mark.SetText("⛟")
@@ -139,5 +140,44 @@ func setIconMark(mark *Drawing.TextBlock, icon string) {
 	case WaitingFor:
 		mark.SetText("⚠")
 		mark.SetColor(Color.Get(Color.Yellow, Color.None))
+	}
+}
+
+func closeAll() {
+	viewModal.Close()
+	searchModal.Close()
+	edit.Close()
+	tutorialModal.SetVisibility(false)
+}
+func manageOpenCloseModal(keyb Keyboard.IKeyBoard) {
+	if keyb.IsKeySPressed(Keyboard.CtrlV) {
+		_, ele := carosello.GetSelectedElement()
+		if viewModal.IsOpen() {
+			viewModal.Close()
+		} else {
+			closeAll()
+			viewModal.Open(ele.Title, ele.Text, ele.Status)
+		}
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlF) {
+		if searchModal.IsOpen() {
+			searchModal.Close()
+		} else {
+			closeAll()
+			searchModal.Open()
+		}
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlS) {
+		isOn := edit.IsOpen()
+		if !isOn {
+			closeAll()
+			edit.SetTitleModal("New Todo")
+			edit.Open()
+		} else {
+			edit.Close()
+			saveContentEditBlock()
+		}
 	}
 }
