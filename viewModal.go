@@ -34,6 +34,7 @@ func CreateViewModal(w, h int, core *GTUI.Gtui) *ViewModal {
 	modal.AddDrawing(titleField)
 	modal.SetPos(x, y)
 	modal.SetVisibility(false)
+	modal.SetActive(false)
 	return &ViewModal{
 		Modal:   modal,
 		textbox: textbox,
