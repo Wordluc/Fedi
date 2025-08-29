@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func initCarosello(width int) *Carosello[*TodoBlock, TODO] {
+func initCarosello(width, height int) *Carosello[*TodoBlock, TODO] {
 	updateCallback := func(display *TodoBlock, data TODO) {
 		display.SetElement(data.Title, data.Text, data.Date, data.Status, data.Id)
 	}
@@ -31,7 +31,7 @@ func initCarosello(width int) *Carosello[*TodoBlock, TODO] {
 		deselectDisplay: deselectCallback,
 	}
 
-	carosello := CreateCarosello(10, callback)
+	carosello := CreateCarosello((height/4)-1, callback)
 	return carosello
 }
 
