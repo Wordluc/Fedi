@@ -44,10 +44,10 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	}
 }
 
-func (e *EditBlock) Toggle() bool {
-	e.container.SetActive(!e.container.GetActivity())
-	e.container.SetVisibility(e.container.GetActivity())
-	e.core.SetVisibilityCursor(e.container.GetActivity())
+func (e *EditBlock) Toggle(isOn bool) bool {
+	e.container.SetActive(isOn)
+	e.container.SetVisibility(isOn)
+	e.core.SetVisibilityCursor(isOn)
 	if e.container.GetActivity() {
 		e.text.ClearAll()
 		e.title.ClearAll()
@@ -79,4 +79,11 @@ func (e *EditBlock) IsOn() bool {
 
 func (e *EditBlock) GetContent() (string, string) {
 	return e.title.GetText(), e.text.GetText()
+}
+
+func (e *EditBlock) Set(title, text string) {
+	e.text.ClearAll()
+	e.text.Paste(text)
+	e.title.ClearAll()
+	e.title.Paste(title)
 }

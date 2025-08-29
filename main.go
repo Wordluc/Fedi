@@ -41,6 +41,7 @@ var carosello *Carosello[*TodoBlock, TODO]
 var edit *EditBlock
 var numberTodos *Drawing.TextField
 var repository *Repositoty[TODO]
+var editingTODO *TODO
 
 func main() {
 	keyb := Keyboard.Keyboard{}
@@ -93,12 +94,11 @@ func main() {
 	core.Start()
 }
 
-var i = 0
-
 func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
 		if edit.IsOn() {
-			edit.Toggle()
+			edit.Toggle(false)
+			editingTODO = nil
 			return true
 		}
 		return false
@@ -165,10 +165,27 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		}
 	}
 
+	if keyb.IsKeySPressed(Keyboard.CtrlE) {
+		_, ele := carosello.GetSelectedElement()
+		edit.Toggle(true)
+		edit.Set(ele.Title, ele.Text)
+		editingTODO = &ele
+	}
+
 	if keyb.IsKeySPressed(Keyboard.CtrlS) {
-		isOn := edit.Toggle()
+		isOn := edit.Toggle(!edit.IsOn())
 		if !isOn {
-			if title, text := edit.GetContent(); text != "" || title != "" {
+			if editingTODO != nil {
+				if title, text := edit.GetContent(); text != "" || title != "" {
+					editingTODO.Title = title
+					editingTODO.Text = text
+					editingTODO.Status = Ready
+					if repository.Set(*editingTODO) == nil {
+						updateData()
+					}
+					editingTODO = nil
+				}
+			} else if title, text := edit.GetContent(); text != "" || title != "" {
 				text = strings.ReplaceAll(text, "\n", ";")
 				ele := TODO{
 					Id:     uuid.NewString(),
