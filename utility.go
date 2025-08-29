@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/Wordluc/GTUI"
+	"github.com/Wordluc/GTUI/Core/Drawing"
+	"github.com/Wordluc/GTUI/Core/Utils/Color"
 	"github.com/Wordluc/GTUI/Keyboard"
 	"github.com/google/uuid"
 )
@@ -115,5 +117,27 @@ func saveContentEditBlock() {
 			carosello.AddData(ele)
 		}
 		numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
+	}
+}
+
+func setIconMark(mark *Drawing.TextBlock, icon string) {
+	switch icon {
+	case Ready:
+		mark.SetText("⛟")
+		mark.SetColor(Color.Get(Color.Gray, Color.None))
+	case Done:
+		mark.SetText("✓")
+		mark.SetColor(Color.Get(Color.Green, Color.None))
+	case Progress:
+		mark.SetText("⛏")
+		mark.SetColor(Color.Get(Color.Cyan, Color.None))
+	case Deleted:
+		mark.SetText("⛔")
+	case Archived:
+		mark.SetText("X")
+		mark.SetColor(Color.Get(Color.Yellow, Color.None))
+	case WaitingFor:
+		mark.SetText("⚠")
+		mark.SetColor(Color.Get(Color.Yellow, Color.None))
 	}
 }

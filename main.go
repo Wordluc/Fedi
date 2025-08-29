@@ -123,7 +123,7 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		if viewModal.IsOpen() {
 			viewModal.Close()
 		} else {
-			viewModal.Open(ele.Title, ele.Text)
+			viewModal.Open(ele.Title, ele.Text, ele.Status)
 		}
 	}
 	if keyb.IsKeySPressed(Keyboard.CtrlS) {
@@ -138,7 +138,7 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 
 	if viewModal.IsOpen() {
 		_, ele := carosello.GetSelectedElement()
-		viewModal.Change(ele.Title, ele.Text)
+		viewModal.Change(ele.Title, ele.Text, ele.Status)
 	}
 
 	return true
