@@ -45,8 +45,8 @@ func (c *Carosello[tDisplay, tdata]) AddData(data tdata) {
 			c.callback.updateDisplay(c.displayElements[i], c.dataElements[i%len(c.dataElements)])
 		}
 	}
-	if len(c.dataElements) == 0 {
-		return
+	if c.currentDataSelected < 0 {
+		c.currentDataSelected = 0
 	}
 	c.callback.selectDisplay(c.displayElements[c.currentDisplaySelected])
 }
@@ -66,7 +66,9 @@ func (c *Carosello[tDisplay, tdata]) DeleteData(i int) {
 		c.currentDataSelected = len(c.dataElements) - 1
 	}
 	c.updateDisplay()
-	c.callback.selectDisplay(c.displayElements[c.currentDisplaySelected])
+	if len(c.dataElements) != 0 {
+		c.callback.selectDisplay(c.displayElements[c.currentDisplaySelected])
+	}
 
 }
 func (c *Carosello[tDisplay, tdata]) Next() {
