@@ -51,22 +51,25 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 		core:       core,
 	}
 }
-
-func (e *EditBlock) Toggle(isOn bool) bool {
-	e.container.SetActive(isOn)
-	e.container.SetVisibility(isOn)
-	e.core.SetVisibilityCursor(isOn)
-	if e.container.GetActivity() {
-		e.textField.ClearAll()
-		e.titleField.ClearAll()
-		e.ActiveTitle()
-	} else {
-		e.textField.OnLeave()
-		e.titleField.OnLeave()
-	}
-	return e.container.GetActivity()
+func (e *EditBlock) Close() {
+	e.container.SetActive(false)
+	e.container.SetVisibility(false)
+	e.core.SetVisibilityCursor(false)
+	e.textField.OnLeave()
+	e.titleField.OnLeave()
 }
 
+func (e *EditBlock) Open() {
+	e.container.SetActive(true)
+	e.container.SetVisibility(true)
+	e.core.SetVisibilityCursor(true)
+	e.textField.ClearAll()
+	e.titleField.ClearAll()
+	e.ActiveTitle()
+}
+func (e *EditBlock) IsOn() bool {
+	return e.container.GetVisibility()
+}
 func (e *EditBlock) ActiveText() {
 	x, y := e.textField.GetPos()
 	e.textField.OnClick()
@@ -81,7 +84,7 @@ func (e *EditBlock) ActiveTitle() {
 	e.core.SetCur(x+1, y+1)
 }
 
-func (e *EditBlock) IsOn() bool {
+func (e *EditBlock) IsOpen() bool {
 	return e.container.GetActivity()
 }
 

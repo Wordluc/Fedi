@@ -18,6 +18,7 @@ var repository *Repositoty[TODO]
 var editTODO *TODO
 var tutorialModal *Component.Modal
 var viewModal *ViewModal
+var searchModal *Search
 
 func main() {
 	keyb := Keyboard.Keyboard{}
@@ -70,27 +71,43 @@ func main() {
 	numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 	helper := Drawing.CreateTextField(1, hig-2, "Tab: to open/close tutorial")
 	viewModal = CreateViewModal(wid, hig, core)
+	searchModal = CreateSearch(core)
+
 	core.AddDrawing(outline, title, numberTodos, helper)
 	core.AddContainer(carosello)
 	core.AddContainer(edit.container)
 	core.AddComplexElement(tutorialModal)
 	core.AddComplexElement(viewModal)
+	core.AddComplexElement(searchModal)
 	core.Start()
 }
 
 func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlQ) {
-		if edit.IsOn() {
-			edit.Toggle(false)
-			editTODO = nil
+		editTODO = nil
+		if edit.IsOpen() {
+			edit.Close()
+			return true
+		}
+		if viewModal.IsOpen() {
+			viewModal.Close()
+			return true
+		}
+		if searchModal.IsOpen() {
+			searchModal.Close()
+			return true
+		}
+		if tutorialModal.GetVisibility() {
+			tutorialModal.SetVisibility(false)
 			return true
 		}
 		return false
 	}
-	if edit.IsOn() {
-		if keyb.IsKeySPressed(Keyboard.Esc) {
-			edit.Toggle(false)
-		} else if keyb.IsKeySPressed(Keyboard.CtrlK) {
+	if keyb.IsKeySPressed(Keyboard.Esc) {
+		closeAll()
+	}
+	if edit.IsOpen() {
+		if keyb.IsKeySPressed(Keyboard.CtrlK) {
 			edit.ActiveTitle()
 		} else if keyb.IsKeySPressed(Keyboard.CtrlJ) {
 			edit.ActiveText()
@@ -98,7 +115,7 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		cursorMovement(core, keyb)
 	}
 
-	if !edit.IsOn() {
+	if !edit.IsOpen() {
 		if keyb.IsKeyPressed('l') || keyb.IsKeyPressed('j') || keyb.IsKeySPressed(Keyboard.Down) {
 			carosello.Next()
 		} else if keyb.IsKeyPressed('h') || keyb.IsKeyPressed('k') || keyb.IsKeySPressed(Keyboard.Up) {
@@ -113,33 +130,50 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.CtrlE) {
 		_, ele := carosello.GetSelectedElement()
 		edit.SetTitleModal("Edit")
-		edit.Toggle(true)
+		edit.Open()
 		edit.Set(ele.Title, ele.Text)
 		editTODO = &ele
 	}
-
-	if keyb.IsKeySPressed(Keyboard.CtrlV) {
-		_, ele := carosello.GetSelectedElement()
-		if viewModal.IsOpen() {
-			viewModal.Close()
-		} else {
-			viewModal.Open(ele.Title, ele.Text, ele.Status)
-		}
-	}
-	if keyb.IsKeySPressed(Keyboard.CtrlS) {
-		isOn := edit.Toggle(!edit.IsOn())
-		if !isOn {
-			saveContentEditBlock()
-		} else {
-			edit.SetTitleModal("New Todo")
-		}
-	}
-	manageMarksTodos(keyb)
 
 	if viewModal.IsOpen() {
 		_, ele := carosello.GetSelectedElement()
 		viewModal.Change(ele.Title, ele.Text, ele.Status)
 	}
 
+	if searchModal.IsOpen() {
+		toSearchFor := searchModal.GetText()
+		data, e := repository.Get()
+		if e != nil {
+			return true
+		}
+		newData := []TODO{}
+		for i := range data {
+			if ok := strings.Contains(data[i].Title, toSearchFor); ok {
+				newData = append(newData, data[i])
+				continue
+			}
+			if ok := strings.Contains(data[i].Text, toSearchFor); ok {
+				newData = append(newData, data[i])
+				continue
+			}
+			if ok := strings.Contains(data[i].Status, toSearchFor); ok {
+				newData = append(newData, data[i])
+				continue
+			}
+		}
+		carosello.Reset()
+		carosello.AddDataAll(newData...)
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlR) {
+		carosello.Reset()
+		data, e := repository.Get()
+		if e == nil {
+			carosello.AddDataAll(data...)
+		}
+	}
+
+	manageMarksTodos(keyb)
+	manageOpenCloseModal(keyb)
 	return true
 }
