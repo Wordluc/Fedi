@@ -7,10 +7,11 @@ import (
 )
 
 type EditBlock struct {
-	container *Component.Container
-	text      *Component.TextBox
-	title     *Component.TextBox
-	core      *GTUI.Gtui
+	container  *Component.Container
+	textField  *Component.TextBox
+	titleField *Component.TextBox
+	titleModal *Drawing.TextField
+	core       *GTUI.Gtui
 }
 
 func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *GTUI.Gtui) *EditBlock {
@@ -24,23 +25,26 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	y := heightScreen - heighetBlock
 	container := Component.CreateContainer(x, y)
 	outline := Drawing.CreateRectangle(x, y, widBlock, heighetBlock-1)
-	title, err := Component.CreateTextBox(x+1, y+1, widBlock-2, 3, core.CreateStreamingCharacter())
-	title.IsOneLine = true
-	text, err := Component.CreateTextBox(x+1, y+4, widBlock-2, heighetBlock-6, core.CreateStreamingCharacter())
+	titleField, err := Component.CreateTextBox(x+1, y+1, widBlock-2, 3, core.CreateStreamingCharacter())
+	titleField.IsOneLine = true
+	textField, err := Component.CreateTextBox(x+1, y+4, widBlock-2, heighetBlock-6, core.CreateStreamingCharacter())
 	if err != nil {
 		return nil
 	}
+	titleModal := Drawing.CreateTextField(x, y, "Edit")
+	container.AddDrawing(titleModal)
 	container.AddDrawing(outline)
-	container.AddComponent(text)
-	container.AddComponent(title)
+	container.AddComponent(textField)
+	container.AddComponent(titleField)
 	container.SetLayer(2)
 	container.SetActive(false)
 	container.SetVisibility(false)
 	return &EditBlock{
-		container: container,
-		text:      text,
-		title:     title,
-		core:      core,
+		container:  container,
+		textField:  textField,
+		titleModal: titleModal,
+		titleField: titleField,
+		core:       core,
 	}
 }
 
@@ -49,27 +53,27 @@ func (e *EditBlock) Toggle(isOn bool) bool {
 	e.container.SetVisibility(isOn)
 	e.core.SetVisibilityCursor(isOn)
 	if e.container.GetActivity() {
-		e.text.ClearAll()
-		e.title.ClearAll()
+		e.textField.ClearAll()
+		e.titleField.ClearAll()
 		e.ActiveTitle()
 	} else {
-		e.text.OnLeave()
-		e.title.OnLeave()
+		e.textField.OnLeave()
+		e.titleField.OnLeave()
 	}
 	return e.container.GetActivity()
 }
 
 func (e *EditBlock) ActiveText() {
-	x, y := e.text.GetPos()
-	e.text.OnClick()
-	e.title.OnLeave()
+	x, y := e.textField.GetPos()
+	e.textField.OnClick()
+	e.titleField.OnLeave()
 	e.core.SetCur(x+1, y+1)
 }
 
 func (e *EditBlock) ActiveTitle() {
-	x, y := e.title.GetPos()
-	e.title.OnClick()
-	e.text.OnLeave()
+	x, y := e.titleField.GetPos()
+	e.titleField.OnClick()
+	e.textField.OnLeave()
 	e.core.SetCur(x+1, y+1)
 }
 
@@ -78,12 +82,16 @@ func (e *EditBlock) IsOn() bool {
 }
 
 func (e *EditBlock) GetContent() (string, string) {
-	return e.title.GetText(), e.text.GetText()
+	return e.titleField.GetText(), e.textField.GetText()
 }
 
 func (e *EditBlock) Set(title, text string) {
-	e.text.ClearAll()
-	e.text.Paste(text)
-	e.title.ClearAll()
-	e.title.Paste(title)
+	e.textField.ClearAll()
+	e.textField.Paste(text)
+	e.titleField.ClearAll()
+	e.titleField.Paste(title)
+}
+
+func (e *EditBlock) SetTitleModal(text string) {
+	e.titleModal.SetText(text)
 }
