@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core"
 	"github.com/Wordluc/GTUI/Core/Component"
 )
@@ -23,7 +22,7 @@ type Carosello[tDisplay Core.IContainer, tdata any] struct {
 }
 
 func CreateCarosello[tDisplay Core.IContainer, tdata any](nDisplayElements int, callback Callbacks[tDisplay, tdata]) *Carosello[tDisplay, tdata] {
-	container := Component.CreateContainer(0, 0)
+	container := Component.CreateContainer()
 	displays := make([]tDisplay, nDisplayElements)
 	for i := range nDisplayElements {
 		ele := callback.newDisplay(i)
@@ -134,7 +133,6 @@ func (c *Carosello[tDisplay, tdata]) updateDisplay() {
 			c.callback.updateDisplay(c.displayElements[iDisplay], *new(tdata))
 			continue
 		}
-		GTUI.Logf("page: %v", c.firstElementInPage)
 		data := c.dataElements[(c.firstElementInPage+iDisplay)%len(c.dataElements)]
 		c.callback.updateDisplay(c.displayElements[iDisplay], data)
 	}

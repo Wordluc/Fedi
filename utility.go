@@ -1,0 +1,122 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/Wordluc/GTUI"
+	"github.com/Wordluc/GTUI/Keyboard"
+	"github.com/google/uuid"
+)
+
+func initCarosello(width int) *Carosello[*TodoBlock, TODO] {
+	updateCallback := func(display *TodoBlock, data TODO) {
+		data.Text = strings.ReplaceAll(data.Text, "/n", "\n")
+		display.SetElement(data.Title, data.Text, data.Date, data.Status, data.Id)
+	}
+	newCallback := func(nDisplay int) *TodoBlock {
+		return CreateTodoBlock(0, 4*nDisplay, width-7)
+	}
+	selectCallback := func(display *TodoBlock) {
+		display.Select()
+	}
+	deselectCallback := func(display *TodoBlock) {
+		display.Deselect()
+	}
+	callback := Callbacks[*TodoBlock, TODO]{
+		updateDisplay:   updateCallback,
+		newDisplay:      newCallback,
+		selectDisplay:   selectCallback,
+		deselectDisplay: deselectCallback,
+	}
+
+	carosello := CreateCarosello(10, callback)
+	return carosello
+}
+
+func updateCaroselloData() {
+	data, err := repository.Get()
+	if err != nil {
+		return
+	}
+	carosello.Refresh(data...)
+	numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
+}
+
+func manageMarksTodos(keyb Keyboard.IKeyBoard) {
+	var ele TODO
+	if keyb.IsKeySPressed(Keyboard.CtrlD) {
+		_, ele = carosello.GetSelectedElement()
+		ele.Status = Done
+	}
+	if keyb.IsKeySPressed(Keyboard.CtrlX) {
+		_, ele = carosello.GetSelectedElement()
+		ele.Status = Deleted
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlA) {
+		_, ele = carosello.GetSelectedElement()
+		ele.Status = Archived
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlW) {
+		_, ele = carosello.GetSelectedElement()
+		ele.Status = WaitingFor
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlP) {
+		_, ele = carosello.GetSelectedElement()
+		ele.Status = Progress
+	}
+
+	if ele.Status != "" && repository.Set(ele) == nil {
+		updateCaroselloData()
+	}
+}
+
+func cursorMovement(core *GTUI.Gtui, keyb Keyboard.IKeyBoard) {
+	var x, y = core.GetCur()
+	if keyb.IsKeySPressed(Keyboard.Down) {
+		y++
+	}
+	if keyb.IsKeySPressed(Keyboard.Up) {
+		y--
+	}
+	if keyb.IsKeySPressed(Keyboard.Right) {
+		x++
+	}
+	if keyb.IsKeySPressed(Keyboard.Left) {
+		x--
+	}
+	core.SetCur(x, y)
+}
+
+func saveContentEditBlock() {
+	title, text := edit.GetContent()
+	if text == "" && title == "" {
+		return
+	}
+	text = strings.ReplaceAll(text, "\n", "/n")
+	if editTODO != nil {
+		editTODO.Title = title
+		editTODO.Text = text
+		editTODO.Status = Ready
+		if repository.Set(*editTODO) == nil {
+			updateCaroselloData()
+		}
+		editTODO = nil
+	} else {
+		ele := TODO{
+			Id:     uuid.NewString(),
+			Title:  title,
+			Text:   text,
+			Date:   time.Now().Format("Mon, 02 Jan 2006"),
+			Status: Ready,
+		}
+		if err := repository.Add(ele); err == nil {
+			carosello.AddData(ele)
+		}
+		numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
+	}
+}

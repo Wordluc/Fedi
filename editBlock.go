@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core/Component"
 	"github.com/Wordluc/GTUI/Core/Drawing"
@@ -21,17 +23,15 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	if heighetBlock > heightScreen {
 		return nil
 	}
-	x := widScreen/2 - widBlock/2
-	y := heightScreen - heighetBlock
-	container := Component.CreateContainer(x, y)
-	outline := Drawing.CreateRectangle(x, y, widBlock, heighetBlock-1)
-	titleField, err := Component.CreateTextBox(x+1, y+1, widBlock-2, 3, core.CreateStreamingCharacter())
+	container := Component.CreateContainer()
+	outline := Drawing.CreateRectangle(0, 0, widBlock, heighetBlock-1)
+	titleField, err := Component.CreateTextBox(1, 1, widBlock-2, 3, core.CreateStreamingCharacter())
 	titleField.IsOneLine = true
-	textField, err := Component.CreateTextBox(x+1, y+4, widBlock-2, heighetBlock-6, core.CreateStreamingCharacter())
+	textField, err := Component.CreateTextBox(1, 4, widBlock-2, heighetBlock-6, core.CreateStreamingCharacter())
 	if err != nil {
 		return nil
 	}
-	titleModal := Drawing.CreateTextField(x, y, "Edit")
+	titleModal := Drawing.CreateTextField(0, 0, "Edit")
 	container.AddDrawing(titleModal)
 	container.AddDrawing(outline)
 	container.AddComponent(textField)
@@ -39,6 +39,10 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	container.SetLayer(2)
 	container.SetActive(false)
 	container.SetVisibility(false)
+
+	x := widScreen/2 - widBlock/2
+	y := heightScreen - heighetBlock
+	container.SetPos(x, y)
 	return &EditBlock{
 		container:  container,
 		textField:  textField,
@@ -82,12 +86,13 @@ func (e *EditBlock) IsOn() bool {
 }
 
 func (e *EditBlock) GetContent() (string, string) {
+	GTUI.Log(e.textField.GetText())
 	return e.titleField.GetText(), e.textField.GetText()
 }
 
 func (e *EditBlock) Set(title, text string) {
 	e.textField.ClearAll()
-	e.textField.Paste(text)
+	e.textField.Paste(strings.ReplaceAll(text, "/n", "\n"))
 	e.titleField.ClearAll()
 	e.titleField.Paste(title)
 }
