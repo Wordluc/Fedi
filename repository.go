@@ -14,10 +14,11 @@ type Repositoty[t any] struct {
 }
 
 type TODO struct {
-	Id    string
-	Title string
-	Text  string
-	Date  string
+	Id     string
+	Title  string
+	Text   string
+	Date   string
+	Status MarkType
 }
 
 func NewRepositoty[t any](fileName string, unmarshall func([]string) t, marshall func(t) []string, equal func(t, t) bool) *Repositoty[t] {
@@ -71,6 +72,24 @@ func (r *Repositoty[t]) Remove(ele t) error {
 			continue
 		}
 		if err := r.Add(content[i]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Repositoty[t]) Set(ele t) error {
+	content, e := r.Get()
+	if e != nil {
+		return e
+	}
+	os.Remove(r.fileName)
+	for i := range content {
+		currentContent := content[i]
+		if r.equal(content[i], ele) {
+			currentContent = ele
+		}
+		if err := r.Add(currentContent); err != nil {
 			return err
 		}
 	}

@@ -15,7 +15,7 @@ import (
 
 func initCarosello(width int) *Carosello[*TodoBlock, TODO] {
 	updateCallback := func(display *TodoBlock, data TODO) {
-		display.SetElement(data.Title, data.Text, data.Date)
+		display.SetElement(data.Title, data.Text, data.Date, data.Status, data.Id)
 	}
 	newCallback := func(nDisplay int) *TodoBlock {
 		return CreateTodoBlock(0, 3*nDisplay, width-7)
@@ -63,14 +63,15 @@ func main() {
 	repository = NewRepositoty("prova.csv",
 		func(s []string) TODO {
 			return TODO{
-				Id:    s[0],
-				Title: s[1],
-				Text:  s[2],
-				Date:  s[3],
+				Id:     s[0],
+				Title:  s[1],
+				Text:   s[2],
+				Date:   s[3],
+				Status: s[4],
 			}
 		},
 		func(t TODO) []string {
-			return []string{t.Id, t.Title, t.Text, t.Date}
+			return []string{t.Id, t.Title, t.Text, t.Date, t.Status}
 		},
 		func(t1, t2 TODO) bool {
 			return t1.Id == t2.Id
@@ -134,22 +135,47 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	}
 
 	if keyb.IsKeySPressed(Keyboard.CtrlD) {
-		i, ele := carosello.GetSelectedElement()
-		if err := repository.Remove(ele); err == nil {
-			carosello.DeleteData(i)
+		_, ele := carosello.GetSelectedElement()
+		ele.Status = Done
+		if repository.Set(ele) == nil {
+			updateData()
 		}
-		numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 	}
+	if keyb.IsKeySPressed(Keyboard.CtrlX) {
+		_, ele := carosello.GetSelectedElement()
+		ele.Status = Deleted
+		if repository.Set(ele) == nil {
+			updateData()
+		}
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlA) {
+		_, ele := carosello.GetSelectedElement()
+		ele.Status = Archived
+		if repository.Set(ele) == nil {
+			updateData()
+		}
+	}
+
+	if keyb.IsKeySPressed(Keyboard.CtrlW) {
+		_, ele := carosello.GetSelectedElement()
+		ele.Status = WaitingFor
+		if repository.Set(ele) == nil {
+			updateData()
+		}
+	}
+
 	if keyb.IsKeySPressed(Keyboard.CtrlS) {
 		isOn := edit.Toggle()
 		if !isOn {
 			if title, text := edit.GetContent(); text != "" || title != "" {
 				text = strings.ReplaceAll(text, "\n", ";")
 				ele := TODO{
-					Id:    uuid.NewString(),
-					Title: title,
-					Text:  text,
-					Date:  time.Now().Format(time.RFC850),
+					Id:     uuid.NewString(),
+					Title:  title,
+					Text:   text,
+					Date:   time.Now().Format("Mon, 02 Jan 2006"),
+					Status: Ready,
 				}
 				if err := repository.Add(ele); err == nil {
 					carosello.AddData(ele)
@@ -160,4 +186,13 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	}
 
 	return true
+}
+
+func updateData() {
+	data, err := repository.Get()
+	if err != nil {
+		return
+	}
+	carosello.Refresh(data...)
+	numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 }
