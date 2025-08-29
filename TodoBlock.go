@@ -67,26 +67,7 @@ func (t *TodoBlock) SetElement(title, text, date, mark, id string) {
 	t.iconTextBig.SetVisibility(len(strings.Split(text, "\n")) > 2)
 	t.title.SetText(title)
 	t.date.SetText(date)
-	switch mark {
-	case Ready:
-		t.mark.SetText("⛟")
-		t.mark.SetColor(Color.Get(Color.Gray, Color.None))
-	case Done:
-		t.mark.SetText("✓")
-		t.mark.SetColor(Color.Get(Color.Green, Color.None))
-	case Progress:
-		t.mark.SetText("⛏")
-		t.mark.SetColor(Color.Get(Color.Cyan, Color.None))
-	case Deleted:
-		t.mark.SetText("⛔")
-	case Archived:
-		t.mark.SetText("X")
-		t.mark.SetColor(Color.Get(Color.Yellow, Color.None))
-	case WaitingFor:
-		t.mark.SetText("⚠")
-		t.mark.SetColor(Color.Get(Color.Yellow, Color.None))
-	}
-
+	setIconMark(t.mark, mark)
 }
 
 func (t *TodoBlock) Select() {

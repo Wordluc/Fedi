@@ -7,7 +7,7 @@ import (
 )
 
 func CreateTutorialModal(w, h int) *Component.Modal {
-	const sizeX, sizeY = 80, 40
+	const sizeX, sizeY = 81, 43
 	modal := Component.CreateModal(sizeX, sizeY)
 	x := w/2 - sizeX/2
 	y := h/2 - sizeY/2
@@ -22,6 +22,7 @@ func CreateTutorialModal(w, h int) *Component.Modal {
 		{"Ctrl-x", "Set todo as Deleted"},
 		{"Ctrl-a", "Set todo as Archived"},
 		{"Ctrl-w", "Set todo as WaitingFor"},
+		{"Ctrl-v", "Open open the view modal to see details about the todo"},
 		{"(Modal)Ctrl-k", "Focus the title field"},
 		{"(Modal)Ctrl-j", "Focus the text field"},
 		{"(Modal)Ctrl-q", "Close the modal"},
