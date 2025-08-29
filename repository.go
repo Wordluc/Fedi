@@ -14,6 +14,7 @@ type Repositoty[t any] struct {
 }
 
 type TODO struct {
+	Row    int
 	Id     string
 	Title  string
 	Text   string
