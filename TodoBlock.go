@@ -1,43 +1,52 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/Wordluc/GTUI/Core/Drawing"
 	"github.com/Wordluc/GTUI/Core/Utils/Color"
 )
 
 type TodoBlock struct {
 	*Drawing.Container
-	text       *Drawing.TextBlock
-	title      *Drawing.TextBlock
-	id         *Drawing.TextField
-	date       *Drawing.TextBlock
-	mark       *Drawing.TextField
-	line       *Drawing.Line
-	isSelected bool
+	text        *Drawing.TextBlock
+	title       *Drawing.TextBlock
+	id          *Drawing.TextField
+	date        *Drawing.TextBlock
+	mark        *Drawing.TextBlock
+	line        *Drawing.Line
+	iconTextBig *Drawing.TextBlock
+	isSelected  bool
 }
 
+const sizeTitle = 40
+
 func CreateTodoBlock(x, y int, xSize int) *TodoBlock {
-	container := Drawing.CreateContainer(x, y)
-	line := Drawing.CreateLine(x, y, 1)
+	container := Drawing.CreateContainer()
+	line := Drawing.CreateLine(0, 0, 1)
 	line.SetColor(Color.Get(Color.Red, Color.None))
-	mark := Drawing.CreateTextField(x+2, y, "")
-	title := Drawing.CreateTextBlock(x+4, y, 20, 1, 0)
-	title.SetLayer(2)
-	id := Drawing.CreateTextField(x+50, y, "")
-	text := Drawing.CreateTextBlock(x+6, y+1, xSize-5, 1, 0)
-	date := Drawing.CreateTextBlock(x+23, y, 20, 1, 10)
-	date.SetLayer(3)
-	container.AddDrawings(line, title, text, date, mark, id)
-	container.SetLayer(1)
+	mark := Drawing.CreateTextBlock(2, 0, 1, 1, 1)
+	title := Drawing.CreateTextBlock(4, 0, sizeTitle, 1, 0)
+	id := Drawing.CreateTextField(sizeTitle+30, 0, "")
+	text := Drawing.CreateTextBlock(5, 1, xSize-5, 2, 0)
+	horizontalLine := Drawing.CreateLine(4, 1, 2)
+	horizontalLine.SetAngle(90)
+	iconTextBig := Drawing.CreateTextBlock(4, 2, 1, 1, 0)
+	iconTextBig.SetText("⇣")
+	iconTextBig.SetVisibility(false)
+	date := Drawing.CreateTextBlock(sizeTitle+4, 0, 20, 1, 10)
+	container.AddDrawings(line, title, text, date, mark, id, horizontalLine, iconTextBig)
+	container.SetPos(x, y)
 	return &TodoBlock{
-		Container:  container,
-		text:       text,
-		title:      title,
-		mark:       mark,
-		date:       date,
-		id:         id,
-		line:       line,
-		isSelected: false,
+		Container:   container,
+		text:        text,
+		title:       title,
+		mark:        mark,
+		date:        date,
+		id:          id,
+		line:        line,
+		isSelected:  false,
+		iconTextBig: iconTextBig,
 	}
 }
 
@@ -54,7 +63,10 @@ const (
 
 func (t *TodoBlock) SetElement(title, text, date, mark, id string) {
 	t.id.SetText(id)
+	text = strings.ReplaceAll(text, "/n", "\n")
+	t.text.SetCursor_Relative(-3, -3)
 	t.text.SetText(text)
+	t.iconTextBig.SetVisibility(len(strings.Split(text, "\n")) > 2)
 	t.title.SetText(title)
 	t.date.SetText(date)
 	switch mark {
@@ -66,7 +78,7 @@ func (t *TodoBlock) SetElement(title, text, date, mark, id string) {
 		t.mark.SetColor(Color.Get(Color.Green, Color.None))
 	case Progress:
 		t.mark.SetText("⛏")
-		t.mark.SetColor(Color.Get(Color.Yellow, Color.None))
+		t.mark.SetColor(Color.Get(Color.Cyan, Color.None))
 	case Deleted:
 		t.mark.SetText("⛔")
 	case Archived:

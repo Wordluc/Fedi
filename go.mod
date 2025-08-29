@@ -3,7 +3,7 @@ module Fedi
 go 1.22.1
 
 require (
-	github.com/Wordluc/GTUI v0.0.0-20250828125739-885bff7dfdf0
+	github.com/Wordluc/GTUI v0.0.0-20250829134944-2f45bf1b3569
 	github.com/joho/godotenv v1.5.1
 )
 
