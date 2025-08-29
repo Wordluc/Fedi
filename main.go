@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core/Component"
 	"github.com/Wordluc/GTUI/Core/Drawing"
@@ -15,6 +17,7 @@ var numberTodos *Drawing.TextField
 var repository *Repositoty[TODO]
 var editTODO *TODO
 var tutorialModal *Component.Modal
+var viewModal *ViewModal
 
 func main() {
 	keyb := Keyboard.Keyboard{}
@@ -36,16 +39,18 @@ func main() {
 	}
 	repository = NewRepositoty("prova.csv",
 		func(s []string) TODO {
+			text := strings.ReplaceAll(s[2], "/n", "\n")
 			return TODO{
 				Id:     s[0],
 				Title:  s[1],
-				Text:   s[2],
+				Text:   text,
 				Date:   s[3],
 				Status: s[4],
 			}
 		},
 		func(t TODO) []string {
-			return []string{t.Id, t.Title, t.Text, t.Date, t.Status}
+			text := strings.ReplaceAll(t.Text, "\n", "/n")
+			return []string{t.Id, t.Title, text, t.Date, t.Status}
 		},
 		func(t1, t2 TODO) bool {
 			return t1.Id == t2.Id
@@ -64,11 +69,12 @@ func main() {
 	numberTodos = Drawing.CreateTextField(5, 0, "0")
 	numberTodos.SetText(fmt.Sprint(len(carosello.GetElements())))
 	helper := Drawing.CreateTextField(1, hig-2, "Tab: to open/close tutorial")
-
+	viewModal = CreateViewModal(wid, hig, core)
 	core.AddDrawing(outline, title, numberTodos, helper)
 	core.AddContainer(carosello)
 	core.AddContainer(edit.container)
 	core.AddComplexElement(tutorialModal)
+	core.AddComplexElement(viewModal)
 	core.Start()
 }
 
@@ -112,6 +118,14 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		editTODO = &ele
 	}
 
+	if keyb.IsKeySPressed(Keyboard.CtrlV) {
+		_, ele := carosello.GetSelectedElement()
+		if viewModal.IsOpen() {
+			viewModal.Close()
+		} else {
+			viewModal.Open(ele.Title, ele.Text)
+		}
+	}
 	if keyb.IsKeySPressed(Keyboard.CtrlS) {
 		isOn := edit.Toggle(!edit.IsOn())
 		if !isOn {
@@ -121,6 +135,11 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		}
 	}
 	manageMarksTodos(keyb)
+
+	if viewModal.IsOpen() {
+		_, ele := carosello.GetSelectedElement()
+		viewModal.Change(ele.Title, ele.Text)
+	}
 
 	return true
 }

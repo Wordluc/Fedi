@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/Wordluc/GTUI"
@@ -12,7 +11,6 @@ import (
 
 func initCarosello(width int) *Carosello[*TodoBlock, TODO] {
 	updateCallback := func(display *TodoBlock, data TODO) {
-		data.Text = strings.ReplaceAll(data.Text, "/n", "\n")
 		display.SetElement(data.Title, data.Text, data.Date, data.Status, data.Id)
 	}
 	newCallback := func(nDisplay int) *TodoBlock {
@@ -97,7 +95,6 @@ func saveContentEditBlock() {
 	if text == "" && title == "" {
 		return
 	}
-	text = strings.ReplaceAll(text, "\n", "/n")
 	if editTODO != nil {
 		editTODO.Title = title
 		editTODO.Text = text

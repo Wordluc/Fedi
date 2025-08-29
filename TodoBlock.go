@@ -63,8 +63,6 @@ const (
 
 func (t *TodoBlock) SetElement(title, text, date, mark, id string) {
 	t.id.SetText(id)
-	text = strings.ReplaceAll(text, "/n", "\n")
-	t.text.SetCursor_Relative(-3, -3)
 	t.text.SetText(text)
 	t.iconTextBig.SetVisibility(len(strings.Split(text, "\n")) > 2)
 	t.title.SetText(title)
