@@ -36,9 +36,9 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	container.AddDrawing(outline)
 	container.AddComponent(textField)
 	container.AddComponent(titleField)
-	container.SetLayer(2)
 	container.SetActive(false)
 	container.SetVisibility(false)
+	container.SetLayer(2)
 
 	x := widScreen/2 - widBlock/2
 	y := heightScreen - heighetBlock
