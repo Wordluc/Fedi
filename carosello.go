@@ -113,7 +113,10 @@ func (c *Carosello[tDisplay, tdata]) Pre() {
 	c.currentDisplaySelected--
 	if c.currentDisplaySelected < 0 {
 		c.currentDisplaySelected = 0
-		c.firstElementInPage = (c.firstElementInPage + 1)
+		c.firstElementInPage = (c.firstElementInPage - 1)
+		if c.firstElementInPage < 0 {
+			c.firstElementInPage = len(c.dataElements) - 1
+		}
 	}
 	c.callback.selectDisplay(c.displayElements[c.currentDisplaySelected])
 	if c.currentDisplaySelected == 0 {

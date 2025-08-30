@@ -148,21 +148,26 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		}
 		newData := []TODO{}
 		for i := range data {
-			if ok := strings.Contains(data[i].Title, toSearchFor); ok {
+			if ok := strings.Contains(strings.ToLower(data[i].Title), strings.ToLower(toSearchFor)); ok {
 				newData = append(newData, data[i])
 				continue
 			}
-			if ok := strings.Contains(data[i].Text, toSearchFor); ok {
+			if ok := strings.Contains(strings.ToLower(data[i].Text), strings.ToLower(toSearchFor)); ok {
 				newData = append(newData, data[i])
 				continue
 			}
-			if ok := strings.Contains(data[i].Status, toSearchFor); ok {
+			if ok := strings.Contains(strings.ToLower(data[i].Status), strings.ToLower(toSearchFor)); ok {
+				newData = append(newData, data[i])
+				continue
+			}
+			if ok := strings.Contains(strings.ToLower(data[i].Date), strings.ToLower(toSearchFor)); ok {
 				newData = append(newData, data[i])
 				continue
 			}
 		}
 		carosello.Reset()
 		carosello.AddDataAll(newData...)
+		searchModal.SetHowManyTODOsFound(len(newData))
 	}
 
 	if keyb.IsKeySPressed(Keyboard.CtrlR) {
