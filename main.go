@@ -98,14 +98,17 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		}
 		cursorMovement(core, keyb)
 	}
-
-	if !edit.IsOpen() {
+	if searchModal.IsOpen() {
+		cursorMovement(core, keyb)
+	}
+	if !edit.IsOpen() && !searchModal.IsOpen() {
 		if keyb.IsKeyPressed('l') || keyb.IsKeyPressed('j') || keyb.IsKeySPressed(Keyboard.Down) {
 			carosello.Next()
 		} else if keyb.IsKeyPressed('h') || keyb.IsKeyPressed('k') || keyb.IsKeySPressed(Keyboard.Up) {
 			carosello.Pre()
 		}
 	}
+
 	if keyb.IsKeySPressed(Keyboard.Tab) {
 		tutorialModal.SetActive(!tutorialModal.GetActivity())
 		tutorialModal.SetVisibility(tutorialModal.GetActivity())
