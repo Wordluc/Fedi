@@ -16,6 +16,7 @@ func CreateTutorialModal(w, h int) *Component.Modal {
 		{"Ctrl-q", "Close the app"},
 		{"j", "Scroll down"},
 		{"k", "Scroll up"},
+		{"Ctrl-r", "Refresh"},
 		{"Ctrl-s", "Open the editing modal and save a new todo, or save changes to an existing one"},
 		{"Ctrl-e", "Open the editing modal to edit a todo"},
 		{"Ctrl-d", "Set todo as Done"},

@@ -210,4 +210,12 @@ func manageOpenCloseModal(keyb Keyboard.IKeyBoard) {
 			saveContentEditBlock()
 		}
 	}
+	if keyb.IsKeySPressed(Keyboard.CtrlE) {
+		closeAll()
+		_, ele := carosello.GetSelectedElement()
+		edit.SetTitleModal("Edit")
+		edit.Open()
+		edit.Set(ele.Title, ele.Text)
+		editTODO = &ele
+	}
 }

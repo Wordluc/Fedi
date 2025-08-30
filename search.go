@@ -39,11 +39,13 @@ func (s *Search) Close() {
 	s.textbox.ClearAll()
 	s.textbox.OnLeave()
 	s.SetVisibility(false)
+	s.SetActive(false)
 	s.core.SetVisibilityCursor(false)
 	s.howManyFound.SetText("")
 }
 func (s *Search) Open() {
 	s.SetVisibility(true)
+	s.SetActive(true)
 	s.textbox.OnClick()
 	x, y := s.textbox.GetPos()
 	s.core.SetVisibilityCursor(true)

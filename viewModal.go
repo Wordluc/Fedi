@@ -55,6 +55,7 @@ func (v *ViewModal) Change(title, text, status string) {
 }
 func (v *ViewModal) Close() {
 	v.Modal.SetVisibility(false)
+	v.Modal.SetActive(false)
 }
 
 func (v *ViewModal) IsOpen() bool {
