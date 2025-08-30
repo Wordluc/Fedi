@@ -2,6 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/Wordluc/GTUI"
@@ -34,7 +38,33 @@ func initCarosello(width, height int) *Carosello[*TodoBlock, TODO] {
 	carosello := CreateCarosello((height/4)-1, callback)
 	return carosello
 }
-
+func initRepository(fileName string) *Repositoty[TODO] {
+	p, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	p = filepath.Dir(p)
+	repository = NewRepositoty(path.Join(p, fileName+".csv"),
+		func(s []string) TODO {
+			text := strings.ReplaceAll(s[2], "/n", "\n")
+			return TODO{
+				Id:     s[0],
+				Title:  s[1],
+				Text:   text,
+				Date:   s[3],
+				Status: s[4],
+			}
+		},
+		func(t TODO) []string {
+			text := strings.ReplaceAll(t.Text, "\n", "/n")
+			return []string{t.Id, t.Title, text, t.Date, t.Status}
+		},
+		func(t1, t2 TODO) bool {
+			return t1.Id == t2.Id
+		},
+	)
+	return repository
+}
 func updateCaroselloData() {
 	data, err := repository.Get()
 	if err != nil {

@@ -32,8 +32,7 @@ func CreateTutorialModal(w, h int) *Component.Modal {
 		title := Drawing.CreateTextField(1, 3+distance*c, commands[c][0])
 		title.SetColor(Color.Get(Color.Red, Color.None))
 		text := Drawing.CreateTextField(2, 4+distance*c, commands[c][1])
-		modal.AddDrawing(title)
-		modal.AddDrawing(text)
+		modal.AddDrawing(title, text)
 	}
 	modal.AddDrawing(title)
 	modal.SetPos(x, y)
