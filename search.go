@@ -24,8 +24,7 @@ func CreateSearch(core *GTUI.Gtui) *Search {
 	howManyFound := Drawing.CreateTextField(26, 2, "")
 	title := Drawing.CreateTextField(0, 4, "Search")
 	modal.AddComponent(textBox)
-	modal.AddDrawing(title)
-	modal.AddDrawing(howManyFound)
+	modal.AddDrawing(title, howManyFound)
 	modal.SetPos(x, 0)
 	modal.SetVisibility(false)
 	return &Search{

@@ -9,7 +9,7 @@ import (
 )
 
 type EditBlock struct {
-	container  *Component.Container
+	*Component.Container
 	textField  *Component.TextBox
 	titleField *Component.TextBox
 	titleModal *Drawing.TextField
@@ -32,10 +32,8 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 		return nil
 	}
 	titleModal := Drawing.CreateTextField(0, 0, "Edit")
-	container.AddDrawing(titleModal)
-	container.AddDrawing(outline)
-	container.AddComponent(textField)
-	container.AddComponent(titleField)
+	container.AddDrawing(titleModal, outline)
+	container.AddComponent(textField, titleField)
 	container.SetActive(false)
 	container.SetVisibility(false)
 	container.SetLayer(2)
@@ -44,7 +42,7 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	y := heightScreen - heighetBlock
 	container.SetPos(x, y)
 	return &EditBlock{
-		container:  container,
+		Container:  container,
 		textField:  textField,
 		titleModal: titleModal,
 		titleField: titleField,
@@ -52,23 +50,23 @@ func CreateEditBlock(widScreen, heightScreen, widBlock, heighetBlock int, core *
 	}
 }
 func (e *EditBlock) Close() {
-	e.container.SetActive(false)
-	e.container.SetVisibility(false)
+	e.SetActive(false)
+	e.SetVisibility(false)
 	e.core.SetVisibilityCursor(false)
 	e.textField.OnLeave()
 	e.titleField.OnLeave()
 }
 
 func (e *EditBlock) Open() {
-	e.container.SetActive(true)
-	e.container.SetVisibility(true)
+	e.SetActive(true)
+	e.SetVisibility(true)
 	e.core.SetVisibilityCursor(true)
 	e.textField.ClearAll()
 	e.titleField.ClearAll()
 	e.ActiveTitle()
 }
 func (e *EditBlock) IsOn() bool {
-	return e.container.GetVisibility()
+	return e.GetVisibility()
 }
 func (e *EditBlock) ActiveText() {
 	x, y := e.textField.GetPos()
@@ -85,7 +83,7 @@ func (e *EditBlock) ActiveTitle() {
 }
 
 func (e *EditBlock) IsOpen() bool {
-	return e.container.GetActivity()
+	return e.GetActivity()
 }
 
 func (e *EditBlock) GetContent() (string, string) {

@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/Wordluc/GTUI"
 	"github.com/Wordluc/GTUI/Core/Component"
 	"github.com/Wordluc/GTUI/Core/Drawing"
 	"github.com/Wordluc/GTUI/Keyboard"
-	"github.com/Wordluc/GTUI/Terminal"
 )
 
 var carosello *Carosello[*TodoBlock, TODO]
@@ -21,12 +21,19 @@ var viewModal *ViewModal
 var searchModal *Search
 
 func main() {
-	keyb := Keyboard.Keyboard{}
-	term := Terminal.Terminal{}
-	core, e := GTUI.NewGtui(loop, &keyb, &term)
+
+	var file string
+	if len(os.Args) == 1 {
+		file = "main"
+	} else {
+		file = os.Args[1]
+	}
+	repository = initRepository(file)
+	core, e := GTUI.NewGtui(loop)
 	if e != nil {
 		panic(e)
 	}
+	defer core.Start()
 	core.SetVisibilityCursor(false)
 	wid, hig := core.Size()
 	outline := Drawing.CreateRectangleFull(0, 0, wid, hig)
@@ -38,25 +45,6 @@ func main() {
 	if edit == nil {
 		panic("")
 	}
-	repository = NewRepositoty("prova.csv",
-		func(s []string) TODO {
-			text := strings.ReplaceAll(s[2], "/n", "\n")
-			return TODO{
-				Id:     s[0],
-				Title:  s[1],
-				Text:   text,
-				Date:   s[3],
-				Status: s[4],
-			}
-		},
-		func(t TODO) []string {
-			text := strings.ReplaceAll(t.Text, "\n", "/n")
-			return []string{t.Id, t.Title, text, t.Date, t.Status}
-		},
-		func(t1, t2 TODO) bool {
-			return t1.Id == t2.Id
-		},
-	)
 	data, err := repository.Get()
 	if err != nil {
 		panic(err)
@@ -74,12 +62,8 @@ func main() {
 	searchModal = CreateSearch(core)
 
 	core.AddDrawing(outline, title, numberTodos, helper)
-	core.AddContainer(carosello)
-	core.AddContainer(edit.container)
-	core.AddComplexElement(tutorialModal)
-	core.AddComplexElement(viewModal)
-	core.AddComplexElement(searchModal)
-	core.Start()
+	core.AddContainer(carosello, edit)
+	core.AddComplexElement(tutorialModal, viewModal, searchModal)
 }
 
 func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
