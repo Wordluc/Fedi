@@ -111,14 +111,6 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 		tutorialModal.SetVisibility(tutorialModal.GetActivity())
 	}
 
-	if keyb.IsKeySPressed(Keyboard.CtrlE) {
-		_, ele := carosello.GetSelectedElement()
-		edit.SetTitleModal("Edit")
-		edit.Open()
-		edit.Set(ele.Title, ele.Text)
-		editTODO = &ele
-	}
-
 	if viewModal.IsOpen() {
 		_, ele := carosello.GetSelectedElement()
 		viewModal.Change(ele.Title, ele.Text, ele.Status)
