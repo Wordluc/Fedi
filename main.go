@@ -24,10 +24,11 @@ func main() {
 
 	var file string
 	if len(os.Args) == 1 {
-		file = "main"
+		file = "default"
 	} else {
 		file = os.Args[1]
 	}
+	file = "workspace/" + file
 	repository = initRepository(file)
 	core, e := GTUI.NewGtui(loop)
 	if e != nil {

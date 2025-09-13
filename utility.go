@@ -44,7 +44,9 @@ func initRepository(fileName string) *Repositoty[TODO] {
 		panic(err)
 	}
 	p = filepath.Dir(p)
-	repository = NewRepositoty(path.Join(p, fileName+".csv"),
+	fullpath := path.Join(p, fileName+".csv")
+	os.MkdirAll(filepath.Dir(fullpath), os.ModePerm)
+	repository = NewRepositoty(fullpath,
 		func(s []string) TODO {
 			text := strings.ReplaceAll(s[2], "/n", "\n")
 			return TODO{
