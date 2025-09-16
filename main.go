@@ -35,12 +35,12 @@ func main() {
 		panic(e)
 	}
 	defer core.Start()
-	core.SetVisibilityCursor(false)
+	core.SetVisibilityCursor(true)
 	wid, hig := core.Size()
 	outline := Drawing.CreateRectangleFull(0, 0, wid, hig)
 	title := Drawing.CreateTextField(0, 0, "TODO:")
 	title.SetLayer(2)
-	carosello = initCarosello(wid, hig)
+	carosello = initCarosello(core, wid, hig)
 	carosello.SetPos(2, 2)
 	edit = CreateEditBlock(wid, hig, 40, 10, core)
 	if edit == nil {
@@ -94,8 +94,10 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if edit.IsOpen() {
 		if keyb.IsKeySPressed(Keyboard.CtrlK) {
 			edit.ActiveTitle()
+			core.GoToComponent(edit.titleField)
 		} else if keyb.IsKeySPressed(Keyboard.CtrlJ) {
 			edit.ActiveText()
+			core.GoToComponent(edit.textField)
 		}
 		cursorMovement(core, keyb)
 	}
@@ -113,6 +115,12 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	if keyb.IsKeySPressed(Keyboard.Tab) {
 		tutorialModal.SetActive(!tutorialModal.GetActivity())
 		tutorialModal.SetVisibility(tutorialModal.GetActivity())
+	}
+	if keyb.IsKeySPressed(Keyboard.CtrlV) {
+		ele := core.GetCurrentComponent()
+		if textBox, ok := ele.(*Component.TextBox); ok {
+			textBox.Paste(keyb.GetClickboard())
+		}
 	}
 
 	if viewModal.IsOpen() {
@@ -159,6 +167,6 @@ func loop(keyb Keyboard.IKeyBoard, core *GTUI.Gtui) bool {
 	}
 
 	manageMarksTodos(keyb)
-	manageOpenCloseModal(keyb)
+	manageOpenCloseModal(core, keyb)
 	return true
 }
