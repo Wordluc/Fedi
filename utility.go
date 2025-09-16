@@ -15,7 +15,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func initCarosello(width, height int) *Carosello[*TodoBlock, TODO] {
+func initCarosello(core *GTUI.Gtui, width, height int) *Carosello[*TodoBlock, TODO] {
 	updateCallback := func(display *TodoBlock, data TODO) {
 		display.SetElement(data.Title, data.Text, data.Date, data.Status, data.Id)
 	}
@@ -24,6 +24,7 @@ func initCarosello(width, height int) *Carosello[*TodoBlock, TODO] {
 	}
 	selectCallback := func(display *TodoBlock) {
 		display.Select()
+		core.GoToDrawing(display.text)
 	}
 	deselectCallback := func(display *TodoBlock) {
 		display.Deselect()
@@ -181,14 +182,16 @@ func closeAll() {
 	edit.Close()
 	tutorialModal.SetVisibility(false)
 }
-func manageOpenCloseModal(keyb Keyboard.IKeyBoard) {
-	if keyb.IsKeySPressed(Keyboard.CtrlV) {
+func manageOpenCloseModal(core *GTUI.Gtui, keyb Keyboard.IKeyBoard) {
+	if keyb.IsKeySPressed(Keyboard.CtrlT) {
 		_, ele := carosello.GetSelectedElement()
 		if viewModal.IsOpen() {
 			viewModal.Close()
 		} else {
 			closeAll()
 			viewModal.Open(ele.Title, ele.Text, ele.Status)
+			core.GoToDrawing(viewModal.textbox)
+
 		}
 	}
 
@@ -198,6 +201,7 @@ func manageOpenCloseModal(keyb Keyboard.IKeyBoard) {
 		} else {
 			closeAll()
 			searchModal.Open()
+			core.GoToComponent(searchModal.textbox)
 		}
 	}
 
