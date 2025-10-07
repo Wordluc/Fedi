@@ -1,5 +1,6 @@
 # Todo app
 It's a test for the framework [GTUI](https://github.com/Wordluc/GTUI), that allow you to buid terminal application.
+
 Fedi is a local TODO app that store information inside your computer, his focus is on been blazingly fast using beautiful shortcut.
 Press "Tab" to see the magic happend.
 # Showcase
