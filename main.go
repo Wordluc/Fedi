@@ -35,7 +35,7 @@ func main() {
 		panic(e)
 	}
 	defer core.Start()
-	core.SetVisibilityCursor(true)
+	core.SetVisibilityCursor(false)
 	wid, hig := core.Size()
 	outline := Drawing.CreateRectangleFull(0, 0, wid, hig)
 	title := Drawing.CreateTextField(0, 0, "TODO:")
