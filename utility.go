@@ -79,6 +79,10 @@ func updateCaroselloData() {
 
 func manageMarksTodos(keyb Keyboard.IKeyBoard) {
 	var ele TODO
+	if keyb.IsKeySPressed(Keyboard.CtrlN) {
+		_, ele = carosello.GetSelectedElement()
+		ele.Status = Ready
+	}
 	if keyb.IsKeySPressed(Keyboard.CtrlD) {
 		_, ele = carosello.GetSelectedElement()
 		ele.Status = Done
